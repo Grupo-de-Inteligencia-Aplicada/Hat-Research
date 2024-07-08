@@ -1,0 +1,13 @@
+event Hello {
+    silas: bool
+}
+
+handler Another (Hye) {
+    echo("NOT OK!")
+}
+
+handler "Bye Ae" (Hello) {
+
+    echo("OK!")
+
+}
