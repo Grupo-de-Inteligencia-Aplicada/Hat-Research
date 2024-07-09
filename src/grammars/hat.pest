@@ -50,12 +50,11 @@ handler_declaration = {
     whitespace* ~
     "{" ~
     whitespace* ~
-    handler_condition? ~
-    whitespace* ~
-    handler_action ~
-    whitespace* ~
+    (handler_expr ~ whitespace*)* ~
     "}"
 }
+
+handler_expr = _{ handler_action | handler_condition }
 
 expr = {"true"}
 
@@ -66,6 +65,8 @@ handler_condition = {
 }
 
 handler_action = {
+    "run" ~
+    whitespace* ~
     "echo" ~
     "(" ~
     whitespace* ~

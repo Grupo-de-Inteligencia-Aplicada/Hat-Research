@@ -1,13 +1,13 @@
-event Hello {
-    silas: bool
-}
-
 handler Another (Hye) {
-    echo("NOT OK!")
+    run echo("NOT OK!")
 }
 
 handler "Bye Ae" (Hello) {
 
-    echo("OK!")
+    run echo("OK!")
+
+
+        run echo(   "si ")
+       if truee
 
 }
