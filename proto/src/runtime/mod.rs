@@ -60,7 +60,10 @@ impl HatRuntime {
                         ErrorVariant::ParsingError { positives, negatives: _ } => {
                             positives.into_iter().map(|rule| match rule {
                                 Rule::EOI => "end of input",
-                                Rule::whitespace => "whitespace",
+                                Rule::COMMENT => "comment",
+                                Rule::SINGLE_LINE_COMMENT => "single line comment",
+                                Rule::BLOCK_COMMENT => "block comment",
+                                Rule::WHITESPACE => "whitespace",
                                 Rule::ident => "identifier",
                                 Rule::integer => "integer value",
                                 Rule::decimal => "decimal value",

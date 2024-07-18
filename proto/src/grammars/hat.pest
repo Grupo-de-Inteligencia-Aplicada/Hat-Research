@@ -1,4 +1,4 @@
-whitespace = _{ " " | "\t" | "\n" | "\r" }
+WHITESPACE = _{ " " | "\t" | "\n" | "\r" }
 SINGLE_LINE_COMMENT = _{ "//" ~ (!NEWLINE ~ ANY)* ~ NEWLINE }
 BLOCK_COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
 COMMENT = _{
@@ -14,28 +14,22 @@ string = @{ "\"" ~ ( "\"\"" | (!"\"" ~ ANY) )* ~ "\"" }
 
 event_declaration = {
     "event" ~
-    whitespace+ ~
     ident ~
-    whitespace* ~
     "{" ~
-    whitespace* ~
     event_parameters? ~
-    whitespace* ~
     "}"
 }
 
 event_parameter = {
     ident ~
-    whitespace* ~
     ":" ~
-    whitespace* ~
     type_keyword
 }
 
 event_parameters = {
     event_parameter ~
-    (whitespace* ~ "," ~ whitespace* ~ event_parameter)* ~
-    (whitespace* ~ ",")?
+    ("," ~ event_parameter)* ~
+    ","?
 }
 
 type_keyword = @{
@@ -45,18 +39,12 @@ type_keyword = @{
 
 handler_declaration = {
     "handler" ~
-    whitespace+ ~
     (string | ident) ~
-    whitespace* ~
     "(" ~
-    whitespace* ~
     ident ~
-    whitespace* ~
     ")" ~
-    whitespace* ~
     "{" ~
-    whitespace* ~
-    (handler_expr ~ whitespace*)* ~
+    handler_expr* ~
     "}"
 }
 
@@ -66,22 +54,18 @@ expr = {"true"}
 
 handler_condition = {
     "if" ~
-    whitespace* ~
     expr
 }
 
 handler_action = {
     "run" ~
-    whitespace* ~
     "echo" ~
     "(" ~
-    whitespace* ~
     string ~
-    whitespace* ~
     ")"
 }
 
 stmt = _{ event_declaration | handler_declaration }
 
 // Entry rule
-program = _{ SOI ~ whitespace* ~ (stmt ~ whitespace+) * ~ stmt? ~ EOI }
+program = _{ SOI ~ stmt* ~ stmt? ~ EOI }

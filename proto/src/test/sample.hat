@@ -8,6 +8,6 @@ handler "Bye Ae" (Hello) {
 
 
         run echo(   "si ")
-       if truee
+       if true
 
 }
