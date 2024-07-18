@@ -1,4 +1,10 @@
 whitespace = _{ " " | "\t" | "\n" | "\r" }
+SINGLE_LINE_COMMENT = _{ "//" ~ (!NEWLINE ~ ANY)* ~ NEWLINE }
+BLOCK_COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
+COMMENT = _{
+    SINGLE_LINE_COMMENT |
+    BLOCK_COMMENT
+}
 
 ident = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
 
