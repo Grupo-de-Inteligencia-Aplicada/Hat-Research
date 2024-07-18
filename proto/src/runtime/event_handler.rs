@@ -1,3 +1,1 @@
-pub struct EventHandler {
-
-}
+pub struct EventHandler {}

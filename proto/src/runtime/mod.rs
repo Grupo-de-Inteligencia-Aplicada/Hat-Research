@@ -1,11 +1,11 @@
 mod event_handler;
 
-use std::collections::HashMap;
+use crate::runtime::event_handler::EventHandler;
 use pest::error::{ErrorVariant, InputLocation, LineColLocation};
 use pest::Parser;
-use thiserror::Error;
 use pest_derive::Parser;
-use crate::runtime::event_handler::EventHandler;
+use std::collections::HashMap;
+use thiserror::Error;
 
 #[derive(Parser)]
 #[grammar = "grammars/hat.pest"]
@@ -22,7 +22,7 @@ pub enum RuntimeError {
         line_number: usize,
         col_number: usize,
         expected: Vec<&'static str>,
-    }
+    },
 }
 
 #[derive(Default)]
@@ -57,8 +57,12 @@ impl HatRuntime {
                         LineColLocation::Span((_, y), _) => y,
                     },
                     expected: match e.variant {
-                        ErrorVariant::ParsingError { positives, negatives: _ } => {
-                            positives.into_iter().map(|rule| match rule {
+                        ErrorVariant::ParsingError {
+                            positives,
+                            negatives: _,
+                        } => positives
+                            .into_iter()
+                            .map(|rule| match rule {
                                 Rule::EOI => "end of input",
                                 Rule::COMMENT => "comment",
                                 Rule::SINGLE_LINE_COMMENT => "single line comment",
@@ -79,8 +83,8 @@ impl HatRuntime {
                                 Rule::handler_action => "handler action",
                                 Rule::stmt => "statement",
                                 Rule::program => "program",
-                            }).collect()
-                        },
+                            })
+                            .collect(),
                         ErrorVariant::CustomError { .. } => todo!(),
                     },
                 })
