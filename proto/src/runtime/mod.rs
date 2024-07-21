@@ -13,7 +13,13 @@ pub struct DcParser;
 
 #[derive(Error, Debug)]
 pub enum RuntimeError {
-    #[error("Syntax error at {file}:{line_number}:{col_number}. Expected: {}", expected.join(", "))]
+    #[error(
+        "\
+        Syntax error at {file}:{line_number}:{col_number}. Expected: {}\
+        \nAt: {line}
+        ",
+        expected.join(", "))
+    ]
     ParseError {
         file: String,
         line: String,
@@ -39,7 +45,7 @@ impl HatRuntime {
             Err(e) => {
                 return Err(RuntimeError::ParseError {
                     file: filename,
-                    line: "".to_string(),
+                    line: e.line().to_owned(),
                     location_start: match e.location {
                         InputLocation::Pos(x) => x,
                         InputLocation::Span((x, _)) => x,
