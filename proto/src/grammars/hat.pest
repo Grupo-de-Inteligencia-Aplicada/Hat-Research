@@ -44,11 +44,10 @@ handler_declaration = {
     ident ~
     ")" ~
     "{" ~
-    handler_expr* ~
+    handler_condition* ~
+    handler_action+ ~
     "}"
 }
-
-handler_expr = _{ handler_action | handler_condition }
 
 expr = {"true"}
 

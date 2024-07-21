@@ -83,7 +83,6 @@ impl HatRuntime {
                                 Rule::event_parameters => "event parameter list",
                                 Rule::type_keyword => "type",
                                 Rule::handler_declaration => "handler declaration",
-                                Rule::handler_expr => "handler expression",
                                 Rule::expr => "expression",
                                 Rule::handler_condition => "handler condition",
                                 Rule::handler_action => "handler action",

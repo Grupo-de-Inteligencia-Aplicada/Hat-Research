@@ -4,10 +4,8 @@ handler Another (Hye) {
 
 handler "Bye Ae" (Hello) {
 
+    if true
     run echo("OK!")
-
-
-        run echo(   "si ")
-       if true
+    run echo(   "si ")
 
 }
