@@ -2,7 +2,7 @@ handler Another (Hye) {
     run echo("NOT OK!")
 }
 
-handler "Bye Ae" (Hello) {
+handler "Bye Ae" (Hello, Another) {
 
     if true
     run echo("OK!")

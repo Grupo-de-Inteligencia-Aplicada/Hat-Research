@@ -88,6 +88,7 @@ impl HatRuntime {
                                 Rule::handler_action => "handler action",
                                 Rule::stmt => "statement",
                                 Rule::program => "program",
+                                Rule::handler_triggers => "handler triggers",
                             })
                             .collect(),
                         ErrorVariant::CustomError { .. } => todo!(),

@@ -41,12 +41,17 @@ handler_declaration = {
     "handler" ~
     (string | ident) ~
     "(" ~
-    ident ~
+    handler_triggers ~
     ")" ~
     "{" ~
     handler_condition* ~
     handler_action+ ~
     "}"
+}
+
+handler_triggers = {
+    ident ~
+    ("," ~ ident)*
 }
 
 expr = {"true"}
