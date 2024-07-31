@@ -6,6 +6,9 @@ use pest::Parser;
 use pest_derive::Parser;
 use std::collections::HashMap;
 use thiserror::Error;
+use anyhow::{Context, Result};
+use futures_util::StreamExt;
+use tracing::debug;
 
 #[derive(Parser)]
 #[grammar = "grammars/hat.pest"]
@@ -31,12 +34,21 @@ pub enum RuntimeError {
     },
 }
 
-#[derive(Default)]
 pub struct HatRuntime {
     event_handlers: HashMap<String, EventHandler>,
 }
 
 impl HatRuntime {
+    pub async fn new(ha_ws_path: &str) -> Result<Self> {
+        let (mut ws_stream, _) = tokio_tungstenite::connect_async(ha_ws_path).await?;
+        let (mut tx, mut rx) = ws_stream.split();
+        let msg = rx.next().await
+            .context("expected websocket message")?
+            .context("failed to read from websocket")?;
+
+        debug!("{msg:?}");
+        todo!()
+    }
     pub fn parse(&mut self, filename: String, code: &str) -> Result<(), RuntimeError> {
         let code_program = DcParser::parse(Rule::program, code);
 
