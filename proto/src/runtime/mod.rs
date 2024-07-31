@@ -8,7 +8,7 @@ use std::collections::HashMap;
 use thiserror::Error;
 use anyhow::{Context, Result};
 use futures_util::StreamExt;
-use tracing::debug;
+use crate::home_assistant::HAWebSocket;
 
 #[derive(Parser)]
 #[grammar = "grammars/hat.pest"]
@@ -36,17 +36,14 @@ pub enum RuntimeError {
 
 pub struct HatRuntime {
     event_handlers: HashMap<String, EventHandler>,
+    ha_ws: HAWebSocket,
 }
 
 impl HatRuntime {
-    pub async fn new(ha_ws_path: &str) -> Result<Self> {
-        let (mut ws_stream, _) = tokio_tungstenite::connect_async(ha_ws_path).await?;
-        let (mut tx, mut rx) = ws_stream.split();
-        let msg = rx.next().await
-            .context("expected websocket message")?
-            .context("failed to read from websocket")?;
-
-        debug!("{msg:?}");
+    pub async fn new(ha_ws_url: &str, ha_token: &str) -> Result<Self> {
+        let ha_ws = HAWebSocket::connect(ha_ws_url, ha_token).await
+            .context("failed to connect to home assistant")?;
+        
         todo!()
     }
     pub fn parse(&mut self, filename: String, code: &str) -> Result<(), RuntimeError> {
