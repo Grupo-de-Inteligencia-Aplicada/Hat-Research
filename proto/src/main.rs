@@ -1,4 +1,4 @@
-use anyhow::Context;
+﻿use anyhow::Context;
 use crate::runtime::HatRuntime;
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 
@@ -9,7 +9,7 @@ pub mod home_assistant;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    dotenv::dotenv().ok();
+    read_env_files();
 
     tracing_subscriber::registry()
         .with(fmt::layer())
@@ -24,4 +24,20 @@ async fn main() -> anyhow::Result<()> {
     // program.parse("test/sample.hat".into(), src)?;
 
     Ok(())
+}
+
+fn read_env_files() {
+    let mut env: &str;
+    let env_var = std::env::var("RUST_ENV").unwrap_or("".into());
+    env = &env_var;
+    if env.is_empty() {
+        env = "development";
+    }
+
+    dotenvy::from_filename(format!(".env.{env}.local")).ok();
+    if "test" != env {
+        dotenvy::from_filename(".env.local").ok();
+    }
+    dotenvy::from_filename(format!(".env.{env}")).ok();
+    dotenvy::dotenv().ok();
 }
