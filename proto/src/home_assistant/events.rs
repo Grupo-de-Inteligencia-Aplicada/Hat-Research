@@ -2,15 +2,16 @@ use anyhow::{Context, ensure, Result};
 use std::pin::Pin;
 use futures_util::Stream;
 use serde::{Deserialize, Serialize};
+use serde_json::{Map, Value};
 use crate::home_assistant::command::Command;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Event {
-    event_type: String,
-    time_fired: String,
-    origin: String,
-    context: serde_json::Value,
-    data: serde_json::Value,
+    pub event_type: String,
+    pub time_fired: String,
+    pub origin: String,
+    pub context: serde_json::Value,
+    pub data: EventData,
 }
 
 pub struct Events<'a> {
@@ -25,5 +26,19 @@ impl<'a> Events<'a> {
             .context("message does not have event field")?;
         let event: Event = serde_json::from_value(event)?;
         Ok(event)
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum EventData {
+    StateChanged {
+        entity_id: String,
+        new_state: Map<String, Value>,
+        old_state: Map<String, Value>,
+    },
+    Unknown {
+        #[serde(flatten)]
+        data: serde_json::Value,
     }
 }

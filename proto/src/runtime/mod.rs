@@ -51,7 +51,7 @@ impl HatRuntime {
         loop {
             match events.next().await {
                 Ok(event) => {
-                    debug!("Got event {event:?}");
+                    debug!("Got event {event:#?}");
                 },
                 Err(e) => {
                     error!("Failed to get event {e:?}");
