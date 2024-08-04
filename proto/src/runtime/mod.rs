@@ -5,6 +5,7 @@ use pest::error::{ErrorVariant, InputLocation, LineColLocation};
 use pest::Parser;
 use pest_derive::Parser;
 use std::collections::HashMap;
+use std::time::Duration;
 use thiserror::Error;
 use anyhow::{Context, Result};
 use futures_util::StreamExt;
@@ -43,8 +44,11 @@ impl HatRuntime {
     pub async fn new(ha_ws_url: &str, ha_token: &str) -> Result<Self> {
         let ha_ws = HAWebSocket::connect(ha_ws_url, ha_token).await
             .context("failed to connect to home assistant")?;
-        
-        todo!()
+
+        Ok(Self {
+            ha_ws,
+            event_handlers: Default::default(),
+        })
     }
     pub fn parse(&mut self, filename: String, code: &str) -> Result<(), RuntimeError> {
         let code_program = DcParser::parse(Rule::program, code);

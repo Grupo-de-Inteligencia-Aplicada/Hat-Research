@@ -1,15 +1,16 @@
-use anyhow::Result;
+use anyhow::{Context, Result};
 use futures_util::SinkExt;
 use serde::{Deserialize, Serialize};
-use tokio::sync::mpsc;
 use tokio_tungstenite::tungstenite::Message as WebSocketMessage;
 use crate::home_assistant::{HAWebSocket, Message};
+use tokio::sync::mpsc;
+use tracing::debug;
 
 #[derive(Deserialize, Serialize)]
-struct CommandMessage {
-    id: usize,
+pub(super) struct CommandMessage {
+    pub id: usize,
     #[serde(flatten)]
-    message: Message,
+    pub message: Message,
 }
 
 pub struct Command<'a> {
@@ -25,9 +26,14 @@ impl<'a> Command<'a> {
             message: msg,
         };
         let json = serde_json::to_string(&command_message)?;
+        debug!("Sending {json}");
         let mut tx = self.ws.tx.lock().await;
         tx.send(WebSocketMessage::Text(json)).await?;
         Ok(())
+    }
+    pub async fn receive_message(&mut self) -> Result<Message> {
+        self.recv.recv().await
+            .context("command channel already closed")
     }
 }
 
