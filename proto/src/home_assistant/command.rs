@@ -1,10 +1,9 @@
+use crate::home_assistant::{HAWebSocket, Message};
 use anyhow::{Context, Result};
 use futures_util::SinkExt;
 use serde::{Deserialize, Serialize};
-use tokio_tungstenite::tungstenite::Message as WebSocketMessage;
-use crate::home_assistant::{HAWebSocket, Message};
 use tokio::sync::mpsc;
-use tracing::debug;
+use tokio_tungstenite::tungstenite::Message as WebSocketMessage;
 
 #[derive(Deserialize, Serialize)]
 pub(super) struct CommandMessage {
@@ -31,12 +30,15 @@ impl<'a> Command<'a> {
         Ok(())
     }
     pub async fn receive_message(&mut self) -> Result<Message> {
-        self.recv.recv().await
+        self.recv
+            .recv()
+            .await
             .context("command channel already closed")
     }
 }
 
 impl<'a> Drop for Command<'a> {
     fn drop(&mut self) {
+        self.ws.drop_command(self.id);
     }
 }

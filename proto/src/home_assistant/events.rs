@@ -1,9 +1,7 @@
-use anyhow::{Context, ensure, Result};
-use std::pin::Pin;
-use futures_util::Stream;
+use crate::home_assistant::command::Command;
+use anyhow::{ensure, Context, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
-use crate::home_assistant::command::Command;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Event {
@@ -22,7 +20,9 @@ impl<'a> Events<'a> {
     pub async fn next(&mut self) -> Result<Event> {
         let mut msg = self.command.receive_message().await?;
         ensure!(&msg.msg_type == "event");
-        let event = msg.fields.remove("event")
+        let event = msg
+            .fields
+            .remove("event")
             .context("message does not have event field")?;
         let event: Event = serde_json::from_value(event)?;
         Ok(event)
@@ -40,5 +40,5 @@ pub enum EventData {
     Unknown {
         #[serde(flatten)]
         data: serde_json::Value,
-    }
+    },
 }
