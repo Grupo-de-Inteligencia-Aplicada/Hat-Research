@@ -31,7 +31,7 @@ pub struct Message {
 
 pub struct HAWebSocket {
     pub ha_version: String,
-    pub tx: Mutex<SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, WebSocketMessage>>,
+    tx: Arc<Mutex<SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, WebSocketMessage>>>,
     last_command_id: AtomicUsize,
     command_channels: Arc<Mutex<BTreeMap<usize, mpsc::Sender<Message>>>>,
 }
@@ -98,38 +98,50 @@ impl HAWebSocket {
 
         debug!("Connected and authenticated to HomeAssistant {ha_version}!");
 
+        let tx = Arc::new(Mutex::new(tx));
+
         let command_channels = Arc::new(
             Mutex::new(BTreeMap::<usize, mpsc::Sender<Message>>::new())
         );
 
         let channels = Arc::clone(&command_channels);
-        
+        let tx_weak = Arc::downgrade(&tx);
+
+        // Receiver task
         tokio::spawn(async move {
             while let Some(msg) = rx.next().await {
                 match msg {
-                    Ok(msg) => {
-                        let json = match msg.into_text() {
-                            Ok(msg) => msg,
-                            Err(_) => { continue; },
-                        };
-                        debug!("Received: {json}");
-                        let msg: CommandMessage = match serde_json::from_str(&json) {
-                            Ok(msg) => msg,
-                            Err(e) => {
-                                error!("Failed to parse message from home assistant: {e:?}");
-                                continue;
+                    Ok(msg) => match msg {
+                        WebSocketMessage::Ping(payload) => {
+                            if let Some(tx) = tx_weak.upgrade() {
+                                let mut tx_lock = tx.lock().await;
+                                if let Err(e) = tx_lock.send(WebSocketMessage::Pong(payload)).await {
+                                    error!("Failed to answer ping request from server: {e:?}");
+                                }
+                            } else {
+                                break;
                             }
-                        };
-                        let channel = {
-                            let channels_lock = channels.lock().await;
-                            channels_lock.get(&msg.id).map(|c| c.clone())
-                        };
-                        match channel {
-                            Some(mut c) => {
-                                c.send(msg.message).await.ok();
-                            },
-                            None => warn!("Received message for unknown command channel {}", msg.id),
-                        }
+                        },
+                        WebSocketMessage::Text(msg) => {
+                            let msg: CommandMessage = match serde_json::from_str(&msg) {
+                                Ok(msg) => msg,
+                                Err(e) => {
+                                    error!("Failed to parse message from home assistant: {e:?}");
+                                    continue;
+                                }
+                            };
+                            let channel = {
+                                let channels_lock = channels.lock().await;
+                                channels_lock.get(&msg.id).map(|c| c.clone())
+                            };
+                            match channel {
+                                Some(mut c) => {
+                                    c.send(msg.message).await.ok();
+                                },
+                                None => warn!("Received message for unknown command channel {}", msg.id),
+                            }
+                        },
+                        _ => {},
                     },
                     Err(e) => {
                         error!("Failed to read message from home assistant: {e:?}");
@@ -140,7 +152,7 @@ impl HAWebSocket {
 
         Ok(Self {
             ha_version: ha_version.to_owned(),
-            tx: Mutex::new(tx),
+            tx,
             last_command_id: AtomicUsize::new(1),
             command_channels,
         })

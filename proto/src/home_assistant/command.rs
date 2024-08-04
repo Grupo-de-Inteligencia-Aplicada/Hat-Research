@@ -26,7 +26,6 @@ impl<'a> Command<'a> {
             message: msg,
         };
         let json = serde_json::to_string(&command_message)?;
-        debug!("Sending {json}");
         let mut tx = self.ws.tx.lock().await;
         tx.send(WebSocketMessage::Text(json)).await?;
         Ok(())
