@@ -9,6 +9,7 @@ use std::time::Duration;
 use thiserror::Error;
 use anyhow::{Context, Result};
 use futures_util::StreamExt;
+use tracing::{debug, error};
 use crate::home_assistant::HAWebSocket;
 
 #[derive(Parser)]
@@ -44,6 +45,19 @@ impl HatRuntime {
     pub async fn new(ha_ws_url: &str, ha_token: &str) -> Result<Self> {
         let ha_ws = HAWebSocket::connect(ha_ws_url, ha_token).await
             .context("failed to connect to home assistant")?;
+
+        let mut events = ha_ws.subscribe_events(Some("state_changed".into())).await?;
+
+        loop {
+            match events.next().await {
+                Ok(event) => {
+                    debug!("Got event {event:?}");
+                },
+                Err(e) => {
+                    error!("Failed to get event {e:?}");
+                }
+            }
+        }
 
         Ok(Self {
             ha_ws,

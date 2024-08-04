@@ -1,3 +1,4 @@
+pub mod events;
 pub mod command;
 
 use std::collections::{BTreeMap, HashMap};
@@ -9,7 +10,7 @@ use futures_util::{SinkExt, StreamExt};
 use futures_util::stream::{SplitSink, SplitStream};
 use log::error;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
+use serde_json::{json, Value};
 use tokio::net::TcpStream;
 use tokio_tungstenite::tungstenite::Message as WebSocketMessage;
 use tokio_tungstenite::{MaybeTlsStream, WebSocketStream};
@@ -18,11 +19,14 @@ use command::Command;
 use tokio::sync::{mpsc, Mutex};
 use tokio::time::timeout;
 use crate::home_assistant::command::CommandMessage;
+use crate::home_assistant::events::Events;
 
 #[derive(Deserialize, Serialize)]
 pub struct Message {
     #[serde(rename = "type")]
     pub msg_type: String,
+    #[serde(flatten)]
+    pub fields: HashMap<String, serde_json::Value>,
 }
 
 pub struct HAWebSocket {
@@ -144,12 +148,29 @@ impl HAWebSocket {
     pub async fn ping(&self, timeout: Duration) -> Result<()> {
         let mut command = self.new_command().await;
         command.send_message(Message {
-            msg_type: "ping".into()
+            msg_type: "ping".into(),
+            fields: Default::default(),
         }).await?;
         let res = tokio::time::timeout(timeout, command.receive_message()).await
             .context("ping command timed out")??;
         ensure!(&res.msg_type == "pong");
         Ok(())
+    }
+    pub async fn subscribe_events<'a>(&'a self, event_type: Option<String>) -> Result<Events<'a>> {
+        let mut command = self.new_command().await;
+        command.send_message(Message {
+            msg_type: "subscribe_events".into(),
+            fields: HashMap::from([
+                ("event_type".into(), serde_json::to_value(event_type)?),
+            ]),
+        }).await?;
+        let result = command.receive_message().await?;
+        ensure!(&result.msg_type == "result");
+        let success = result.fields.get("success");
+        ensure!(success == Some(&Value::Bool(true)));
+        Ok(Events {
+            command,
+        })
     }
     fn generate_command_id(&self) -> usize {
         self.last_command_id.fetch_add(1, Ordering::SeqCst)
