@@ -45,7 +45,7 @@ handler_declaration = {
     ")" ~
     "{" ~
     handler_condition* ~
-    handler_action+ ~
+    handler_actions ~
     "}"
 }
 
@@ -61,8 +61,11 @@ handler_condition = {
     expr
 }
 
-handler_action = {
-    "run" ~
+handler_actions = {
+    ("run" ~ echo_action)+
+}
+
+echo_action = {
     "echo" ~
     "(" ~
     string ~

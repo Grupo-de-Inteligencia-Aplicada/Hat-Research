@@ -1,14 +1,5 @@
-handler Another (Hye) {
-    run echo("NOT OK!")
-}
-
-handler "Bye Ae" (Hello, Another) {
-
-    run echo("OK!")
-    run echo(   "si ")
-
-}
-
-handler "Luz quando abrir porta" (DoorOpenEvent) {
+handler "Luz quando abrir porta" (DoorOpenEvent, Abc) {
     run echo("Ligar luz!")
+    run echo("si")
+    run echo("LAS!")
 }

@@ -1,9 +1,12 @@
+mod actions;
 mod event_handler;
 
 use crate::home_assistant::HAWebSocket;
 use crate::runtime::event_handler::EventHandler;
+use actions::{Action, EchoAction};
 use anyhow::{Context, Result};
 use pest::error::{ErrorVariant, InputLocation, LineColLocation};
+use pest::iterators::Pair;
 use pest::Parser;
 use pest_derive::Parser;
 use std::collections::HashMap;
@@ -98,10 +101,11 @@ impl HatRuntime {
                                 Rule::handler_declaration => "handler declaration",
                                 Rule::expr => "expression",
                                 Rule::handler_condition => "handler condition",
-                                Rule::handler_action => "handler action",
                                 Rule::stmt => "statement",
                                 Rule::program => "program",
                                 Rule::handler_triggers => "handler triggers",
+                                Rule::echo_action => "echo command",
+                                Rule::handler_actions => "handler actions",
                             })
                             .collect(),
                         ErrorVariant::CustomError { .. } => todo!(),
@@ -110,8 +114,52 @@ impl HatRuntime {
             }
         };
 
-        println!("{program:#?}");
+        for rule in program {
+            if matches!(rule.as_rule(), Rule::handler_declaration) {
+                let mut inner = rule.into_inner();
+
+                let name_rule = inner
+                    .next()
+                    .expect("missing name of the handler declaration");
+                let name_str = name_rule.as_span().as_str();
+                let name = match name_rule.as_rule() {
+                    Rule::ident => name_str,
+                    Rule::string => &name_str[1..name_str.len() - 1],
+                    _ => unreachable!(),
+                };
+
+                let triggers: Vec<_> = inner
+                    .next()
+                    .expect("missing the handler triggers")
+                    .into_inner()
+                    .map(|trigger| trigger.as_span().as_str())
+                    .collect();
+
+                let actions = inner
+                    .next()
+                    .expect("missing the handler action")
+                    .into_inner()
+                    .map(|r| parse_action(r))
+                    .collect::<Vec<_>>();
+
+                println!("{name}");
+                println!("{triggers:?}");
+                println!("{actions:?}");
+            }
+        }
 
         Ok(())
+    }
+}
+
+pub fn parse_action(rule: Pair<Rule>) -> Option<Box<dyn Action>> {
+    match rule.as_rule() {
+        Rule::echo_action => {
+            let message = rule.into_inner().next().unwrap().as_span().as_str();
+            Some(Box::new(EchoAction::new(
+                message[1..message.len() - 1].to_owned(),
+            )))
+        }
+        _ => None,
     }
 }
