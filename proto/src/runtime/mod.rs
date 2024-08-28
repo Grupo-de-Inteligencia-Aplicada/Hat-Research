@@ -1,8 +1,8 @@
 mod actions;
-mod event_handler;
+mod automation;
 
 use crate::home_assistant::HAWebSocket;
-use crate::runtime::event_handler::EventHandler;
+use crate::runtime::automation::Automation;
 use actions::{Action, EchoAction};
 use anyhow::{Context, Result};
 use pest::error::{ErrorVariant, InputLocation, LineColLocation};
@@ -38,7 +38,7 @@ pub enum RuntimeError {
 }
 
 pub struct HatRuntime {
-    event_handlers: HashMap<String, EventHandler>,
+    automations: HashMap<String, Automation>,
     ha_ws: HAWebSocket,
 }
 
@@ -50,7 +50,7 @@ impl HatRuntime {
 
         Ok(Self {
             ha_ws,
-            event_handlers: Default::default(),
+            automations: Default::default(),
         })
     }
     pub fn parse(&mut self, filename: String, code: &str) -> Result<(), RuntimeError> {
@@ -98,14 +98,14 @@ impl HatRuntime {
                                 Rule::event_parameter => "event parameter",
                                 Rule::event_parameters => "event parameter list",
                                 Rule::type_keyword => "type",
-                                Rule::handler_declaration => "handler declaration",
+                                Rule::automation_declaration => "automation declaration",
                                 Rule::expr => "expression",
-                                Rule::handler_condition => "handler condition",
+                                Rule::automation_conditions => "automation condition",
                                 Rule::stmt => "statement",
                                 Rule::program => "program",
-                                Rule::handler_triggers => "handler triggers",
+                                Rule::automation_triggers => "automation triggers",
                                 Rule::echo_action => "echo command",
-                                Rule::handler_actions => "handler actions",
+                                Rule::automation_actions => "automation actions",
                             })
                             .collect(),
                         ErrorVariant::CustomError { .. } => todo!(),
@@ -115,12 +115,12 @@ impl HatRuntime {
         };
 
         for rule in program {
-            if matches!(rule.as_rule(), Rule::handler_declaration) {
+            if matches!(rule.as_rule(), Rule::automation_declaration) {
                 let mut inner = rule.into_inner();
 
                 let name_rule = inner
                     .next()
-                    .expect("missing name of the handler declaration");
+                    .expect("missing name of the automation");
                 let name_str = name_rule.as_span().as_str();
                 let name = match name_rule.as_rule() {
                     Rule::ident => name_str,
@@ -130,14 +130,14 @@ impl HatRuntime {
 
                 let triggers: Vec<_> = inner
                     .next()
-                    .expect("missing the handler triggers")
+                    .expect("missing the automation triggers")
                     .into_inner()
                     .map(|trigger| trigger.as_span().as_str())
                     .collect();
 
                 let actions = inner
                     .next()
-                    .expect("missing the handler action")
+                    .expect("missing the automation action")
                     .into_inner()
                     .map(|r| parse_action(r))
                     .collect::<Vec<_>>();

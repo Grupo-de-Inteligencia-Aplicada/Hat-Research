@@ -37,31 +37,31 @@ type_keyword = @{
 }
 
 
-handler_declaration = {
-    "handler" ~
+automation_declaration = {
+    "automation" ~
     (string | ident) ~
     "(" ~
-    handler_triggers ~
+    automation_triggers ~
     ")" ~
     "{" ~
-    handler_condition* ~
-    handler_actions ~
+    automation_conditions* ~
+    automation_actions ~
     "}"
 }
 
-handler_triggers = {
+automation_triggers = {
     ident ~
     ("," ~ ident)*
 }
 
 expr = {"true"}
 
-handler_condition = {
+automation_conditions = {
     "if" ~
     expr
 }
 
-handler_actions = {
+automation_actions = {
     ("run" ~ echo_action)+
 }
 
@@ -72,7 +72,7 @@ echo_action = {
     ")"
 }
 
-stmt = _{ event_declaration | handler_declaration }
+stmt = _{ event_declaration | automation_declaration }
 
 // Entry rule
 program = _{ SOI ~ stmt* ~ stmt? ~ EOI }

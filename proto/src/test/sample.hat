@@ -1,4 +1,4 @@
-handler "Luz quando abrir porta" (DoorOpenEvent, Abc) {
+automation "Luz quando abrir porta" (DoorOpenEvent, Abc) {
     run echo("Ligar luz!")
     run echo("si")
     run echo("LAS!")
