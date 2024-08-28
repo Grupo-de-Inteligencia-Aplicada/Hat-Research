@@ -8,3 +8,7 @@ handler "Bye Ae" (Hello, Another) {
     run echo(   "si ")
 
 }
+
+handler "Luz quando abrir porta" (DoorOpenEvent) {
+    run echo("Ligar luz!")
+}
