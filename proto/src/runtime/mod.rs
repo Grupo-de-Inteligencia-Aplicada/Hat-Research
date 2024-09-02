@@ -132,7 +132,7 @@ impl HatRuntime {
                     .next()
                     .expect("missing the automation triggers")
                     .into_inner()
-                    .map(|trigger| trigger.as_span().as_str())
+                    .map(|trigger| trigger.as_span().as_str().to_owned())
                     .collect();
 
                 let actions = inner
@@ -140,13 +140,19 @@ impl HatRuntime {
                     .expect("missing the automation action")
                     .into_inner()
                     .map(|r| parse_action(r))
+                    .filter_map(|r| r)
                     .collect::<Vec<_>>();
 
-                println!("{name}");
-                println!("{triggers:?}");
-                println!("{actions:?}");
+                let automation = Automation {
+                    name: name.to_owned(),
+                    triggers,
+                    actions
+                };
+
+                self.automations.insert(name.to_owned(), automation);
             }
         }
+
 
         Ok(())
     }
