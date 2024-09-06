@@ -1,5 +1,8 @@
 pub mod command;
 pub mod events;
+mod integration;
+
+pub use integration::HassIntegration;
 
 use anyhow::{ensure, Context, Result};
 use command::{Command, CommandMessage};

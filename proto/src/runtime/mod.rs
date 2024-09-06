@@ -1,14 +1,16 @@
-mod actions;
-mod automation;
+pub mod actions;
+pub mod automation;
+pub mod device;
 
+use crate::integrations::Integration;
 use crate::runtime::automation::Automation;
 use actions::{Action, EchoAction};
-use anyhow::{Context, Result};
+use anyhow::Result;
 use pest::error::{ErrorVariant, InputLocation, LineColLocation};
 use pest::iterators::Pair;
 use pest::Parser;
 use pest_derive::Parser;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use thiserror::Error;
 use tracing::error;
 
@@ -36,12 +38,18 @@ pub enum RuntimeError {
     },
 }
 
-#[derive(Default)]
 pub struct HatRuntime {
     automations: HashMap<String, Automation>,
+    integrations: HashSet<Box<dyn Integration>>,
 }
 
 impl HatRuntime {
+    pub fn new() -> Self {
+        Self {
+            automations: HashMap::new(),
+            integrations: HashSet::new(),
+        }
+    }
     pub fn parse(&mut self, filename: String, code: &str) -> Result<(), RuntimeError> {
         let code_program = DcParser::parse(Rule::program, code);
 
@@ -107,9 +115,7 @@ impl HatRuntime {
             if matches!(rule.as_rule(), Rule::automation_declaration) {
                 let mut inner = rule.into_inner();
 
-                let name_rule = inner
-                    .next()
-                    .expect("missing name of the automation");
+                let name_rule = inner.next().expect("missing name of the automation");
                 let name_str = name_rule.as_span().as_str();
                 let name = match name_rule.as_rule() {
                     Rule::ident => name_str,
@@ -134,13 +140,12 @@ impl HatRuntime {
                 let automation = Automation {
                     name: name.to_owned(),
                     triggers,
-                    actions
+                    actions,
                 };
 
                 self.automations.insert(name.to_owned(), automation);
             }
         }
-
 
         Ok(())
     }
