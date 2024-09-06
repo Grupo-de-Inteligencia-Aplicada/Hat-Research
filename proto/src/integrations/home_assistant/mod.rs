@@ -1,10 +1,9 @@
 pub mod command;
 pub mod events;
 
-use crate::home_assistant::command::CommandMessage;
-use crate::home_assistant::events::Events;
 use anyhow::{ensure, Context, Result};
-use command::Command;
+use command::{Command, CommandMessage};
+use events::Events;
 use futures_util::stream::SplitSink;
 use futures_util::{SinkExt, StreamExt};
 use log::error;

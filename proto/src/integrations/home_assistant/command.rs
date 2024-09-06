@@ -1,9 +1,10 @@
-use crate::home_assistant::{HAWebSocket, Message};
 use anyhow::{Context, Result};
-use futures_util::SinkExt;
 use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc;
 use tokio_tungstenite::tungstenite::Message as WebSocketMessage;
+use futures_util::SinkExt;
+
+use super::{HAWebSocket, Message};
 
 #[derive(Deserialize, Serialize)]
 pub(super) struct CommandMessage {

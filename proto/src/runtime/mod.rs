@@ -1,7 +1,6 @@
 mod actions;
 mod automation;
 
-use crate::home_assistant::HAWebSocket;
 use crate::runtime::automation::Automation;
 use actions::{Action, EchoAction};
 use anyhow::{Context, Result};
@@ -37,22 +36,12 @@ pub enum RuntimeError {
     },
 }
 
+#[derive(Default)]
 pub struct HatRuntime {
     automations: HashMap<String, Automation>,
-    ha_ws: HAWebSocket,
 }
 
 impl HatRuntime {
-    pub async fn new(ha_ws_url: &str, ha_token: &str) -> Result<Self> {
-        let ha_ws = HAWebSocket::connect(ha_ws_url, ha_token)
-            .await
-            .context("failed to connect to home assistant")?;
-
-        Ok(Self {
-            ha_ws,
-            automations: Default::default(),
-        })
-    }
     pub fn parse(&mut self, filename: String, code: &str) -> Result<(), RuntimeError> {
         let code_program = DcParser::parse(Rule::program, code);
 
@@ -139,8 +128,7 @@ impl HatRuntime {
                     .next()
                     .expect("missing the automation action")
                     .into_inner()
-                    .map(|r| parse_action(r))
-                    .filter_map(|r| r)
+                    .filter_map(|r| parse_action(r))
                     .collect::<Vec<_>>();
 
                 let automation = Automation {

@@ -1,7 +1,8 @@
-use crate::home_assistant::command::Command;
 use anyhow::{ensure, Context, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
+
+use super::command::Command;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Event {
