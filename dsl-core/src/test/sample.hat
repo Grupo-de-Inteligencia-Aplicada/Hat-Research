@@ -3,3 +3,7 @@ automation "Luz quando abrir porta" (DoorOpenEvent, Abc) {
     run echo("si")
     run echo("LAS!")
 }
+
+automation DummyAutomation (Dummy) {
+  run echo("dummy hello world!")
+}

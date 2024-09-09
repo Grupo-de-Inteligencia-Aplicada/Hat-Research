@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use crate::runtime::HatRuntime;
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 
@@ -20,11 +22,19 @@ async fn main() -> anyhow::Result<()> {
     //let mut runtime = HatRuntime::new("wss://ha.polaris.fleap.dev/api/websocket", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI3YzhiYjdkMDczYmY0OWFiYTc4YTY0YjVmMzZkYTkwNiIsImlhdCI6MTcyMjQzNzk3NywiZXhwIjoyMDM3Nzk3OTc3fQ.h8uzazAaV_4MopUB3vPu258l54bhoh4DuZc30shF42M").await
     //.context("failed to initialize runtime")?;
 
-    let mut runtime = HatRuntime::new();
+    let runtime = HatRuntime::new();
 
     runtime.parse("test/sample.hat".into(), src)?;
 
-    Ok(())
+    loop {
+        runtime
+            .dispatch_event(runtime::event::Event {
+                typ: runtime::event::EventType::Dummy,
+                time: Instant::now(),
+            })
+            .unwrap();
+        tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+    }
 }
 
 fn read_env_files() {

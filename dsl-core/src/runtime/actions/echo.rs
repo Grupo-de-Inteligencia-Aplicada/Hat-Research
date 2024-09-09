@@ -1,5 +1,7 @@
 use log::info;
 
+use crate::runtime::HatRuntime;
+
 use super::Action;
 
 #[derive(Debug)]
@@ -18,7 +20,7 @@ impl Action for EchoAction {
         "echo"
     }
 
-    fn run(&self, _runtime: &tokio::runtime::Runtime) {
+    fn run(&self, _runtime: &HatRuntime) {
         info!("ECHO: {}", self.message);
     }
 }
