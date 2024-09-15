@@ -11,9 +11,7 @@ use pest::error::{ErrorVariant, InputLocation, LineColLocation};
 use pest::iterators::Pair;
 use pest::Parser;
 use pest_derive::Parser;
-use std::collections::{HashMap, HashSet};
-use std::future::AsyncDrop;
-use std::pin::Pin;
+use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use thiserror::Error;
 use tokio::sync::{mpsc, oneshot, RwLock};
@@ -46,9 +44,11 @@ pub enum RuntimeError {
     },
 }
 
+type IntegrationAndStopChannel = (Box<dyn Integration>, oneshot::Sender<()>);
+
 pub struct HatRuntime {
     automations: Mutex<HashMap<String, Automation>>,
-    integrations: RwLock<Vec<(Box<dyn Integration>, oneshot::Sender<()>)>>,
+    integrations: RwLock<Vec<IntegrationAndStopChannel>>,
     executor_channel: mpsc::UnboundedSender<ExecutorMessage>,
     executor_handle: Mutex<Option<JoinHandle<()>>>,
 }
@@ -85,7 +85,7 @@ impl HatRuntime {
             let mut executor_handle = runtime.executor_handle.lock().unwrap();
             *executor_handle = Some(handle);
         }
-        
+
         runtime
     }
 
@@ -239,7 +239,7 @@ impl HatRuntime {
             _ => None,
         }
     }
-    
+
     pub async fn join(&self) {
         let mut handle_lock = self.executor_handle.lock().unwrap();
         let handle = &mut *handle_lock;
