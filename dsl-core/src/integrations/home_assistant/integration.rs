@@ -1,8 +1,8 @@
 use anyhow::Result;
 use async_trait::async_trait;
-
+use tokio::sync::mpsc::UnboundedReceiver;
 use crate::{integrations::Integration, runtime::device::Device};
-
+use crate::runtime::event::Event;
 use super::HAWebSocket;
 
 pub struct HassIntegration {
@@ -19,6 +19,14 @@ impl HassIntegration {
 #[async_trait]
 impl Integration for HassIntegration {
     async fn list_devices(&self) -> Vec<Device> {
+        todo!()
+    }
+
+    fn subscribe(&self) -> UnboundedReceiver<Event> {
+        todo!()
+    }
+
+    fn name(&self) -> &'static str {
         todo!()
     }
 }

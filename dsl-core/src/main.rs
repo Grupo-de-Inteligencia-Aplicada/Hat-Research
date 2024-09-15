@@ -1,7 +1,10 @@
+#![feature(async_drop)]
+
 use std::time::Instant;
 
 use crate::runtime::HatRuntime;
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
+use crate::integrations::dummy::DummyIntegration;
 
 pub mod integrations;
 pub mod runtime;
@@ -23,18 +26,14 @@ async fn main() -> anyhow::Result<()> {
     //.context("failed to initialize runtime")?;
 
     let runtime = HatRuntime::new();
+    
+    runtime.integrate(DummyIntegration).await;
 
     runtime.parse("test/sample.hat".into(), src)?;
+    
+    runtime.join().await;
 
-    loop {
-        runtime
-            .dispatch_event(runtime::event::Event {
-                typ: runtime::event::EventType::Dummy,
-                time: Instant::now(),
-            })
-            .unwrap();
-        tokio::time::sleep(std::time::Duration::from_secs(2)).await;
-    }
+    Ok(())
 }
 
 fn read_env_files() {
