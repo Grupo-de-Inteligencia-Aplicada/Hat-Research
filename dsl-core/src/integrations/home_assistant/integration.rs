@@ -1,9 +1,9 @@
+use super::HAWebSocket;
+use crate::runtime::event::Event;
+use crate::{integrations::Integration, runtime::device::Device};
 use anyhow::Result;
 use async_trait::async_trait;
 use tokio::sync::mpsc::UnboundedReceiver;
-use crate::{integrations::Integration, runtime::device::Device};
-use crate::runtime::event::Event;
-use super::HAWebSocket;
 
 pub struct HassIntegration {
     ws: HAWebSocket,

@@ -1,10 +1,8 @@
 #![feature(async_drop)]
 
-use std::time::Instant;
-
+use crate::integrations::dummy::DummyIntegration;
 use crate::runtime::HatRuntime;
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
-use crate::integrations::dummy::DummyIntegration;
 
 pub mod integrations;
 pub mod runtime;
@@ -26,11 +24,11 @@ async fn main() -> anyhow::Result<()> {
     //.context("failed to initialize runtime")?;
 
     let runtime = HatRuntime::new();
-    
+
     runtime.integrate(DummyIntegration).await;
 
     runtime.parse("test/sample.hat".into(), src)?;
-    
+
     runtime.join().await;
 
     Ok(())

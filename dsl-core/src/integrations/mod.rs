@@ -1,10 +1,10 @@
 use crate::runtime::device::Device;
+use crate::runtime::event::Event;
 use async_trait::async_trait;
 use tokio::sync::mpsc;
-use crate::runtime::event::Event;
 
-pub mod home_assistant;
 pub mod dummy;
+pub mod home_assistant;
 
 #[async_trait]
 pub trait Integration: Send + Sync {
