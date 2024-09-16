@@ -22,7 +22,7 @@ use tokio_tungstenite::tungstenite::Message as WebSocketMessage;
 use tokio_tungstenite::{MaybeTlsStream, WebSocketStream};
 use tracing::{debug, warn};
 
-#[derive(Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Message {
     #[serde(rename = "type")]
     pub msg_type: String,
@@ -189,10 +189,16 @@ impl HAWebSocket {
     }
     pub async fn subscribe_events(&self, event_type: Option<String>) -> Result<Events<'_>> {
         let mut command = self.new_command().await;
+        
+        let mut message_fields = HashMap::new();
+        if let Some(event_type) = event_type {
+            message_fields.insert("event_type".into(), event_type.into());
+        }
+        
         command
             .send_message(Message {
                 msg_type: "subscribe_events".into(),
-                fields: HashMap::from([("event_type".into(), serde_json::to_value(event_type)?)]),
+                fields: message_fields,
             })
             .await?;
         let result = command.receive_message().await?;
