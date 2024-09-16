@@ -1,10 +1,16 @@
-#[derive(Debug, Eq, PartialEq)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum DeviceType {
     Dummy,
+    DoorSensor,
+    Light,
 }
 
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Device {
+    pub integration: String,
     pub id: String,
-    pub name: String,
+    pub name: Option<String>,
     pub typ: DeviceType,
 }

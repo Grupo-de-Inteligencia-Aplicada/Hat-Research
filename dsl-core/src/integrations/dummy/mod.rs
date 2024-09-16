@@ -2,7 +2,8 @@ use crate::integrations::Integration;
 use crate::runtime::device::{Device, DeviceType};
 use crate::runtime::event::{Event, EventType};
 use async_trait::async_trait;
-use std::time::{Duration, Instant};
+use std::time::Duration;
+use chrono::Utc;
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::UnboundedReceiver;
 use tokio::time::sleep;
@@ -15,8 +16,9 @@ pub struct DummyIntegration;
 impl Integration for DummyIntegration {
     async fn list_devices(&self) -> Vec<Device> {
         [Device {
+            integration: self.name().to_owned(),
             id: "dummy-device-2707".into(),
-            name: "Dummy Device".into(),
+            name: Some("Dummy Device".into()),
             typ: DeviceType::Dummy,
         }]
         .into()
@@ -24,12 +26,20 @@ impl Integration for DummyIntegration {
 
     fn subscribe(&self) -> UnboundedReceiver<Event> {
         let (tx, rx) = mpsc::unbounded_channel();
+        
+        let integration_name = self.name();
 
         tokio::spawn(async move {
             loop {
                 let result = tx.send(Event {
                     typ: EventType::Dummy,
-                    time: Instant::now(),
+                    time: Utc::now(),
+                    device: Device {
+                        integration: integration_name.to_string(),
+                        id: "dummy-device-2707".into(),
+                        name: Some("Dummy Device".into()),
+                        typ: DeviceType::Dummy,
+                    },
                 });
                 if result.is_err() {
                     error!("Failed to send event to runtime!");
