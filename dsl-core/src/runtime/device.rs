@@ -5,6 +5,7 @@ pub enum DeviceType {
     Dummy,
     DoorSensor,
     Light,
+    Sensor,
 }
 
 #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]

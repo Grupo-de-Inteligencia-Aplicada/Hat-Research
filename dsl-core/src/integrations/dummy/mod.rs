@@ -40,6 +40,7 @@ impl Integration for DummyIntegration {
                         name: Some("Dummy Device".into()),
                         typ: DeviceType::Dummy,
                     },
+                    parameters: Default::default(),
                 });
                 if result.is_err() {
                     error!("Failed to send event to runtime!");

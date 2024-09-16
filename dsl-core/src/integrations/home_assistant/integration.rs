@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::sync::Arc;
 use super::HAWebSocket;
 use crate::runtime::event::{Event as RuntimeEvent, EventType};
@@ -57,7 +58,7 @@ impl Integration for HassIntegration {
                 if let Some(runtime_event) = runtime_event {
                     tx.send(runtime_event).unwrap();
                 } else {
-                    debug!("Event not recognized: {hass_event:?}");
+                    debug!("Event not recognized: {}", serde_json::to_string_pretty(&hass_event).unwrap_or_default());
                 }
             }
         });
@@ -76,15 +77,16 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
     match &hass_event.data {
         EventData::StateChanged { entity_id, old_state: old_state_data, new_state: new_state_data } => {
             let entity_type = entity_id.split(".").next()?;
+            let new_state = new_state_data.get("state")?;
+            let old_state = old_state_data.get("state")?;
+            let attribs = new_state_data.get("attributes")?;
+            let name = attribs.get("friendly_name")
+                .and_then(|v| v.as_str())
+                .map(|s| s.to_owned());
 
             match entity_type {
                 "binary_sensor" => {
                     let attribs = new_state_data.get("attributes")?;
-                    let name = attribs.get("friendly_name")
-                        .and_then(|v| v.as_str())
-                        .map(|s| s.to_owned());
-                    let new_state = new_state_data.get("state")?;
-                    let old_state = old_state_data.get("state")?;
                     let device_class = attribs.get("device_class")
                         .and_then(|v| v.as_str());
                     if device_class == Some("door") {
@@ -99,6 +101,7 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
                                 typ: EventType::DoorOpenEvent,
                                 time,
                                 device,
+                                parameters: Default::default(),
                             });
                         }
                         if old_state == "on" && new_state == "off" {
@@ -106,17 +109,12 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
                                 typ: EventType::DoorCloseEvent,
                                 time,
                                 device,
+                                parameters: Default::default(),
                             });
                         }
                     }
                 }
                 "light" => {
-                    let new_state = new_state_data.get("state")?;
-                    let old_state = old_state_data.get("state")?;
-                    let attribs = new_state_data.get("attributes")?;
-                    let name = attribs.get("friendly_name")
-                        .and_then(|v| v.as_str())
-                        .map(|s| s.to_owned());
                     let device = Device {
                         integration: integration_name.to_owned(),
                         id: entity_id.to_owned(),
@@ -128,6 +126,7 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
                             typ: EventType::LightOnEvent,
                             time,
                             device,
+                            parameters: Default::default(),
                         });
                     }
                     if old_state == "on" && new_state == "off" {
@@ -135,8 +134,27 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
                             typ: EventType::LightOffEvent,
                             time,
                             device,
+                            parameters: Default::default(),
                         });
                     }
+                },
+                "sensor" => {
+                    let mut parameters = HashMap::new();
+                    let value = new_state.as_str();
+                    if let Some(value) = value {
+                        parameters.insert("value".into(), value.to_owned());
+                    }
+                    return Some(RuntimeEvent {
+                        typ: EventType::SensorValueChangeEvent,
+                        time,
+                        device: Device {
+                            integration: integration_name.to_owned(),
+                            id: entity_id.to_owned(),
+                            name,
+                            typ: DeviceType::Sensor,
+                        },
+                        parameters,
+                    })
                 }
                 _ => {}
             }

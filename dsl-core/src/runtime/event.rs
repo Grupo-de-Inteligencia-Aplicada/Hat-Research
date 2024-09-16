@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use crate::runtime::device::Device;
@@ -9,6 +10,7 @@ pub enum EventType {
     DoorCloseEvent,
     LightOnEvent,
     LightOffEvent,
+    SensorValueChangeEvent,
 }
 
 impl EventType {
@@ -19,6 +21,7 @@ impl EventType {
             EventType::DoorCloseEvent => "DoorCloseEvent",
             EventType::LightOnEvent => "LightOnEvent",
             EventType::LightOffEvent => "LightOffEvent",
+            EventType::SensorValueChangeEvent => "SensorValueChangeEvent",
         }
     }
 }
@@ -28,4 +31,5 @@ pub struct Event {
     pub typ: EventType,
     pub time: chrono::DateTime<Utc>,
     pub device: Device,
+    pub parameters: HashMap<String, String>,
 }
