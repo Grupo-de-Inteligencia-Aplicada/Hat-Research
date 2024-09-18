@@ -15,3 +15,9 @@ pub struct Device {
     pub name: Option<String>,
     pub typ: DeviceType,
 }
+
+impl Device {
+    pub fn full_id(&self) -> String {
+        format!("{}@{}", self.integration, self.id)
+    }
+}

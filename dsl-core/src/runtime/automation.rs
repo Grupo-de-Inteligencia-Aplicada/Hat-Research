@@ -1,3 +1,4 @@
+use crate::runtime::expression::Expression;
 use super::{actions::Action, event::Event, HatRuntime};
 
 #[derive(Debug)]

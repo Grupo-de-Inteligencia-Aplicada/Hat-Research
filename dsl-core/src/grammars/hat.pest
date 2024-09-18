@@ -54,13 +54,6 @@ automation_triggers = {
     ("," ~ ident)*
 }
 
-expr = {"true"}
-
-automation_conditions = {
-    "if" ~
-    expr
-}
-
 automation_actions = {
     ("run" ~ echo_action)+
 }
@@ -70,6 +63,32 @@ echo_action = {
     "(" ~
     string ~
     ")"
+}
+
+expr = {
+    const_expr |
+    function_expr
+}
+
+const_expr = {
+    "true" | "false"
+}
+
+function_expr = {
+    ident ~
+    "(" ~
+    function_parameters? ~
+    ")"
+}
+
+function_parameters = {
+    expr ~
+    ("," ~ expr)*
+}
+
+automation_conditions = {
+    "if" ~
+    expr
 }
 
 stmt = _{ event_declaration | automation_declaration }

@@ -2,6 +2,10 @@ pub mod actions;
 pub mod automation;
 pub mod device;
 pub mod event;
+pub mod expression;
+pub mod value;
+pub mod function;
+pub mod context;
 
 use crate::integrations::Integration;
 use crate::runtime::automation::Automation;
@@ -142,6 +146,9 @@ impl HatRuntime {
                                 Rule::automation_triggers => "automation triggers",
                                 Rule::echo_action => "echo command",
                                 Rule::automation_actions => "automation actions",
+                                Rule::const_expr => "constant expression",
+                                Rule::function_expr => "function expression",
+                                Rule::function_parameters => "function parameters",
                             })
                             .collect(),
                         ErrorVariant::CustomError { .. } => todo!(),
