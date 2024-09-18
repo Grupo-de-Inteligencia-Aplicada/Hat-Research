@@ -1,3 +1,13 @@
+automation ConstExpr (Dummy) {
+    if false
+    run echo("should not be printed")
+}
+
+automation ConstExpr2 (Dummy) {
+    if is_it_true(false, get_val())
+    run echo("hello")
+}
+
 automation "Luz quando abrir porta" (DoorOpenEvent, Abc) {
     run echo("Ligar luz!")
     run echo("si")
@@ -7,3 +17,4 @@ automation "Luz quando abrir porta" (DoorOpenEvent, Abc) {
 automation DummyAutomation (Dummy) {
   run echo("dummy hello world!")
 }
+

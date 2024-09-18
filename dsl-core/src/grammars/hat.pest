@@ -71,19 +71,28 @@ expr = {
 }
 
 const_expr = {
+    bool_expr |
+    string |
+    decimal |
+    integer
+}
+
+bool_expr = {
     "true" | "false"
 }
 
 function_expr = {
     ident ~
     "(" ~
-    function_parameters? ~
+    function_parameters ~
     ")"
 }
 
 function_parameters = {
-    expr ~
-    ("," ~ expr)*
+    (
+        expr ~
+        ("," ~ expr)*
+    )?
 }
 
 automation_conditions = {

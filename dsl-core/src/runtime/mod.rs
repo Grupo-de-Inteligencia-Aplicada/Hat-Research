@@ -10,18 +10,22 @@ pub mod context;
 use crate::integrations::Integration;
 use crate::runtime::automation::Automation;
 use actions::{Action, EchoAction};
-use anyhow::Result;
+use anyhow::{bail, Context, ensure, Result};
 use pest::error::{ErrorVariant, InputLocation, LineColLocation};
-use pest::iterators::Pair;
+use pest::iterators::{Pair, Pairs};
 use pest::Parser;
 use pest_derive::Parser;
 use std::collections::HashMap;
+use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use thiserror::Error;
 use tokio::sync::{mpsc, oneshot, RwLock};
 use tokio::task::JoinHandle;
 use tracing::{debug, error, warn};
-
+use crate::runtime::context::AutomationContext;
+use crate::runtime::expression::Expression;
+use crate::runtime::function::FunctionCall;
+use crate::runtime::value::Value;
 use self::event::Event;
 
 #[derive(Parser)]
@@ -77,7 +81,12 @@ impl HatRuntime {
 
                         for (_name, automation) in automations.iter() {
                             if automation.should_be_triggered_by(&event) {
-                                automation.trigger(&runtime_clone);
+                                let mut context = AutomationContext {
+                                    event: event.clone(),
+                                };
+                                if let Err(e) = automation.trigger(&runtime_clone, &mut context) {
+                                    error!("Failed to run automation {}: {e:?}", automation.name);
+                                }
                             }
                         }
                     }
@@ -94,6 +103,7 @@ impl HatRuntime {
     }
 
     pub fn parse(&self, filename: String, code: &str) -> Result<(), RuntimeError> {
+        // TODO: stop panicking
         let code_program = DcParser::parse(Rule::program, code);
 
         let program = match code_program {
@@ -147,6 +157,7 @@ impl HatRuntime {
                                 Rule::echo_action => "echo command",
                                 Rule::automation_actions => "automation actions",
                                 Rule::const_expr => "constant expression",
+                                Rule::bool_expr => "boolean expression",
                                 Rule::function_expr => "function expression",
                                 Rule::function_parameters => "function parameters",
                             })
@@ -164,10 +175,9 @@ impl HatRuntime {
                 let mut inner = rule.into_inner();
 
                 let name_rule = inner.next().expect("missing name of the automation");
-                let name_str = name_rule.as_span().as_str();
                 let name = match name_rule.as_rule() {
-                    Rule::ident => name_str,
-                    Rule::string => &name_str[1..name_str.len() - 1],
+                    Rule::ident => name_rule.as_span().as_str().to_owned(),
+                    Rule::string => Self::parse_string(name_rule).expect("failed to parse string"),
                     _ => unreachable!(),
                 };
 
@@ -178,20 +188,36 @@ impl HatRuntime {
                     .map(|trigger| trigger.as_span().as_str().to_owned())
                     .collect();
 
-                let actions = inner
+                let mut maybe_conditions_or_actions = inner
                     .next()
-                    .expect("missing the automation action")
+                    .expect("missing the automation action");
+
+                let mut conditions: Vec<Expression> = Vec::new();
+
+                if maybe_conditions_or_actions.as_rule() == Rule::automation_conditions {
+                    conditions = maybe_conditions_or_actions
+                        .into_inner()
+                        .map(|r| Self::parse_expression(r).unwrap())
+                        .collect();
+
+                    maybe_conditions_or_actions = inner
+                        .next()
+                        .expect("missing the automation action");
+                }
+
+                let actions = maybe_conditions_or_actions
                     .into_inner()
-                    .filter_map(|r| Self::parse_action(r))
+                    .map(|r| Self::parse_action(r).unwrap())
                     .collect::<Vec<_>>();
 
                 let automation = Automation {
-                    name: name.to_owned(),
+                    name: name.clone(),
                     triggers,
+                    conditions,
                     actions,
                 };
-
-                automations.insert(name.to_owned(), automation);
+                
+                automations.insert(name, automation);
             }
         }
 
@@ -235,23 +261,91 @@ impl HatRuntime {
         Ok(())
     }
 
-    fn parse_action(rule: Pair<Rule>) -> Option<Box<dyn Action>> {
-        match rule.as_rule() {
-            Rule::echo_action => {
-                let message = rule.into_inner().next().unwrap().as_span().as_str();
-                Some(Box::new(EchoAction::new(
-                    message[1..message.len() - 1].to_owned(),
-                )))
-            }
-            _ => None,
-        }
-    }
-
     pub async fn join(&self) {
         let mut handle_lock = self.executor_handle.lock().unwrap();
         let handle = &mut *handle_lock;
         if let Some(handle) = handle {
             let _ = handle.await;
+        }
+    }
+
+    fn parse_string(rule: Pair<Rule>) -> Result<String> {
+        match rule.as_rule() {
+            Rule::string => {
+                let val = rule.as_span().as_str();
+                Ok(val[1..val.len() - 1].to_owned())
+            }
+            _ => bail!("rule is not a string"),
+        }
+    }
+
+    fn parse_action(rule: Pair<Rule>) -> Result<Box<dyn Action>> {
+        match rule.as_rule() {
+            Rule::echo_action => {
+                let message = rule.into_inner().next().unwrap().as_span().as_str();
+                Ok(Box::new(EchoAction::new(
+                    message[1..message.len() - 1].to_owned(),
+                )))
+            }
+            _ => bail!("rule is not an action"),
+        }
+    }
+
+    fn parse_expression(rule: Pair<Rule>) -> Result<Expression> {
+        match rule.as_rule() {
+            Rule::expr => {
+                let inner = rule.into_inner().next()
+                    .context("expression does not have inner rules")?;
+
+                match inner.as_rule() {
+                    Rule::const_expr => {
+                        let inner = inner.into_inner().next()
+                            .context("constant expression does not have inner rules")?;
+                        match inner.as_rule() {
+                            Rule::bool_expr => {
+                                match inner.as_span().as_str() {
+                                    "true" => Ok(Expression::Constant(true.into())),
+                                    "false" => Ok(Expression::Constant(false.into())),
+                                    _ => unreachable!(),
+                                }
+                            }
+                            Rule::string => {
+                                Self::parse_string(inner)
+                                    .map(|s| Expression::Constant(s.into()))
+                            }
+                            Rule::decimal => {
+                                let inner = inner.as_span().as_str();
+                                Ok(Expression::Constant(f64::from_str(inner)?.into()))
+                            }
+                            Rule::integer => {
+                                let inner = inner.as_span().as_str();
+                                Ok(Expression::Constant((i64::from_str(inner)? as f64).into()))
+                            }
+                            _ => {
+                                unimplemented!()
+                            }
+                        }
+                    }
+                    Rule::function_expr => {
+                        let mut inner = inner.into_inner();
+                        let name = inner.next()
+                            .context("function expression does not have inner rules")?
+                            .as_span()
+                            .as_str();
+                        let parameters = inner.next()
+                            .context("function expression have just one inner rule")?
+                            .into_inner()
+                            .map(|rule| Self::parse_expression(rule))
+                            .collect::<Result<Vec<_>>>()?;
+                        Ok(Expression::Function(FunctionCall {
+                            name: name.to_owned(),
+                            arguments: parameters,
+                        }))
+                    }
+                    _ => bail!("unknown expression rule"),
+                }
+            }
+            _ => bail!("rule is not an expression"),
         }
     }
 }
