@@ -1,7 +1,7 @@
-use std::collections::HashMap;
+use crate::runtime::device::Device;
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
-use crate::runtime::device::Device;
+use std::collections::HashMap;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum EventType {

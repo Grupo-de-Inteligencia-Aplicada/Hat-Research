@@ -12,7 +12,9 @@ pub struct FunctionCall {
 
 impl FunctionCall {
     pub fn evaluate(&self, ctx: &mut AutomationContext) -> Result<Value> {
-        let arguments = self.arguments.iter()
+        let arguments = self
+            .arguments
+            .iter()
             .map(|expr| expr.evaluate(ctx))
             .collect::<Result<Vec<Value>>>()?;
 
@@ -33,11 +35,11 @@ pub mod default_functions {
     pub fn get_device(ctx: &mut AutomationContext, _args: Vec<Value>) -> Result<Value> {
         Ok(ctx.event.device.full_id().into())
     }
-    
+
     pub fn get_integration(ctx: &mut AutomationContext, _args: Vec<Value>) -> Result<Value> {
         Ok(ctx.event.device.integration.clone().into())
     }
-    
+
     pub fn get_time(ctx: &mut AutomationContext, _args: Vec<Value>) -> Result<Value> {
         Ok(ctx.event.time.to_rfc3339().into())
     }

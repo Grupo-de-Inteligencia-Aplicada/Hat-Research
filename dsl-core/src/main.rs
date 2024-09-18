@@ -3,7 +3,6 @@
 use crate::integrations::dummy::DummyIntegration;
 use crate::runtime::HatRuntime;
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
-use crate::integrations::home_assistant::HassIntegration;
 
 pub mod integrations;
 pub mod runtime;

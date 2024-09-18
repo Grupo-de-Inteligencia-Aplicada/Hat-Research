@@ -1,6 +1,6 @@
+use super::{actions::Action, event::Event, HatRuntime};
 use crate::runtime::context::AutomationContext;
 use crate::runtime::expression::Expression;
-use super::{actions::Action, event::Event, HatRuntime};
 
 use anyhow::{Context, Result};
 
@@ -24,9 +24,10 @@ impl Automation {
 
     pub fn trigger(&self, runtime: &HatRuntime, ctx: &mut AutomationContext) -> Result<()> {
         for condition in &self.conditions {
-            let result = condition.evaluate(ctx)
-                .with_context(|| format!("failed to evaluate expression in condition {condition:?}"))?;
-            
+            let result = condition.evaluate(ctx).with_context(|| {
+                format!("failed to evaluate expression in condition {condition:?}")
+            })?;
+
             if !result.as_bool() {
                 return Ok(());
             }

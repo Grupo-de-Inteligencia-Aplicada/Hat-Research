@@ -2,8 +2,8 @@ use crate::integrations::Integration;
 use crate::runtime::device::{Device, DeviceType};
 use crate::runtime::event::{Event, EventType};
 use async_trait::async_trait;
-use std::time::Duration;
 use chrono::Utc;
+use std::time::Duration;
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::UnboundedReceiver;
 use tokio::time::sleep;
@@ -26,7 +26,7 @@ impl Integration for DummyIntegration {
 
     fn subscribe(&self) -> UnboundedReceiver<Event> {
         let (tx, rx) = mpsc::unbounded_channel();
-        
+
         let integration_name = self.name();
 
         tokio::spawn(async move {

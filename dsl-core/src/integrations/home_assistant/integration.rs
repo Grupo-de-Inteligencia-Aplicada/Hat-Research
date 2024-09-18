@@ -1,16 +1,16 @@
-use std::collections::HashMap;
-use std::sync::Arc;
 use super::HAWebSocket;
+use crate::integrations::home_assistant::events::{Event as HassEvent, EventData};
+use crate::runtime::device::DeviceType;
 use crate::runtime::event::{Event as RuntimeEvent, EventType};
 use crate::{integrations::Integration, runtime::device::Device};
 use anyhow::Result;
 use async_trait::async_trait;
 use chrono::{DateTime, TimeZone, Utc};
+use std::collections::HashMap;
+use std::sync::Arc;
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::UnboundedReceiver;
 use tracing::{debug, error};
-use crate::integrations::home_assistant::events::{Event as HassEvent, EventData};
-use crate::runtime::device::DeviceType;
 
 pub struct HassIntegration {
     ws: Arc<HAWebSocket>,
@@ -58,7 +58,10 @@ impl Integration for HassIntegration {
                 if let Some(runtime_event) = runtime_event {
                     tx.send(runtime_event).unwrap();
                 } else {
-                    debug!("Event not recognized: {}", serde_json::to_string_pretty(&hass_event).unwrap_or_default());
+                    debug!(
+                        "Event not recognized: {}",
+                        serde_json::to_string_pretty(&hass_event).unwrap_or_default()
+                    );
                 }
             }
         });
@@ -75,20 +78,24 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
     let time = DateTime::parse_from_rfc3339(&hass_event.time_fired).ok()?;
     let time = Utc.from_utc_datetime(&time.naive_utc());
     match &hass_event.data {
-        EventData::StateChanged { entity_id, old_state: old_state_data, new_state: new_state_data } => {
+        EventData::StateChanged {
+            entity_id,
+            old_state: old_state_data,
+            new_state: new_state_data,
+        } => {
             let entity_type = entity_id.split(".").next()?;
             let new_state = new_state_data.get("state")?;
             let old_state = old_state_data.get("state")?;
             let attribs = new_state_data.get("attributes")?;
-            let name = attribs.get("friendly_name")
+            let name = attribs
+                .get("friendly_name")
                 .and_then(|v| v.as_str())
                 .map(|s| s.to_owned());
 
             match entity_type {
                 "binary_sensor" => {
                     let attribs = new_state_data.get("attributes")?;
-                    let device_class = attribs.get("device_class")
-                        .and_then(|v| v.as_str());
+                    let device_class = attribs.get("device_class").and_then(|v| v.as_str());
                     if device_class == Some("door") {
                         let device = Device {
                             integration: integration_name.to_owned(),
@@ -137,7 +144,7 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
                             parameters: Default::default(),
                         });
                     }
-                },
+                }
                 "sensor" => {
                     let mut parameters = HashMap::new();
                     let value = new_state.as_str();
@@ -154,7 +161,7 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
                             typ: DeviceType::Sensor,
                         },
                         parameters,
-                    })
+                    });
                 }
                 _ => {}
             }

@@ -18,11 +18,13 @@ pub fn test_function_call() {
             FunctionCall {
                 name: "get_integration".to_string(),
                 arguments: vec![],
-            }.into(),
-            Value::Boolean(true).into()
+            }
+            .into(),
+            Value::Boolean(true).into(),
         ],
-    }.into();
-    
+    }
+    .into();
+
     let mut context = AutomationContext {
         event: Event {
             typ: EventType::Dummy,
@@ -36,8 +38,8 @@ pub fn test_function_call() {
             parameters: Default::default(),
         },
     };
-    
+
     let result = expression.evaluate(&mut context).unwrap();
-    
+
     assert_eq!(result, Value::String(context.event.device.full_id()))
 }

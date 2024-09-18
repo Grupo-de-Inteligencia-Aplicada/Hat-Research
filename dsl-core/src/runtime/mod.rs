@@ -1,18 +1,22 @@
 pub mod actions;
 pub mod automation;
+pub mod context;
 pub mod device;
 pub mod event;
 pub mod expression;
-pub mod value;
 pub mod function;
-pub mod context;
+pub mod value;
 
+use self::event::Event;
 use crate::integrations::Integration;
 use crate::runtime::automation::Automation;
+use crate::runtime::context::AutomationContext;
+use crate::runtime::expression::Expression;
+use crate::runtime::function::FunctionCall;
 use actions::{Action, EchoAction};
-use anyhow::{bail, Context, ensure, Result};
+use anyhow::{bail, Context, Result};
 use pest::error::{ErrorVariant, InputLocation, LineColLocation};
-use pest::iterators::{Pair, Pairs};
+use pest::iterators::Pair;
 use pest::Parser;
 use pest_derive::Parser;
 use std::collections::HashMap;
@@ -22,11 +26,6 @@ use thiserror::Error;
 use tokio::sync::{mpsc, oneshot, RwLock};
 use tokio::task::JoinHandle;
 use tracing::{debug, error, warn};
-use crate::runtime::context::AutomationContext;
-use crate::runtime::expression::Expression;
-use crate::runtime::function::FunctionCall;
-use crate::runtime::value::Value;
-use self::event::Event;
 
 #[derive(Parser)]
 #[grammar = "grammars/hat.pest"]
@@ -188,9 +187,8 @@ impl HatRuntime {
                     .map(|trigger| trigger.as_span().as_str().to_owned())
                     .collect();
 
-                let mut maybe_conditions_or_actions = inner
-                    .next()
-                    .expect("missing the automation action");
+                let mut maybe_conditions_or_actions =
+                    inner.next().expect("missing the automation action");
 
                 let mut conditions: Vec<Expression> = Vec::new();
 
@@ -200,9 +198,8 @@ impl HatRuntime {
                         .map(|r| Self::parse_expression(r).unwrap())
                         .collect();
 
-                    maybe_conditions_or_actions = inner
-                        .next()
-                        .expect("missing the automation action");
+                    maybe_conditions_or_actions =
+                        inner.next().expect("missing the automation action");
                 }
 
                 let actions = maybe_conditions_or_actions
@@ -216,7 +213,7 @@ impl HatRuntime {
                     conditions,
                     actions,
                 };
-                
+
                 automations.insert(name, automation);
             }
         }
@@ -294,24 +291,25 @@ impl HatRuntime {
     fn parse_expression(rule: Pair<Rule>) -> Result<Expression> {
         match rule.as_rule() {
             Rule::expr => {
-                let inner = rule.into_inner().next()
+                let inner = rule
+                    .into_inner()
+                    .next()
                     .context("expression does not have inner rules")?;
 
                 match inner.as_rule() {
                     Rule::const_expr => {
-                        let inner = inner.into_inner().next()
+                        let inner = inner
+                            .into_inner()
+                            .next()
                             .context("constant expression does not have inner rules")?;
                         match inner.as_rule() {
-                            Rule::bool_expr => {
-                                match inner.as_span().as_str() {
-                                    "true" => Ok(Expression::Constant(true.into())),
-                                    "false" => Ok(Expression::Constant(false.into())),
-                                    _ => unreachable!(),
-                                }
-                            }
+                            Rule::bool_expr => match inner.as_span().as_str() {
+                                "true" => Ok(Expression::Constant(true.into())),
+                                "false" => Ok(Expression::Constant(false.into())),
+                                _ => unreachable!(),
+                            },
                             Rule::string => {
-                                Self::parse_string(inner)
-                                    .map(|s| Expression::Constant(s.into()))
+                                Self::parse_string(inner).map(|s| Expression::Constant(s.into()))
                             }
                             Rule::decimal => {
                                 let inner = inner.as_span().as_str();
@@ -328,11 +326,13 @@ impl HatRuntime {
                     }
                     Rule::function_expr => {
                         let mut inner = inner.into_inner();
-                        let name = inner.next()
+                        let name = inner
+                            .next()
                             .context("function expression does not have inner rules")?
                             .as_span()
                             .as_str();
-                        let parameters = inner.next()
+                        let parameters = inner
+                            .next()
                             .context("function expression have just one inner rule")?
                             .into_inner()
                             .map(|rule| Self::parse_expression(rule))

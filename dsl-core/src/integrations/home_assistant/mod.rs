@@ -189,12 +189,12 @@ impl HAWebSocket {
     }
     pub async fn subscribe_events(&self, event_type: Option<String>) -> Result<Events<'_>> {
         let mut command = self.new_command().await;
-        
+
         let mut message_fields = HashMap::new();
         if let Some(event_type) = event_type {
             message_fields.insert("event_type".into(), event_type.into());
         }
-        
+
         command
             .send_message(Message {
                 msg_type: "subscribe_events".into(),
