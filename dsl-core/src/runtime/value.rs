@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -14,6 +15,17 @@ impl Value {
             Value::Boolean(b) => *b,
             Value::Number(n) => *n != 0.0,
         }
+    }
+}
+
+impl Display for Value {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
+            Value::String(s) => s.to_owned(),
+            Value::Boolean(b) => b.to_string(),
+            Value::Number(n) => n.to_string(),
+        };
+        write!(f, "{}", str)
     }
 }
 

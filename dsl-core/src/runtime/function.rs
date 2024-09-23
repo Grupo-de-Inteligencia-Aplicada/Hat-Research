@@ -22,6 +22,7 @@ impl FunctionCall {
             "get_device" => default_functions::get_device(ctx, arguments),
             "get_integration" => default_functions::get_integration(ctx, arguments),
             "get_time" => default_functions::get_time(ctx, arguments),
+            "is_device" => default_functions::is_device(ctx, arguments),
             _ => bail!("Unknown function {}!", &self.name),
         }
     }
@@ -42,5 +43,11 @@ pub mod default_functions {
 
     pub fn get_time(ctx: &mut AutomationContext, _args: Vec<Value>) -> Result<Value> {
         Ok(ctx.event.time.to_rfc3339().into())
+    }
+    
+    pub fn is_device(ctx: &mut AutomationContext, args: Vec<Value>) -> Result<Value> {
+        let device = &ctx.event.device.id;
+        let first_arg = args.first().map(|v| v.to_string());
+        Ok(Value::from(Some(device) == first_arg.as_ref()))
     }
 }
