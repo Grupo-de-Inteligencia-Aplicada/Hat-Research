@@ -10,6 +10,7 @@ use self::event::Event;
 use crate::integrations::Integration;
 use crate::runtime::automation::Automation;
 use crate::runtime::context::AutomationContext;
+use crate::runtime::function::Function;
 use anyhow::Result;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
@@ -17,7 +18,6 @@ use thiserror::Error;
 use tokio::sync::{mpsc, oneshot, RwLock};
 use tokio::task::JoinHandle;
 use tracing::{debug, error, warn};
-use crate::runtime::function::Function;
 
 #[derive(Error, Debug)]
 pub enum RuntimeError {
@@ -60,7 +60,7 @@ impl HatRuntime {
             executor_handle: Default::default(),
             functions: Default::default(),
         });
-        
+
         runtime.register_default_functions();
 
         let runtime_clone = Arc::clone(&runtime);
@@ -142,15 +142,15 @@ impl HatRuntime {
     pub fn parse(&self, filename: String, code: &str) -> std::result::Result<(), RuntimeError> {
         parser::parse(self, filename, code)
     }
-    
+
     pub fn register_function(&self, fun: Function) {
         let mut lock = self.functions.write().unwrap();
         lock.insert(fun.name.clone(), Arc::new(fun));
     }
-    
+
     fn register_default_functions(&self) {
         let mut lock = self.functions.write().unwrap();
-        
+
         for fun in function::defaults::DEFAULT_FUNCTIONS.iter() {
             lock.insert(fun.name.clone(), Arc::new(fun.clone()));
         }

@@ -119,7 +119,7 @@ impl operations::TrySub for Value {
                 Value::Boolean(_) => bail!("cannot subtract boolean from null"),
                 Value::Number(_) => bail!("cannot subtract number from null"),
                 Value::Null => Value::Null,
-            }
+            },
         })
     }
 }
@@ -150,7 +150,7 @@ impl operations::TryMul for Value {
                 Value::Boolean(_) => bail!("cannot multiply a boolean and null"),
                 Value::Number(_) => bail!("cannot multiply a number and null"),
                 Value::Null => Value::Null,
-            }
+            },
         })
     }
 }
@@ -181,7 +181,7 @@ impl operations::TryDiv for Value {
                 Value::Boolean(_) => bail!("cannot divide a boolean and null"),
                 Value::Number(_) => bail!("cannot divide a number and null"),
                 Value::Null => Value::Null,
-            }
+            },
         })
     }
 }

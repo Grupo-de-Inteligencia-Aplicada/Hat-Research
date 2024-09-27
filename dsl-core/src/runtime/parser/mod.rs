@@ -1,5 +1,6 @@
 use crate::runtime::automation::Automation;
 use crate::runtime::function::FunctionCall;
+use crate::runtime::value::Value;
 use crate::runtime::{HatRuntime, RuntimeError};
 use anyhow::{bail, Context, Result};
 use expression::Expression;
@@ -10,7 +11,6 @@ use pest::pratt_parser::PrattParser;
 use pest::Parser;
 use pest_derive::Parser;
 use std::str::FromStr;
-use crate::runtime::value::Value;
 
 pub mod expression;
 pub mod operation;
@@ -134,14 +134,14 @@ pub fn parse(
             let mut conditions = Vec::new();
             let mut actions = Vec::new();
 
-            while let Some(next) = inner.next() {
+            for next in inner {
                 match next.as_rule() {
                     Rule::automation_condition => {
                         conditions.push(parse_expression(next.into_inner()).unwrap());
-                    },
+                    }
                     Rule::automation_action => {
                         actions.push(parse_expression(next.into_inner()).unwrap());
-                    },
+                    }
                     _ => unreachable!(),
                 }
             }

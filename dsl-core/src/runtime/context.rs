@@ -1,8 +1,8 @@
-use std::fmt::{Debug, Formatter};
-use std::sync::Arc;
 use crate::runtime::event::Event;
 use crate::runtime::function::Function;
 use crate::runtime::HatRuntime;
+use std::fmt::{Debug, Formatter};
+use std::sync::Arc;
 
 pub struct AutomationContext<'r> {
     pub event: Event,
@@ -19,7 +19,8 @@ impl Debug for AutomationContext<'_> {
 
 impl<'r> AutomationContext<'r> {
     pub fn get_function(&self, name: &str) -> Option<Arc<Function>> {
-        self.runtime.functions
+        self.runtime
+            .functions
             .read()
             .unwrap()
             .get(name)

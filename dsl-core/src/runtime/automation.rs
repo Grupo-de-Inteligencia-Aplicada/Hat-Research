@@ -33,7 +33,8 @@ impl Automation {
             }
         }
         for action in &self.actions {
-            action.evaluate(ctx)
+            action
+                .evaluate(ctx)
                 .with_context(|| format!("action of automation {} failed", self.name))?;
         }
         Ok(())
