@@ -2,9 +2,9 @@ use crate::runtime::context::AutomationContext;
 use crate::runtime::function::FunctionCall;
 use crate::runtime::value::Value;
 
-use anyhow::Result;
 use crate::runtime::parser::operation::Operation;
 use crate::runtime::value::operations::{TryAdd, TryDiv, TryMul, TrySub};
+use anyhow::Result;
 
 #[derive(Debug)]
 pub enum Expression {
@@ -14,7 +14,7 @@ pub enum Expression {
         lhs: Box<Expression>,
         op: Operation,
         rhs: Box<Expression>,
-    }
+    },
 }
 
 impl Expression {
@@ -31,7 +31,7 @@ impl Expression {
                     Operation::Multiply => lh_value.try_mul(rh_value),
                     Operation::Divide => lh_value.try_div(rh_value),
                 }
-            },
+            }
         }
     }
 }

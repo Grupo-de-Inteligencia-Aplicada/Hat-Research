@@ -1,18 +1,16 @@
-use std::str::FromStr;
-use pest::error::{ErrorVariant, InputLocation, LineColLocation};
-use pest_derive::Parser;
-use crate::runtime::{HatRuntime, RuntimeError};
-use anyhow::{bail, Context, ensure, Result};
-use futures_util::StreamExt;
-use pest::iterators::{Pair, Pairs};
-use pest::Parser;
-use pest::pratt_parser::PrattParser;
 use crate::runtime::actions::{Action, EchoAction};
 use crate::runtime::automation::Automation;
-use expression::Expression;
 use crate::runtime::function::FunctionCall;
+use crate::runtime::{HatRuntime, RuntimeError};
+use anyhow::{bail, Context, Result};
+use expression::Expression;
 use operation::Operation;
-use crate::runtime::value::Value;
+use pest::error::{ErrorVariant, InputLocation, LineColLocation};
+use pest::iterators::{Pair, Pairs};
+use pest::pratt_parser::PrattParser;
+use pest::Parser;
+use pest_derive::Parser;
+use std::str::FromStr;
 
 pub mod expression;
 pub mod operation;
@@ -34,7 +32,11 @@ lazy_static::lazy_static! {
     };
 }
 
-pub fn parse(runtime: &HatRuntime, filename: String, code: &str) -> std::result::Result<(), RuntimeError> {
+pub fn parse(
+    runtime: &HatRuntime,
+    filename: String,
+    code: &str,
+) -> std::result::Result<(), RuntimeError> {
     // TODO: stop panicking
     let code_program = HatParser::parse(Rule::program, code);
 
@@ -137,8 +139,7 @@ pub fn parse(runtime: &HatRuntime, filename: String, code: &str) -> std::result:
                     .map(|r| parse_expression(r.into_inner()).unwrap())
                     .collect();
 
-                maybe_conditions_or_actions =
-                    inner.next().expect("missing the automation action");
+                maybe_conditions_or_actions = inner.next().expect("missing the automation action");
             }
 
             let actions = maybe_conditions_or_actions
@@ -192,9 +193,7 @@ fn parse_atom(rule: Pair<Rule>) -> Result<Expression> {
                     "false" => Ok(Expression::Constant(false.into())),
                     _ => unreachable!(),
                 },
-                Rule::string => {
-                    parse_string(inner).map(|s| Expression::Constant(s.into()))
-                }
+                Rule::string => parse_string(inner).map(|s| Expression::Constant(s.into())),
                 Rule::decimal => {
                     let inner = inner.as_span().as_str();
                     Ok(Expression::Constant(f64::from_str(inner)?.into()))
@@ -228,26 +227,11 @@ fn parse_atom(rule: Pair<Rule>) -> Result<Expression> {
     }
 }
 
-fn parse_function(rule: Pair<Rule>) -> Result<FunctionCall> {
-    ensure!(rule.as_rule() == Rule::function);
-    let mut inner = rule.into_inner();
-    let name = inner.next().context("missing function name")?;
-    let parameters = inner.next().context("missing function parameters")?;
-    ensure!(parameters.as_rule() == Rule::function_parameters);
-    let inner_parameters: Result<Vec<Expression>> = parameters.into_inner()
-        .map(|p| parse_expression(p.into_inner()))
-        .collect();
-    Ok(FunctionCall {
-        name: name.as_str().to_owned(),
-        arguments: inner_parameters?,
-    })
-}
-
 fn parse_expression(pairs: Pairs<Rule>) -> Result<Expression> {
     PRATT_PARSER
         .map_primary(|primary| match primary.as_rule() {
             Rule::atom => parse_atom(primary),
-            rule => unreachable!("Expr::parse expected atom, found {:?}", primary)
+            _ => unreachable!("Expr::parse expected atom, found {:?}", primary),
         })
         .map_infix(|lhs, op, rhs| {
             let op = match op.as_rule() {

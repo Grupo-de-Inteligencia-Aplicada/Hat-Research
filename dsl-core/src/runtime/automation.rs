@@ -3,7 +3,6 @@ use crate::runtime::context::AutomationContext;
 use crate::runtime::parser::expression::Expression;
 
 use anyhow::{Context, Result};
-use tracing::debug;
 
 #[derive(Debug)]
 pub struct Automation {
@@ -28,8 +27,6 @@ impl Automation {
             let result = condition.evaluate(ctx).with_context(|| {
                 format!("failed to evaluate expression in condition {condition:?}")
             })?;
-
-            debug!("{} evaluated to {result:?}", self.name);
 
             if !result.as_bool() {
                 return Ok(());

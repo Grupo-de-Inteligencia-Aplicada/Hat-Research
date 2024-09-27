@@ -1,4 +1,3 @@
-
 pub trait TryAdd: Sized {
     fn try_add(self, rhs: Self) -> anyhow::Result<Self>;
 }

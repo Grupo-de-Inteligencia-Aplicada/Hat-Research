@@ -1,8 +1,8 @@
 pub mod operations;
 
-use std::fmt::Display;
 use anyhow::bail;
 use serde::{Deserialize, Serialize};
+use std::fmt::Display;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Value {
@@ -53,27 +53,21 @@ impl From<f64> for Value {
 impl operations::TryAdd for Value {
     fn try_add(self, rhs: Self) -> anyhow::Result<Self> {
         Ok(match self {
-            Value::String(lhs) => {
-                match rhs {
-                    Value::String(rhs) => format!("{lhs}{rhs}").into(),
-                    Value::Boolean(rhs) => format!("{lhs}{rhs}").into(),
-                    Value::Number(rhs) => format!("{lhs}{rhs}").into(),
-                }
-            }
-            Value::Boolean(lhs) => {
-                match rhs {
-                    Value::String(rhs) => format!("{lhs}{rhs}").into(),
-                    Value::Boolean(rhs) => ((lhs as u8 + rhs as u8) as f64).into(),
-                    Value::Number(rhs) => ((lhs as u8) as f64 + rhs).into(),
-                }
-            }
-            Value::Number(lhs) => {
-                match rhs {
-                    Value::String(rhs) => format!("{lhs}{rhs}").into(),
-                    Value::Boolean(rhs) => (lhs + (rhs as u8) as f64).into(),
-                    Value::Number(rhs) => (lhs + rhs).into(),
-                }
-            }
+            Value::String(lhs) => match rhs {
+                Value::String(rhs) => format!("{lhs}{rhs}").into(),
+                Value::Boolean(rhs) => format!("{lhs}{rhs}").into(),
+                Value::Number(rhs) => format!("{lhs}{rhs}").into(),
+            },
+            Value::Boolean(lhs) => match rhs {
+                Value::String(rhs) => format!("{lhs}{rhs}").into(),
+                Value::Boolean(rhs) => ((lhs as u8 + rhs as u8) as f64).into(),
+                Value::Number(rhs) => ((lhs as u8) as f64 + rhs).into(),
+            },
+            Value::Number(lhs) => match rhs {
+                Value::String(rhs) => format!("{lhs}{rhs}").into(),
+                Value::Boolean(rhs) => (lhs + (rhs as u8) as f64).into(),
+                Value::Number(rhs) => (lhs + rhs).into(),
+            },
         })
     }
 }
@@ -81,27 +75,21 @@ impl operations::TryAdd for Value {
 impl operations::TrySub for Value {
     fn try_sub(self, rhs: Self) -> anyhow::Result<Self> {
         Ok(match self {
-            Value::String(lhs) => {
-                match rhs {
-                    Value::String(rhs) => bail!("cannot subtract two strings"),
-                    Value::Boolean(rhs) => bail!("cannot subtract a boolean from a string"),
-                    Value::Number(rhs) => bail!("cannot subtract a number from a string"),
-                }
-            }
-            Value::Boolean(lhs) => {
-                match rhs {
-                    Value::String(rhs) => bail!("cannot subtract string from boolean"),
-                    Value::Boolean(rhs) => (((lhs as u8) as f64) - ((rhs as u8) as f64)).into(),
-                    Value::Number(rhs) => ((lhs as u8) as f64 - rhs).into(),
-                }
-            }
-            Value::Number(lhs) => {
-                match rhs {
-                    Value::String(rhs) => bail!("cannot subtract string from number"),
-                    Value::Boolean(rhs) => (lhs - ((rhs as u8) as f64)).into(),
-                    Value::Number(rhs) => (lhs - rhs).into(),
-                }
-            }
+            Value::String(_) => match rhs {
+                Value::String(_) => bail!("cannot subtract two strings"),
+                Value::Boolean(_) => bail!("cannot subtract a boolean from a string"),
+                Value::Number(_) => bail!("cannot subtract a number from a string"),
+            },
+            Value::Boolean(lhs) => match rhs {
+                Value::String(_) => bail!("cannot subtract string from boolean"),
+                Value::Boolean(rhs) => (((lhs as u8) as f64) - ((rhs as u8) as f64)).into(),
+                Value::Number(rhs) => ((lhs as u8) as f64 - rhs).into(),
+            },
+            Value::Number(lhs) => match rhs {
+                Value::String(_) => bail!("cannot subtract string from number"),
+                Value::Boolean(rhs) => (lhs - ((rhs as u8) as f64)).into(),
+                Value::Number(rhs) => (lhs - rhs).into(),
+            },
         })
     }
 }
@@ -109,27 +97,21 @@ impl operations::TrySub for Value {
 impl operations::TryMul for Value {
     fn try_mul(self, rhs: Self) -> anyhow::Result<Self> {
         Ok(match self {
-            Value::String(lhs) => {
-                match rhs {
-                    Value::String(rhs) => bail!("cannot multiply two strings"),
-                    Value::Boolean(rhs) => bail!("cannot multiply a string and a boolean"),
-                    Value::Number(rhs) => bail!("cannot multiply a string and a number"),
-                }
-            }
-            Value::Boolean(lhs) => {
-                match rhs {
-                    Value::String(rhs) => bail!("cannot multiply a boolean and a string"),
-                    Value::Boolean(rhs) => (((lhs as u8) as f64) * ((rhs as u8) as f64)).into(),
-                    Value::Number(rhs) => ((lhs as u8) as f64 * rhs).into(),
-                }
-            }
-            Value::Number(lhs) => {
-                match rhs {
-                    Value::String(rhs) => bail!("cannot multiply a number and a string"),
-                    Value::Boolean(rhs) => (lhs * ((rhs as u8) as f64)).into(),
-                    Value::Number(rhs) => (lhs * rhs).into(),
-                }
-            }
+            Value::String(_) => match rhs {
+                Value::String(_) => bail!("cannot multiply two strings"),
+                Value::Boolean(_) => bail!("cannot multiply a string and a boolean"),
+                Value::Number(_) => bail!("cannot multiply a string and a number"),
+            },
+            Value::Boolean(lhs) => match rhs {
+                Value::String(_) => bail!("cannot multiply a boolean and a string"),
+                Value::Boolean(rhs) => (((lhs as u8) as f64) * ((rhs as u8) as f64)).into(),
+                Value::Number(rhs) => ((lhs as u8) as f64 * rhs).into(),
+            },
+            Value::Number(lhs) => match rhs {
+                Value::String(_) => bail!("cannot multiply a number and a string"),
+                Value::Boolean(rhs) => (lhs * ((rhs as u8) as f64)).into(),
+                Value::Number(rhs) => (lhs * rhs).into(),
+            },
         })
     }
 }
@@ -137,27 +119,21 @@ impl operations::TryMul for Value {
 impl operations::TryDiv for Value {
     fn try_div(self, rhs: Self) -> anyhow::Result<Self> {
         Ok(match self {
-            Value::String(lhs) => {
-                match rhs {
-                    Value::String(rhs) => bail!("cannot divide two strings"),
-                    Value::Boolean(rhs) => bail!("cannot divide a string and a boolean"),
-                    Value::Number(rhs) => bail!("cannot divide a string and a number"),
-                }
-            }
-            Value::Boolean(lhs) => {
-                match rhs {
-                    Value::String(rhs) => bail!("cannot divide a boolean and a string"),
-                    Value::Boolean(rhs) => (((lhs as u8) as f64) / ((rhs as u8) as f64)).into(),
-                    Value::Number(rhs) => ((lhs as u8) as f64 / rhs).into(),
-                }
-            }
-            Value::Number(lhs) => {
-                match rhs {
-                    Value::String(rhs) => bail!("cannot divide a number and a string"),
-                    Value::Boolean(rhs) => (lhs / ((rhs as u8) as f64)).into(),
-                    Value::Number(rhs) => (lhs / rhs).into(),
-                }
-            }
+            Value::String(_) => match rhs {
+                Value::String(_) => bail!("cannot divide two strings"),
+                Value::Boolean(_) => bail!("cannot divide a string and a boolean"),
+                Value::Number(_) => bail!("cannot divide a string and a number"),
+            },
+            Value::Boolean(lhs) => match rhs {
+                Value::String(_) => bail!("cannot divide a boolean and a string"),
+                Value::Boolean(rhs) => (((lhs as u8) as f64) / ((rhs as u8) as f64)).into(),
+                Value::Number(rhs) => ((lhs as u8) as f64 / rhs).into(),
+            },
+            Value::Number(lhs) => match rhs {
+                Value::String(_) => bail!("cannot divide a number and a string"),
+                Value::Boolean(rhs) => (lhs / ((rhs as u8) as f64)).into(),
+                Value::Number(rhs) => (lhs / rhs).into(),
+            },
         })
     }
 }

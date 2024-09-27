@@ -1,8 +1,8 @@
 use crate::runtime::context::AutomationContext;
 use crate::runtime::device::{Device, DeviceType};
 use crate::runtime::event::{Event, EventType};
-use crate::runtime::parser::expression::Expression;
 use crate::runtime::function::FunctionCall;
+use crate::runtime::parser::expression::Expression;
 use crate::runtime::value::Value;
 
 #[test]
