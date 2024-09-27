@@ -1,5 +1,5 @@
 automation ConstExpr (Dummy) {
-    if false
+    if 2 + 2 * 2
     run echo("should not be printed")
 }
 

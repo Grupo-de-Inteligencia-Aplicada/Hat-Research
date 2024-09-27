@@ -1,0 +1,163 @@
+pub mod operations;
+
+use std::fmt::Display;
+use anyhow::bail;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub enum Value {
+    String(String),
+    Boolean(bool),
+    Number(f64),
+}
+
+impl Value {
+    pub fn as_bool(&self) -> bool {
+        match self {
+            Value::String(s) => !s.is_empty(),
+            Value::Boolean(b) => *b,
+            Value::Number(n) => *n != 0.0,
+        }
+    }
+}
+
+impl Display for Value {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
+            Value::String(s) => s.to_owned(),
+            Value::Boolean(b) => b.to_string(),
+            Value::Number(n) => n.to_string(),
+        };
+        write!(f, "{}", str)
+    }
+}
+
+impl From<String> for Value {
+    fn from(value: String) -> Self {
+        Self::String(value)
+    }
+}
+
+impl From<bool> for Value {
+    fn from(value: bool) -> Self {
+        Self::Boolean(value)
+    }
+}
+
+impl From<f64> for Value {
+    fn from(value: f64) -> Self {
+        Self::Number(value)
+    }
+}
+
+impl operations::TryAdd for Value {
+    fn try_add(self, rhs: Self) -> anyhow::Result<Self> {
+        Ok(match self {
+            Value::String(lhs) => {
+                match rhs {
+                    Value::String(rhs) => format!("{lhs}{rhs}").into(),
+                    Value::Boolean(rhs) => format!("{lhs}{rhs}").into(),
+                    Value::Number(rhs) => format!("{lhs}{rhs}").into(),
+                }
+            }
+            Value::Boolean(lhs) => {
+                match rhs {
+                    Value::String(rhs) => format!("{lhs}{rhs}").into(),
+                    Value::Boolean(rhs) => ((lhs as u8 + rhs as u8) as f64).into(),
+                    Value::Number(rhs) => ((lhs as u8) as f64 + rhs).into(),
+                }
+            }
+            Value::Number(lhs) => {
+                match rhs {
+                    Value::String(rhs) => format!("{lhs}{rhs}").into(),
+                    Value::Boolean(rhs) => (lhs + (rhs as u8) as f64).into(),
+                    Value::Number(rhs) => (lhs + rhs).into(),
+                }
+            }
+        })
+    }
+}
+
+impl operations::TrySub for Value {
+    fn try_sub(self, rhs: Self) -> anyhow::Result<Self> {
+        Ok(match self {
+            Value::String(lhs) => {
+                match rhs {
+                    Value::String(rhs) => bail!("cannot subtract two strings"),
+                    Value::Boolean(rhs) => bail!("cannot subtract a boolean from a string"),
+                    Value::Number(rhs) => bail!("cannot subtract a number from a string"),
+                }
+            }
+            Value::Boolean(lhs) => {
+                match rhs {
+                    Value::String(rhs) => bail!("cannot subtract string from boolean"),
+                    Value::Boolean(rhs) => (((lhs as u8) as f64) - ((rhs as u8) as f64)).into(),
+                    Value::Number(rhs) => ((lhs as u8) as f64 - rhs).into(),
+                }
+            }
+            Value::Number(lhs) => {
+                match rhs {
+                    Value::String(rhs) => bail!("cannot subtract string from number"),
+                    Value::Boolean(rhs) => (lhs - ((rhs as u8) as f64)).into(),
+                    Value::Number(rhs) => (lhs - rhs).into(),
+                }
+            }
+        })
+    }
+}
+
+impl operations::TryMul for Value {
+    fn try_mul(self, rhs: Self) -> anyhow::Result<Self> {
+        Ok(match self {
+            Value::String(lhs) => {
+                match rhs {
+                    Value::String(rhs) => bail!("cannot multiply two strings"),
+                    Value::Boolean(rhs) => bail!("cannot multiply a string and a boolean"),
+                    Value::Number(rhs) => bail!("cannot multiply a string and a number"),
+                }
+            }
+            Value::Boolean(lhs) => {
+                match rhs {
+                    Value::String(rhs) => bail!("cannot multiply a boolean and a string"),
+                    Value::Boolean(rhs) => (((lhs as u8) as f64) * ((rhs as u8) as f64)).into(),
+                    Value::Number(rhs) => ((lhs as u8) as f64 * rhs).into(),
+                }
+            }
+            Value::Number(lhs) => {
+                match rhs {
+                    Value::String(rhs) => bail!("cannot multiply a number and a string"),
+                    Value::Boolean(rhs) => (lhs * ((rhs as u8) as f64)).into(),
+                    Value::Number(rhs) => (lhs * rhs).into(),
+                }
+            }
+        })
+    }
+}
+
+impl operations::TryDiv for Value {
+    fn try_div(self, rhs: Self) -> anyhow::Result<Self> {
+        Ok(match self {
+            Value::String(lhs) => {
+                match rhs {
+                    Value::String(rhs) => bail!("cannot divide two strings"),
+                    Value::Boolean(rhs) => bail!("cannot divide a string and a boolean"),
+                    Value::Number(rhs) => bail!("cannot divide a string and a number"),
+                }
+            }
+            Value::Boolean(lhs) => {
+                match rhs {
+                    Value::String(rhs) => bail!("cannot divide a boolean and a string"),
+                    Value::Boolean(rhs) => (((lhs as u8) as f64) / ((rhs as u8) as f64)).into(),
+                    Value::Number(rhs) => ((lhs as u8) as f64 / rhs).into(),
+                }
+            }
+            Value::Number(lhs) => {
+                match rhs {
+                    Value::String(rhs) => bail!("cannot divide a number and a string"),
+                    Value::Boolean(rhs) => (lhs / ((rhs as u8) as f64)).into(),
+                    Value::Number(rhs) => (lhs / rhs).into(),
+                }
+            }
+        })
+    }
+}

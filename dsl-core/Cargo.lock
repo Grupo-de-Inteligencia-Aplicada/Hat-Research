@@ -649,6 +649,7 @@ dependencies = [
  "chrono",
  "dotenvy",
  "futures-util",
+ "lazy_static",
  "log",
  "pest",
  "pest_derive",

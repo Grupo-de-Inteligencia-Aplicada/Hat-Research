@@ -1,5 +1,5 @@
 use crate::runtime::context::AutomationContext;
-use crate::runtime::expression::Expression;
+use crate::runtime::parser::expression::Expression;
 use crate::runtime::value::Value;
 
 use anyhow::{bail, Result};

@@ -65,23 +65,23 @@ echo_action = {
     ")"
 }
 
-expr = {
-    const_expr |
-    function_expr
+atom = {
+    const_atom |
+    function
 }
 
-const_expr = {
-    bool_expr |
+const_atom = _{
+    bool |
     string |
     decimal |
     integer
 }
 
-bool_expr = {
+bool = @{
     "true" | "false"
 }
 
-function_expr = {
+function = {
     ident ~
     "(" ~
     function_parameters ~
@@ -94,6 +94,14 @@ function_parameters = {
         ("," ~ expr)*
     )?
 }
+
+bin_op = _{ add | subtract | multiply | divide }
+add = { "+" }
+subtract = { "-" }
+multiply = { "*" }
+divide = { "/" }
+
+expr = { atom ~ (bin_op ~ atom)* }
 
 automation_conditions = {
     "if" ~
