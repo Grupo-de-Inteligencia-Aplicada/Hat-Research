@@ -1,5 +1,4 @@
-use log::info;
-
+use tracing::info;
 use crate::runtime::HatRuntime;
 
 use super::Action;

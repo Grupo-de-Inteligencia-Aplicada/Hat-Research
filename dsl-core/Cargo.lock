@@ -650,7 +650,6 @@ dependencies = [
  "dotenvy",
  "futures-util",
  "lazy_static",
- "log",
  "pest",
  "pest_derive",
  "serde",

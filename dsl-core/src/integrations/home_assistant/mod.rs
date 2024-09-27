@@ -9,7 +9,6 @@ use command::{Command, CommandMessage};
 use events::Events;
 use futures_util::stream::SplitSink;
 use futures_util::{SinkExt, StreamExt};
-use log::error;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::collections::{BTreeMap, HashMap};
@@ -20,7 +19,7 @@ use tokio::net::TcpStream;
 use tokio::sync::{mpsc, Mutex};
 use tokio_tungstenite::tungstenite::Message as WebSocketMessage;
 use tokio_tungstenite::{MaybeTlsStream, WebSocketStream};
-use tracing::{debug, warn};
+use tracing::{debug, error, warn};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Message {
