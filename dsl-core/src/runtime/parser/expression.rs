@@ -5,7 +5,6 @@ use crate::runtime::value::Value;
 use crate::runtime::parser::operation::Operation;
 use crate::runtime::value::operations::{TryAdd, TryDiv, TryMul, TrySub};
 use anyhow::Result;
-use tracing::debug;
 
 #[derive(Debug)]
 pub enum Expression {

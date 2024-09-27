@@ -1,4 +1,4 @@
-use super::{actions::Action, event::Event};
+use super::event::Event;
 use crate::runtime::context::AutomationContext;
 use crate::runtime::parser::expression::Expression;
 
@@ -9,7 +9,7 @@ pub struct Automation {
     pub name: String,
     pub triggers: Vec<String>,
     pub conditions: Vec<Expression>,
-    pub actions: Vec<Box<dyn Action>>,
+    pub actions: Vec<Expression>,
 }
 
 impl Automation {
@@ -33,7 +33,8 @@ impl Automation {
             }
         }
         for action in &self.actions {
-            action.run(ctx.runtime);
+            action.evaluate(ctx)
+                .with_context(|| format!("action of automation {} failed", self.name))?;
         }
         Ok(())
     }

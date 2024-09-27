@@ -1,4 +1,3 @@
-use crate::runtime::actions::{Action, EchoAction};
 use crate::runtime::automation::Automation;
 use crate::runtime::function::FunctionCall;
 use crate::runtime::{HatRuntime, RuntimeError};
@@ -90,7 +89,6 @@ pub fn parse(
                             Rule::stmt => "statement",
                             Rule::program => "program",
                             Rule::automation_triggers => "automation triggers",
-                            Rule::echo_action => "echo command",
                             Rule::automation_action => "automation action",
                             Rule::const_atom => "constant",
                             Rule::bool => "boolean",
@@ -142,7 +140,7 @@ pub fn parse(
                         conditions.push(parse_expression(next.into_inner()).unwrap());
                     },
                     Rule::automation_action => {
-                        actions.push(parse_action(next).unwrap());
+                        actions.push(parse_expression(next.into_inner()).unwrap());
                     },
                     _ => unreachable!(),
                 }
@@ -169,19 +167,6 @@ fn parse_string(rule: Pair<Rule>) -> Result<String> {
             Ok(val[1..val.len() - 1].to_owned())
         }
         _ => bail!("rule is not a string"),
-    }
-}
-
-fn parse_action(rule: Pair<Rule>) -> Result<Box<dyn Action>> {
-    let inner = rule.into_inner().next().context("missing action")?;
-    match inner.as_rule() {
-        Rule::echo_action => {
-            let message = inner.into_inner().next().unwrap().as_span().as_str();
-            Ok(Box::new(EchoAction::new(
-                message[1..message.len() - 1].to_owned(),
-            )))
-        }
-        _ => bail!("rule is not an action"),
     }
 }
 

@@ -1,4 +1,3 @@
-pub mod actions;
 pub mod automation;
 pub mod context;
 pub mod device;

@@ -62,14 +62,7 @@ automation_condition = {
 }
 
 automation_action = {
-    ("run" ~ echo_action)+
-}
-
-echo_action = {
-    "echo" ~
-    "(" ~
-    string ~
-    ")"
+    "run" ~ expr
 }
 
 atom = {
