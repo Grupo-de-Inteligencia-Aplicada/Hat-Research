@@ -30,6 +30,7 @@ lazy_static::lazy_static! {
             // Addition and subtract have equal precedence
             .op(Op::infix(add, Left) | Op::infix(subtract, Left))
             .op(Op::infix(multiply, Left) | Op::infix(divide, Left))
+            .op(Op::infix(equals, Left) | Op::infix(not_equals, Left))
     };
 }
 
@@ -102,6 +103,8 @@ pub fn parse(
                             Rule::multiply => "addition (*)",
                             Rule::divide => "addition (/)",
                             Rule::null => "null",
+                            Rule::equals => "==",
+                            Rule::not_equals => "!=",
                         })
                         .collect(),
                     ErrorVariant::CustomError { .. } => todo!(),
@@ -240,6 +243,8 @@ fn parse_expression(pairs: Pairs<Rule>) -> Result<Expression> {
                 Rule::subtract => Operation::Subtract,
                 Rule::multiply => Operation::Multiply,
                 Rule::divide => Operation::Divide,
+                Rule::equals => Operation::Equals,
+                Rule::not_equals => Operation::NotEquals,
                 rule => unreachable!("Expr::parse expected infix operation, found {:?}", rule),
             };
             Ok(Expression::BinaryOperation {

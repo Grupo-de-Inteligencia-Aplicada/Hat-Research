@@ -99,11 +99,13 @@ function_parameters = {
     )?
 }
 
-bin_op = _{ add | subtract | multiply | divide }
+bin_op = _{ add | subtract | multiply | divide | equals | not_equals }
 add = { "+" }
 subtract = { "-" }
 multiply = { "*" }
 divide = { "/" }
+equals = { "==" }
+not_equals = { "!=" }
 
 expr = { atom ~ (bin_op ~ atom)* }
 

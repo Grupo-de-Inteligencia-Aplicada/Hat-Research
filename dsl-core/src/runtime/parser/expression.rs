@@ -5,6 +5,7 @@ use crate::runtime::value::Value;
 use crate::runtime::parser::operation::Operation;
 use crate::runtime::value::operations::{TryAdd, TryDiv, TryMul, TrySub};
 use anyhow::Result;
+use tracing::debug;
 
 #[derive(Debug)]
 pub enum Expression {
@@ -30,6 +31,8 @@ impl Expression {
                     Operation::Subtract => lh_value.try_sub(rh_value),
                     Operation::Multiply => lh_value.try_mul(rh_value),
                     Operation::Divide => lh_value.try_div(rh_value),
+                    Operation::Equals => Ok(Value::Boolean(lh_value == rh_value)),
+                    Operation::NotEquals => Ok(Value::Boolean(lh_value != rh_value)),
                 }
             }
         }

@@ -1,16 +1,19 @@
-automation ConstExpr (Dummy) {
-    if get_device() == "dummy-device-2707"
+// Automation to test is_device() condition
+automation "Some test" (Dummy) {
+    if get_device() == "DummyIntegration@dummy-device-2708"
     run echo("should not be printed")
 }
+
+// Automation to test is_device() condition
+automation "Another test" (Dummy) {
+  if get_device() == "DummyIntegration@dummy-device-2707"
+  run echo("dummy hello world!")
+}
+
 
 automation "Luz quando abrir porta" (DoorOpenEvent, Abc) {
     run echo("Ligar luz!")
     run echo("si")
     run echo("LAS!")
-}
-
-automation DummyAutomation (Dummy) {
-  if is_device("dummy-device-2707")
-  run echo("dummy hello world!")
 }
 

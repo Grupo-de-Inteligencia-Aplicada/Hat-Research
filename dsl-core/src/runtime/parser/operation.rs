@@ -4,4 +4,6 @@ pub enum Operation {
     Subtract,
     Multiply,
     Divide,
+    Equals,
+    NotEquals,
 }
