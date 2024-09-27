@@ -11,6 +11,9 @@ ident = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
 integer = @{ "_"? ~ ASCII_DIGIT+ }
 decimal = @{ "_"? ~ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT* }
 string = @{ "\"" ~ ( "\"\"" | (!"\"" ~ ANY) )* ~ "\"" }
+null = @{ "null" }
+bool = @{ "true" | "false" }
+
 
 event_declaration = {
     "event" ~
@@ -66,19 +69,16 @@ echo_action = {
 }
 
 atom = {
-    const_atom |
-    function
+    function |
+    const_atom
 }
 
 const_atom = _{
+    null |
     bool |
     string |
     decimal |
     integer
-}
-
-bool = @{
-    "true" | "false"
 }
 
 function = {

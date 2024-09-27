@@ -11,6 +11,7 @@ use pest::pratt_parser::PrattParser;
 use pest::Parser;
 use pest_derive::Parser;
 use std::str::FromStr;
+use crate::runtime::value::Value;
 
 pub mod expression;
 pub mod operation;
@@ -100,6 +101,7 @@ pub fn parse(
                             Rule::subtract => "addition (-)",
                             Rule::multiply => "addition (*)",
                             Rule::divide => "addition (/)",
+                            Rule::null => "null",
                         })
                         .collect(),
                     ErrorVariant::CustomError { .. } => todo!(),
@@ -188,6 +190,7 @@ fn parse_atom(rule: Pair<Rule>) -> Result<Expression> {
         Rule::atom => {
             let inner = rule.into_inner().next().context("empty atom")?;
             match inner.as_rule() {
+                Rule::null => Ok(Expression::Constant(Value::Null)),
                 Rule::bool => match inner.as_span().as_str() {
                     "true" => Ok(Expression::Constant(true.into())),
                     "false" => Ok(Expression::Constant(false.into())),
