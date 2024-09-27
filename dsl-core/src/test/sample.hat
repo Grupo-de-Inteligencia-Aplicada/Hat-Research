@@ -1,6 +1,5 @@
 automation ConstExpr (Dummy) {
-    if null
-    if is_device("dummy-device-" + "2707")
+    if get_device() == "dummy-device-2707"
     run echo("should not be printed")
 }
 

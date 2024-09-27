@@ -1,8 +1,24 @@
+pub mod defaults;
+
 use crate::runtime::context::AutomationContext;
 use crate::runtime::parser::expression::Expression;
 use crate::runtime::value::Value;
 
 use anyhow::{bail, Result};
+
+pub(crate) type NativeFunctionType = fn(&mut AutomationContext, Vec<Value>) -> Result<Value>;
+
+#[derive(Debug, Clone)]
+pub struct Function {
+    pub name: String,
+    pub fun: NativeFunctionType,
+}
+
+impl Function {
+    pub fn call(&self, ctx: &mut AutomationContext, args: Vec<Value>) -> Result<Value> {
+        (self.fun)(ctx, args)
+    }
+}
 
 #[derive(Debug)]
 pub struct FunctionCall {
@@ -18,36 +34,11 @@ impl FunctionCall {
             .map(|expr| expr.evaluate(ctx))
             .collect::<Result<Vec<Value>>>()?;
 
-        match &*self.name {
-            "get_device" => default_functions::get_device(ctx, arguments),
-            "get_integration" => default_functions::get_integration(ctx, arguments),
-            "get_time" => default_functions::get_time(ctx, arguments),
-            "is_device" => default_functions::is_device(ctx, arguments),
-            _ => bail!("Unknown function {}!", &self.name),
+        let fun = ctx.get_function(&self.name);
+
+        match fun {
+            Some(fun) => fun.call(ctx, arguments),
+            None => bail!("function {} not found!", self.name),
         }
-    }
-}
-
-pub mod default_functions {
-    use crate::runtime::context::AutomationContext;
-    use crate::runtime::value::Value;
-    use anyhow::Result;
-
-    pub fn get_device(ctx: &mut AutomationContext, _args: Vec<Value>) -> Result<Value> {
-        Ok(ctx.event.device.full_id().into())
-    }
-
-    pub fn get_integration(ctx: &mut AutomationContext, _args: Vec<Value>) -> Result<Value> {
-        Ok(ctx.event.device.integration.clone().into())
-    }
-
-    pub fn get_time(ctx: &mut AutomationContext, _args: Vec<Value>) -> Result<Value> {
-        Ok(ctx.event.time.to_rfc3339().into())
-    }
-
-    pub fn is_device(ctx: &mut AutomationContext, args: Vec<Value>) -> Result<Value> {
-        let device = &ctx.event.device.id;
-        let first_arg = args.first().map(|v| v.to_string());
-        Ok(Value::from(Some(device) == first_arg.as_ref()))
     }
 }

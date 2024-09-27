@@ -18,6 +18,7 @@ use thiserror::Error;
 use tokio::sync::{mpsc, oneshot, RwLock};
 use tokio::task::JoinHandle;
 use tracing::{debug, error, warn};
+use crate::runtime::function::Function;
 
 #[derive(Error, Debug)]
 pub enum RuntimeError {
@@ -46,6 +47,7 @@ pub struct HatRuntime {
     integrations: RwLock<Vec<IntegrationAndStopChannel>>,
     executor_channel: mpsc::UnboundedSender<ExecutorMessage>,
     executor_handle: Mutex<Option<JoinHandle<()>>>,
+    functions: std::sync::RwLock<HashMap<String, Arc<Function>>>,
 }
 
 impl HatRuntime {
@@ -57,7 +59,10 @@ impl HatRuntime {
             integrations: Default::default(),
             executor_channel: tx,
             executor_handle: Default::default(),
+            functions: Default::default(),
         });
+        
+        runtime.register_default_functions();
 
         let runtime_clone = Arc::clone(&runtime);
         let handle = tokio::spawn(async move {
@@ -70,8 +75,9 @@ impl HatRuntime {
                             if automation.should_be_triggered_by(&event) {
                                 let mut context = AutomationContext {
                                     event: event.clone(),
+                                    runtime: &runtime_clone,
                                 };
-                                if let Err(e) = automation.trigger(&runtime_clone, &mut context) {
+                                if let Err(e) = automation.trigger(&mut context) {
                                     error!("Failed to run automation {}: {e:?}", automation.name);
                                 }
                             }
@@ -136,6 +142,19 @@ impl HatRuntime {
 
     pub fn parse(&self, filename: String, code: &str) -> std::result::Result<(), RuntimeError> {
         parser::parse(self, filename, code)
+    }
+    
+    pub fn register_function(&self, fun: Function) {
+        let mut lock = self.functions.write().unwrap();
+        lock.insert(fun.name.clone(), Arc::new(fun));
+    }
+    
+    fn register_default_functions(&self) {
+        let mut lock = self.functions.write().unwrap();
+        
+        for fun in function::defaults::DEFAULT_FUNCTIONS.iter() {
+            lock.insert(fun.name.clone(), Arc::new(fun.clone()));
+        }
     }
 }
 
