@@ -47,8 +47,7 @@ automation_declaration = {
     automation_triggers ~
     ")" ~
     "{" ~
-    automation_conditions* ~
-    automation_actions ~
+    (automation_condition | automation_action)* ~
     "}"
 }
 
@@ -57,7 +56,12 @@ automation_triggers = {
     ("," ~ ident)*
 }
 
-automation_actions = {
+automation_condition = {
+    "if" ~
+    expr
+}
+
+automation_action = {
     ("run" ~ echo_action)+
 }
 
@@ -103,10 +107,6 @@ divide = { "/" }
 
 expr = { atom ~ (bin_op ~ atom)* }
 
-automation_conditions = {
-    "if" ~
-    expr
-}
 
 stmt = _{ event_declaration | automation_declaration }
 

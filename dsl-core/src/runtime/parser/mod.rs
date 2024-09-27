@@ -11,6 +11,7 @@ use pest::pratt_parser::PrattParser;
 use pest::Parser;
 use pest_derive::Parser;
 use std::str::FromStr;
+use tracing::debug;
 use crate::runtime::value::Value;
 
 pub mod expression;
@@ -85,12 +86,12 @@ pub fn parse(
                             Rule::type_keyword => "type",
                             Rule::automation_declaration => "automation declaration",
                             Rule::expr => "expression",
-                            Rule::automation_conditions => "automation condition",
+                            Rule::automation_condition => "automation condition",
                             Rule::stmt => "statement",
                             Rule::program => "program",
                             Rule::automation_triggers => "automation triggers",
                             Rule::echo_action => "echo command",
-                            Rule::automation_actions => "automation actions",
+                            Rule::automation_action => "automation action",
                             Rule::const_atom => "constant",
                             Rule::bool => "boolean",
                             Rule::function => "function",
@@ -130,24 +131,20 @@ pub fn parse(
                 .map(|trigger| trigger.as_span().as_str().to_owned())
                 .collect();
 
-            let mut maybe_conditions_or_actions =
-                inner.next().expect("missing the automation action");
+            let mut conditions = Vec::new();
+            let mut actions = Vec::new();
 
-            let mut conditions: Vec<Expression> = Vec::new();
-
-            if maybe_conditions_or_actions.as_rule() == Rule::automation_conditions {
-                conditions = maybe_conditions_or_actions
-                    .into_inner()
-                    .map(|r| parse_expression(r.into_inner()).unwrap())
-                    .collect();
-
-                maybe_conditions_or_actions = inner.next().expect("missing the automation action");
+            while let Some(next) = inner.next() {
+                match next.as_rule() {
+                    Rule::automation_condition => {
+                        conditions.push(parse_expression(next.into_inner()).unwrap());
+                    },
+                    Rule::automation_action => {
+                        actions.push(parse_action(next).unwrap());
+                    },
+                    _ => unreachable!(),
+                }
             }
-
-            let actions = maybe_conditions_or_actions
-                .into_inner()
-                .map(|r| parse_action(r).unwrap())
-                .collect::<Vec<_>>();
 
             let automation = Automation {
                 name: name.clone(),
@@ -174,9 +171,10 @@ fn parse_string(rule: Pair<Rule>) -> Result<String> {
 }
 
 fn parse_action(rule: Pair<Rule>) -> Result<Box<dyn Action>> {
-    match rule.as_rule() {
+    let inner = rule.into_inner().next().context("missing action")?;
+    match inner.as_rule() {
         Rule::echo_action => {
-            let message = rule.into_inner().next().unwrap().as_span().as_str();
+            let message = inner.into_inner().next().unwrap().as_span().as_str();
             Ok(Box::new(EchoAction::new(
                 message[1..message.len() - 1].to_owned(),
             )))
@@ -234,6 +232,7 @@ fn parse_expression(pairs: Pairs<Rule>) -> Result<Expression> {
     PRATT_PARSER
         .map_primary(|primary| match primary.as_rule() {
             Rule::atom => parse_atom(primary),
+            Rule::expr => parse_expression(primary.into_inner()),
             _ => unreachable!("Expr::parse expected atom, found {:?}", primary),
         })
         .map_infix(|lhs, op, rhs| {
