@@ -1,19 +1,47 @@
-// Automation to test is_device() condition
-automation "Some test" (Dummy) {
-    if get_device() == "DummyIntegration@dummy-device-2708"
-    run echo("should not be printed")
+// Exemplo de evento para iniciar rotina matinal quando detectar movimento no quarto
+automation "Iniciar rotina matinal" (MotionDetectEvent) {
+  if get_device() == "SensorQuarto"
+  if event_time() >= time("07:00") && event_time() <= time("08:00")
+  run turn_on_device("Cafeteira")
+  run turn_on_device("LuzCozinha")
+  run set_device_temperature("Aquecedor", 22)
 }
 
-// Automation to test is_device() condition
-automation "Another test" (Dummy) {
-  if get_device() == "DummyIntegration@dummy-device-2707"
-  run echo("dummy hello world!")
+// Exemplo de evento para ligar luz quando detectar movimento em um local
+automation "Ligar luz quando detectar movimento" (MotionDetectEvent) {
+  if get_device() == "SensorCorredor"
+  run turn_on_device("LuzCorredor")
 }
 
-
-automation "Luz quando abrir porta" (DoorOpenEvent, Abc) {
-    run echo("Ligar luz!")
-    run echo("si")
-    run echo("LAS!")
+// Exemplo de evento para desligar ar condicionado quando abrir janela
+automation "Desligar ar condicionado quando abrir janela" (WindowOpenEvent) {
+  if get_device() == "SensorJanelaDoQuarto"
+  if device_status("ArCondicionadoQuarto") == "on"
+  run turn_off_device("ArCondicionadoQuarto")
 }
 
+// Exemplo de evento para dar toggle nas luzes depois do por do sol quando a porta da sala abrir
+automation "Dar toggle nas luzes depois do por do sol" (DoorOpenEvent) {
+  if get_device() == "PortaSala"
+  if event_time() >= time("18:00")
+  run toggle_device("LuzSala")
+}
+
+// Exemplo de evento para desligar luzes quando não houver movimento
+automation "Desligar luzes quando não houver movimento" (NoMotionDetectedEvent) {
+  if get_device() == "SensorSala"
+  if event_time() >= time("22:00")
+  run turn_off_device("LuzSala")
+}
+
+// Exemplo de evento para ligar aspersores no horário específico
+automation "Ligar aspersores no horário específico" (TimeUpdateEvent) {
+  if event_time() == time("06:30")
+  run turn_on_device("AspersoresJardim")
+}
+
+// Exemplo de evento para desligar aspersores no horário específico
+automation "Desligar aspersores no horário específico" (TimeUpdateEvent) {
+  if event_time() == time("07:00")
+  run turn_off_device("AspersoresJardim")
+}
