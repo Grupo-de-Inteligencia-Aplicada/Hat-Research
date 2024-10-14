@@ -57,6 +57,12 @@ impl From<f64> for Value {
     }
 }
 
+impl From<NaiveTime> for Value {
+    fn from(value: NaiveTime) -> Self {
+        Self::Time(value)
+    }
+}
+
 impl<T: Into<Value>> From<Option<T>> for Value {
     fn from(value: Option<T>) -> Self {
         match value {

@@ -27,8 +27,12 @@ lazy_static! {
                 fun: |ctx, _args| Ok(ctx.event.device.integration.clone().into()),
             },
             Function {
-                name: "get_time".to_owned(),
-                fun: |ctx, _args| Ok(ctx.event.time.to_rfc3339().into()),
+                name: "event_date".to_owned(),
+                fun: |ctx, _args| Ok(ctx.event.datetime.to_rfc3339().into()),
+            },
+            Function {
+                name: "event_time".to_owned(),
+                fun: |ctx, _args| Ok(ctx.event.datetime.time().into()),
             },
         ]
     };

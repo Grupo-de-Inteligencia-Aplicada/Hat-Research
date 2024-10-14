@@ -106,7 +106,7 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
                         if old_state == "off" && new_state == "on" {
                             return Some(RuntimeEvent {
                                 typ: EventType::DoorOpenEvent,
-                                time,
+                                datetime: time,
                                 device,
                                 parameters: Default::default(),
                             });
@@ -114,7 +114,7 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
                         if old_state == "on" && new_state == "off" {
                             return Some(RuntimeEvent {
                                 typ: EventType::DoorCloseEvent,
-                                time,
+                                datetime: time,
                                 device,
                                 parameters: Default::default(),
                             });
@@ -131,7 +131,7 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
                     if old_state == "off" && new_state == "on" {
                         return Some(RuntimeEvent {
                             typ: EventType::LightOnEvent,
-                            time,
+                            datetime: time,
                             device,
                             parameters: Default::default(),
                         });
@@ -139,7 +139,7 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
                     if old_state == "on" && new_state == "off" {
                         return Some(RuntimeEvent {
                             typ: EventType::LightOffEvent,
-                            time,
+                            datetime: time,
                             device,
                             parameters: Default::default(),
                         });
@@ -153,7 +153,7 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
                     }
                     return Some(RuntimeEvent {
                         typ: EventType::SensorValueChangeEvent,
-                        time,
+                        datetime: time,
                         device: Device {
                             integration: integration_name.to_owned(),
                             id: entity_id.to_owned(),

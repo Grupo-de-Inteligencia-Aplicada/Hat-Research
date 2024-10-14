@@ -29,7 +29,7 @@ impl EventType {
 #[derive(Debug, Clone)]
 pub struct Event {
     pub typ: EventType,
-    pub time: chrono::DateTime<Utc>,
+    pub datetime: chrono::DateTime<Utc>,
     pub device: Device,
     pub parameters: HashMap<String, String>,
 }

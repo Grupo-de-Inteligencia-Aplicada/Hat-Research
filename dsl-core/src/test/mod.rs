@@ -28,7 +28,7 @@ pub fn test_function_call() {
     let mut context = AutomationContext {
         event: Event {
             typ: EventType::Dummy,
-            time: Default::default(),
+            datetime: Default::default(),
             device: Device {
                 integration: "TestIntegration".to_string(),
                 id: "test_device".to_string(),
