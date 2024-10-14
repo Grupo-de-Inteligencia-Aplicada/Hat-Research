@@ -27,11 +27,11 @@ lazy_static::lazy_static! {
         // Precedence is defined lowest to highest
         PrattParser::new()
             // Addition and subtract have equal precedence
+            .op(Op::infix(equals, Left) | Op::infix(not_equals, Left))
+            .op(Op::infix(and, Left) | Op::infix(or, Left))
+            .op(Op::infix(greater, Left) | Op::infix(greater_eq, Left) | Op::infix(lesser, Left) | Op::infix(lesser_eq, Left))
             .op(Op::infix(add, Left) | Op::infix(subtract, Left))
             .op(Op::infix(multiply, Left) | Op::infix(divide, Left))
-            .op(Op::infix(greater, Left) | Op::infix(greater_eq, Left) | Op::infix(lesser, Left) | Op::infix(lesser_eq, Left))
-            .op(Op::infix(and, Left) | Op::infix(or, Left))
-            .op(Op::infix(equals, Left) | Op::infix(not_equals, Left))
     };
 }
 

@@ -1,9 +1,8 @@
-use crate::runtime::function::Function;
+use crate::runtime::{function::Function, value::time::Time};
 use crate::runtime::value::Value;
 use anyhow::{bail, Context};
-use chrono::{NaiveTime, Utc};
 use lazy_static::lazy_static;
-use tracing::{debug, info};
+use tracing::info;
 
 lazy_static! {
     pub static ref DEFAULT_FUNCTIONS: Vec<Function> = {
@@ -34,7 +33,7 @@ lazy_static! {
             },
             Function {
                 name: "event_time".to_owned(),
-                fun: |ctx, _args| Ok(ctx.event.datetime.time().into()),
+                fun: |ctx, _args| Ok(Time::from(ctx.event.datetime).into()),
             },
             Function {
                 name: "time".to_owned(),
@@ -56,13 +55,13 @@ lazy_static! {
                                     .map(|s| s.parse::<u32>())
                                     .unwrap_or(Ok(0))
                                     .context("failed to parse seconds")?;
-                                Ok(Value::Time(NaiveTime::from_hms_opt(hours, mins, secs).context("invalid time provided")?))
+                                Ok(Value::Time(Time::from_hms_opt(hours, mins, secs).context("invalid time provided")?))
                             } else {
                                 bail!("time function only accepts strings");
                             }
                         },
                         None => {
-                            Ok(Value::Time(Utc::now().time()))
+                            Ok(Value::Time(Time::now()))
                         }
                     }
                 },

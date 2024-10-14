@@ -53,7 +53,7 @@ automation "Test time function" (Dummy) {
 }
 
 // Exemplo de automação para testar a funcionalidade de horários
-automation "Test time function" (Dummy) {
+automation "Test time function 2" (Dummy) {
   if event_time() > time("12:00") and event_time() < time("18:00")
   run echo("está de tarde")
 }
