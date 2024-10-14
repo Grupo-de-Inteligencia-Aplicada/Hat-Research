@@ -29,6 +29,8 @@ lazy_static::lazy_static! {
             // Addition and subtract have equal precedence
             .op(Op::infix(add, Left) | Op::infix(subtract, Left))
             .op(Op::infix(multiply, Left) | Op::infix(divide, Left))
+            .op(Op::infix(greater, Left) | Op::infix(greater_eq, Left) | Op::infix(lesser, Left) | Op::infix(lesser_eq, Left))
+            .op(Op::infix(and, Left) | Op::infix(or, Left))
             .op(Op::infix(equals, Left) | Op::infix(not_equals, Left))
     };
 }
@@ -103,6 +105,12 @@ pub fn parse(
                             Rule::null => "null",
                             Rule::equals => "==",
                             Rule::not_equals => "!=",
+                            Rule::and => "and",
+                            Rule::or => "or",
+                            Rule::greater => ">",
+                            Rule::greater_eq => ">=",
+                            Rule::lesser => "<",
+                            Rule::lesser_eq => "<=",
                         })
                         .collect(),
                     ErrorVariant::CustomError { .. } => todo!(),
@@ -230,6 +238,12 @@ fn parse_expression(pairs: Pairs<Rule>) -> Result<Expression> {
                 Rule::divide => Operation::Divide,
                 Rule::equals => Operation::Equals,
                 Rule::not_equals => Operation::NotEquals,
+                Rule::and => Operation::And,
+                Rule::or => Operation::Or,
+                Rule::greater => Operation::Greater,
+                Rule::greater_eq => Operation::GreaterOrEquals,
+                Rule::lesser => Operation::Lesser,
+                Rule::lesser_eq => Operation::LesserOrEquals,
                 rule => unreachable!("Expr::parse expected infix operation, found {:?}", rule),
             };
             Ok(Expression::BinaryOperation {

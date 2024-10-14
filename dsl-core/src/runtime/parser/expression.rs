@@ -32,6 +32,12 @@ impl Expression {
                     Operation::Divide => lh_value.try_div(rh_value),
                     Operation::Equals => Ok(Value::Boolean(lh_value == rh_value)),
                     Operation::NotEquals => Ok(Value::Boolean(lh_value != rh_value)),
+                    Operation::And => Ok(Value::Boolean(lh_value.as_bool() && rh_value.as_bool())),
+                    Operation::Or => Ok(Value::Boolean(lh_value.as_bool() || rh_value.as_bool())),
+                    Operation::Greater => Ok(Value::Boolean(lh_value > rh_value)),
+                    Operation::GreaterOrEquals => Ok(Value::Boolean(lh_value >= rh_value)),
+                    Operation::Lesser => Ok(Value::Boolean(lh_value < rh_value)),
+                    Operation::LesserOrEquals => Ok(Value::Boolean(lh_value <= rh_value)),
                 }
             }
         }

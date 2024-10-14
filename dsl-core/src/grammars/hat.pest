@@ -92,13 +92,19 @@ function_parameters = {
     )?
 }
 
-bin_op = _{ add | subtract | multiply | divide | equals | not_equals }
+bin_op = _{ add | subtract | multiply | divide | equals | not_equals | and | or | greater_eq | lesser_eq | greater | lesser }
 add = { "+" }
 subtract = { "-" }
 multiply = { "*" }
 divide = { "/" }
 equals = { "==" }
 not_equals = { "!=" }
+and = { "and" }
+or = { "or" }
+greater = { ">" }
+greater_eq = { ">=" }
+lesser = { "<" }
+lesser_eq = { "<=" }
 
 expr = { atom ~ (bin_op ~ atom)* }
 

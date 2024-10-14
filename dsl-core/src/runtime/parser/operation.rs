@@ -6,4 +6,10 @@ pub enum Operation {
     Divide,
     Equals,
     NotEquals,
+    And,
+    Or,
+    Greater,
+    GreaterOrEquals,
+    Lesser,
+    LesserOrEquals,
 }

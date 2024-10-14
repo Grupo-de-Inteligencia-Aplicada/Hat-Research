@@ -1,7 +1,7 @@
 // Exemplo de evento para iniciar rotina matinal quando detectar movimento no quarto
 automation "Iniciar rotina matinal" (MotionDetectEvent) {
   if get_device() == "SensorQuarto"
-  if event_time() >= time("07:00") && event_time() <= time("08:00")
+  if event_time() >= time("07:00") and event_time() <= time("08:00")
   run turn_on_device("Cafeteira")
   run turn_on_device("LuzCozinha")
   run set_device_temperature("Aquecedor", 22)
@@ -44,4 +44,10 @@ automation "Ligar aspersores no horário específico" (TimeUpdateEvent) {
 automation "Desligar aspersores no horário específico" (TimeUpdateEvent) {
   if event_time() == time("07:00")
   run turn_off_device("AspersoresJardim")
+}
+
+// Exemplo de automação para testar a funcionalidade de horários
+automation "Test time function" (Dummy) {
+  if event_time() >= time("06:00") and event_time() <= time("12:00")
+  run echo("está de manhã")
 }
