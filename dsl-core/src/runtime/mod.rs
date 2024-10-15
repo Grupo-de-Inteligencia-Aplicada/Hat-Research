@@ -124,7 +124,10 @@ impl HatRuntime {
         });
         let integration_arc: Arc<dyn Integration> = Arc::new(integration);
         let mut integrations = self.integrations.write().await;
-        integrations.insert(integration_arc.get_id().to_owned(), (integration_arc, stop_signal_tx));
+        integrations.insert(
+            integration_arc.get_id().to_owned(),
+            (integration_arc, stop_signal_tx),
+        );
     }
 
     pub fn dispatch_event(&self, event: Event) -> Result<()> {
@@ -154,9 +157,27 @@ impl HatRuntime {
         lock.get(integration).map(|(i, _)| Arc::clone(i))
     }
 
-    pub async fn get_device(&self, integration: &str, id: &str) -> Option<Device> {
-        let integration = self.get_integration(integration).await;
-        todo!()
+    pub async fn get_device(&self, device_id: &str) -> Option<Device> {
+        let (integration, device) = {
+            if let Some((first, last)) = device_id.split_once("@") {
+                (Some(first), last)
+            } else {
+                (None, device_id)
+            }
+        };
+
+        if let Some(integration) = integration {
+            let integration = self.get_integration(integration).await?;
+            integration.get_device(device).await
+        } else {
+            let integrations = self.integrations.read().await;
+            for (_, (integration, _)) in integrations.iter() {
+                if let Some(device) = integration.get_device(device).await {
+                    return Some(device);
+                }
+            }
+            None
+        }
     }
 
     fn register_default_functions(&self) {

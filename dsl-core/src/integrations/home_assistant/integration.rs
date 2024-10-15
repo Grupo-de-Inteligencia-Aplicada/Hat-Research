@@ -28,13 +28,20 @@ impl HassIntegration {
     pub async fn new(hass_url: &str, access_token: &str) -> Result<Self> {
         let ws = HAWebSocket::connect(hass_url, access_token).await?;
         let new_id = ID_COUNTER.fetch_add(1, Ordering::SeqCst);
-        Ok(Self { ws: Arc::new(ws), id: format!("HassIntegration{new_id}") })
+        Ok(Self {
+            ws: Arc::new(ws),
+            id: format!("HassIntegration{new_id}"),
+        })
     }
 }
 
 #[async_trait]
 impl Integration for HassIntegration {
     async fn list_devices(&self) -> Vec<Device> {
+        todo!()
+    }
+
+    async fn get_device(&self, id: &str) -> Option<Device> {
         todo!()
     }
 

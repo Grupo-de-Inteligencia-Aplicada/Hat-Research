@@ -42,6 +42,19 @@ impl Integration for DummyIntegration {
         .into()
     }
 
+    async fn get_device(&self, id: &str) -> Option<Device> {
+        if id == "dummy-device-2707" {
+            Some(Device {
+                integration: self.get_id().to_owned(),
+                id: "dummy-device-2707".into(),
+                typ: DeviceType::Dummy,
+                name: Some("Dummy Device".into()),
+            })
+        } else {
+            None
+        }
+    }
+
     fn subscribe(&self) -> UnboundedReceiver<Event> {
         let (tx, rx) = mpsc::unbounded_channel();
 
