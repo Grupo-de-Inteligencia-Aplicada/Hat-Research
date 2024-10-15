@@ -1,4 +1,7 @@
-use std::{fmt::Display, ops::{Deref, DerefMut}};
+use std::{
+    fmt::Display,
+    ops::{Deref, DerefMut},
+};
 
 use chrono::{DateTime, Local, NaiveTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -55,4 +58,3 @@ impl Deref for Time {
         &self.0
     }
 }
-

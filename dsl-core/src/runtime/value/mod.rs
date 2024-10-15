@@ -4,8 +4,8 @@ pub mod time;
 use anyhow::{bail, Context};
 use chrono::Timelike;
 use serde::{Deserialize, Serialize};
-use time::Time;
 use std::fmt::Display;
+use time::Time;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
 pub enum Value {
