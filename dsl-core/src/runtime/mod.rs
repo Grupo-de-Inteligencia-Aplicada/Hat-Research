@@ -45,12 +45,12 @@ pub struct HatRuntime {
     automations: Mutex<HashMap<String, Automation>>,
     integrations: RwLock<Vec<IntegrationAndStopChannel>>,
     executor_channel: mpsc::UnboundedSender<ExecutorMessage>,
-    executor_handle: Mutex<Option<JoinHandle<()>>>,
+    executor_handle: tokio::sync::Mutex<Option<JoinHandle<()>>>,
     functions: std::sync::RwLock<HashMap<String, Arc<Function>>>,
 }
 
 impl HatRuntime {
-    pub fn new() -> Arc<Self> {
+    pub async fn new() -> Arc<Self> {
         let (tx, mut rx) = mpsc::unbounded_channel();
 
         let runtime = Arc::new(Self {
@@ -87,7 +87,7 @@ impl HatRuntime {
         });
 
         {
-            let mut executor_handle = runtime.executor_handle.lock().unwrap();
+            let mut executor_handle = runtime.executor_handle.lock().await;
             *executor_handle = Some(handle);
         }
 
@@ -132,7 +132,7 @@ impl HatRuntime {
     }
 
     pub async fn join(&self) {
-        let mut handle_lock = self.executor_handle.lock().unwrap();
+        let mut handle_lock = self.executor_handle.lock().await;
         let handle = &mut *handle_lock;
         if let Some(handle) = handle {
             let _ = handle.await;

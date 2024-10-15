@@ -20,7 +20,7 @@ async fn main() -> anyhow::Result<()> {
 
     let src = include_str!("test/sample.hat");
 
-    let runtime = HatRuntime::new();
+    let runtime = HatRuntime::new().await;
 
     runtime.parse("test/sample.hat".into(), src)?;
 
