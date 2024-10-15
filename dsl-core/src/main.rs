@@ -2,6 +2,7 @@
 
 use crate::integrations::dummy::DummyIntegration;
 use crate::runtime::HatRuntime;
+use integrations::home_assistant::HassIntegration;
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 
 pub mod integrations;
@@ -24,11 +25,11 @@ async fn main() -> anyhow::Result<()> {
 
     runtime.parse("test/sample.hat".into(), src)?;
 
-    runtime.integrate(DummyIntegration).await;
-    // runtime.integrate(HassIntegration::new(
-    //     "wss://ha.polaris.fleap.dev/api/websocket",
-    //    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI3YzhiYjdkMDczYmY0OWFiYTc4YTY0YjVmMzZkYTkwNiIsImlhdCI6MTcyMjQzNzk3NywiZXhwIjoyMDM3Nzk3OTc3fQ.h8uzazAaV_4MopUB3vPu258l54bhoh4DuZc30shF42M"
-    // ).await?).await;
+    runtime.integrate(DummyIntegration::new()).await;
+    runtime.integrate(HassIntegration::new(
+        "wss://ha.polaris.fleap.dev/api/websocket",
+       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI3YzhiYjdkMDczYmY0OWFiYTc4YTY0YjVmMzZkYTkwNiIsImlhdCI6MTcyMjQzNzk3NywiZXhwIjoyMDM3Nzk3OTc3fQ.h8uzazAaV_4MopUB3vPu258l54bhoh4DuZc30shF42M"
+    ).await?).await;
 
     runtime.join().await;
 

@@ -7,19 +7,28 @@ use anyhow::Result;
 use async_trait::async_trait;
 use chrono::{DateTime, TimeZone, Utc};
 use std::collections::HashMap;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::UnboundedReceiver;
 use tracing::{debug, error};
 
+lazy_static::lazy_static! {
+    static ref ID_COUNTER: AtomicU64 = {
+        AtomicU64::default()
+    };
+}
+
 pub struct HassIntegration {
     ws: Arc<HAWebSocket>,
+    id: String,
 }
 
 impl HassIntegration {
     pub async fn new(hass_url: &str, access_token: &str) -> Result<Self> {
         let ws = HAWebSocket::connect(hass_url, access_token).await?;
-        Ok(Self { ws: Arc::new(ws) })
+        let new_id = ID_COUNTER.fetch_add(1, Ordering::SeqCst);
+        Ok(Self { ws: Arc::new(ws), id: format!("HassIntegration{new_id}") })
     }
 }
 
@@ -33,7 +42,7 @@ impl Integration for HassIntegration {
         let (tx, rx) = mpsc::unbounded_channel();
         let api = Arc::clone(&self.ws);
 
-        let integration_name = self.name();
+        let integration_name = self.get_id().to_owned();
 
         tokio::spawn(async move {
             let mut events = match api.subscribe_events(None).await {
@@ -53,7 +62,7 @@ impl Integration for HassIntegration {
                     }
                 };
 
-                let runtime_event = parse_event(integration_name, &hass_event);
+                let runtime_event = parse_event(&integration_name, &hass_event);
 
                 if let Some(runtime_event) = runtime_event {
                     tx.send(runtime_event).unwrap();
@@ -69,8 +78,8 @@ impl Integration for HassIntegration {
         rx
     }
 
-    fn name(&self) -> &'static str {
-        "HassIntegration"
+    fn get_id(&self) -> &str {
+        &self.id
     }
 }
 

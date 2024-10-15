@@ -10,5 +10,5 @@ pub mod home_assistant;
 pub trait Integration: Send + Sync {
     async fn list_devices(&self) -> Vec<Device>;
     fn subscribe(&self) -> mpsc::UnboundedReceiver<Event>;
-    fn name(&self) -> &'static str;
+    fn get_id(&self) -> &str;
 }

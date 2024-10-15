@@ -12,6 +12,7 @@ use crate::runtime::automation::Automation;
 use crate::runtime::context::AutomationContext;
 use crate::runtime::function::Function;
 use anyhow::Result;
+use device::Device;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use thiserror::Error;
@@ -39,11 +40,11 @@ pub enum RuntimeError {
     },
 }
 
-type IntegrationAndStopChannel = (Box<dyn Integration>, oneshot::Sender<()>);
+type IntegrationAndStopChannel = (Arc<dyn Integration>, oneshot::Sender<()>);
 
 pub struct HatRuntime {
     automations: Mutex<HashMap<String, Automation>>,
-    integrations: RwLock<Vec<IntegrationAndStopChannel>>,
+    integrations: RwLock<HashMap<String, IntegrationAndStopChannel>>,
     executor_channel: mpsc::UnboundedSender<ExecutorMessage>,
     executor_handle: tokio::sync::Mutex<Option<JoinHandle<()>>>,
     functions: std::sync::RwLock<HashMap<String, Arc<Function>>>,
@@ -96,9 +97,9 @@ impl HatRuntime {
 
     pub async fn integrate<T: 'static + Integration>(&self, integration: T) {
         let mut integration_events = integration.subscribe();
-        let integration_name = integration.name();
         let executor_channel = self.executor_channel.clone();
         let (stop_signal_tx, mut stop_signal_rx) = oneshot::channel::<()>();
+        let integration_id = integration.get_id().to_owned();
         tokio::spawn(async move {
             loop {
                 tokio::select! {
@@ -107,23 +108,23 @@ impl HatRuntime {
                     }
                     event = integration_events.recv() => {
                         if let Some(event) = event {
-                            debug!("Event from integration {integration_name}: {event:?}");
+                            debug!("Event from integration {integration_id}: {event:?}");
                             if executor_channel.send(
                                 ExecutorMessage::Event(event)
                             ).is_err() {
                                 break;
                             }
                         } else {
-                            warn!("Integration {integration_name} closed communication channel before stopping!");
+                            warn!("Integration {integration_id} closed communication channel before stopping!");
                             break;
                         }
                     },
                 }
             }
         });
+        let integration_arc: Arc<dyn Integration> = Arc::new(integration);
         let mut integrations = self.integrations.write().await;
-        let boxed: Box<dyn Integration> = Box::new(integration);
-        integrations.push((boxed, stop_signal_tx));
+        integrations.insert(integration_arc.get_id().to_owned(), (integration_arc, stop_signal_tx));
     }
 
     pub fn dispatch_event(&self, event: Event) -> Result<()> {
@@ -146,6 +147,16 @@ impl HatRuntime {
     pub fn register_function(&self, fun: Function) {
         let mut lock = self.functions.write().unwrap();
         lock.insert(fun.name.clone(), Arc::new(fun));
+    }
+
+    pub async fn get_integration(&self, integration: &str) -> Option<Arc<dyn Integration>> {
+        let lock = self.integrations.read().await;
+        lock.get(integration).map(|(i, _)| Arc::clone(i))
+    }
+
+    pub async fn get_device(&self, integration: &str, id: &str) -> Option<Device> {
+        let integration = self.get_integration(integration).await;
+        todo!()
     }
 
     fn register_default_functions(&self) {
