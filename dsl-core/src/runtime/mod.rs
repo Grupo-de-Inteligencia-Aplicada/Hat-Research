@@ -157,6 +157,9 @@ impl HatRuntime {
         lock.get(integration).map(|(i, _)| Arc::clone(i))
     }
 
+    /// This function returns the Device, if it exists, that corresponds to the `device_id`.
+    /// The `device_id` can be in the format: `{INTEGRATION_ID}@{DEVICE}`, or just `{DEVICE}`.
+    /// On the last option, this function will search on all integrations for a device that matches the `device_id`.
     pub async fn get_device(&self, device_id: &str) -> Option<Device> {
         let (integration, device) = {
             if let Some((first, last)) = device_id.split_once("@") {
