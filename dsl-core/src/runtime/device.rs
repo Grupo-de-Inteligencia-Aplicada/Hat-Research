@@ -6,6 +6,7 @@ pub enum DeviceType {
     DoorSensor,
     Light,
     Sensor,
+    Unknown,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -14,6 +15,7 @@ pub struct Device {
     pub id: String,
     pub name: Option<String>,
     pub typ: DeviceType,
+    pub state: Option<String>,
 }
 
 impl Device {

@@ -9,6 +9,7 @@ use tokio::sync::mpsc;
 use tokio::sync::mpsc::UnboundedReceiver;
 use tokio::time::sleep;
 use tracing::error;
+use anyhow::Result;
 
 lazy_static::lazy_static! {
     static ref ID_COUNTER: AtomicU64 = {
@@ -32,26 +33,28 @@ impl DummyIntegration {
 
 #[async_trait]
 impl Integration for DummyIntegration {
-    async fn list_devices(&self) -> Vec<Device> {
-        [Device {
+    async fn list_devices(&self) -> Result<Vec<Device>> {
+        Ok([Device {
             integration: self.get_id().to_owned(),
             id: "dummy-device-2707".into(),
             name: Some("Dummy Device".into()),
+            state: Some("dummy-state".into()),
             typ: DeviceType::Dummy,
         }]
-        .into()
+        .into())
     }
 
-    async fn get_device(&self, id: &str) -> Option<Device> {
+    async fn get_device(&self, id: &str) -> Result<Option<Device>> {
         if id == "dummy-device-2707" {
-            Some(Device {
+            Ok(Some(Device {
                 integration: self.get_id().to_owned(),
                 id: "dummy-device-2707".into(),
                 typ: DeviceType::Dummy,
+                state: Some("dummy-state".into()),
                 name: Some("Dummy Device".into()),
-            })
+            }))
         } else {
-            None
+            Ok(None)
         }
     }
 
@@ -69,6 +72,7 @@ impl Integration for DummyIntegration {
                         integration: integration_name.to_string(),
                         id: "dummy-device-2707".into(),
                         name: Some("Dummy Device".into()),
+                        state: Some("dummy-state".into()),
                         typ: DeviceType::Dummy,
                     },
                     parameters: Default::default(),

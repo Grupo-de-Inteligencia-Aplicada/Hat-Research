@@ -160,7 +160,7 @@ impl HatRuntime {
     /// This function returns the Device, if it exists, that corresponds to the `device_id`.
     /// The `device_id` can be in the format: `{INTEGRATION_ID}@{DEVICE}`, or just `{DEVICE}`.
     /// On the last option, this function will search on all integrations for a device that matches the `device_id`.
-    pub async fn get_device(&self, device_id: &str) -> Option<Device> {
+    pub async fn get_device(&self, device_id: &str) -> Result<Option<Device>> {
         let (integration, device) = {
             if let Some((first, last)) = device_id.split_once("@") {
                 (Some(first), last)
@@ -170,16 +170,19 @@ impl HatRuntime {
         };
 
         if let Some(integration) = integration {
-            let integration = self.get_integration(integration).await?;
-            integration.get_device(device).await
+            if let Some(integration) = self.get_integration(integration).await {
+                Ok(integration.get_device(device).await?)
+            } else {
+                Ok(None)
+            }
         } else {
             let integrations = self.integrations.read().await;
             for (_, (integration, _)) in integrations.iter() {
-                if let Some(device) = integration.get_device(device).await {
-                    return Some(device);
+                if let Some(device) = integration.get_device(device).await? {
+                    return Ok(Some(device));
                 }
             }
-            None
+            Ok(None)
         }
     }
 

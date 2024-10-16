@@ -27,7 +27,7 @@ async fn main() -> anyhow::Result<()> {
 
     runtime.integrate(DummyIntegration::new()).await;
     runtime.integrate(HassIntegration::new(
-        "wss://ha.polaris.fleap.dev/api/websocket",
+        "https://ha.polaris.fleap.dev",
        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI3YzhiYjdkMDczYmY0OWFiYTc4YTY0YjVmMzZkYTkwNiIsImlhdCI6MTcyMjQzNzk3NywiZXhwIjoyMDM3Nzk3OTc3fQ.h8uzazAaV_4MopUB3vPu258l54bhoh4DuZc30shF42M"
     ).await?).await;
 

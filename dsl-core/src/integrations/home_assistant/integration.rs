@@ -3,15 +3,19 @@ use crate::integrations::home_assistant::events::{Event as HassEvent, EventData}
 use crate::runtime::device::DeviceType;
 use crate::runtime::event::{Event as RuntimeEvent, EventType};
 use crate::{integrations::Integration, runtime::device::Device};
-use anyhow::Result;
+use anyhow::{bail, ensure, Result};
 use async_trait::async_trait;
 use chrono::{DateTime, TimeZone, Utc};
+use reqwest::header::HeaderMap;
+use reqwest::StatusCode;
+use serde::Deserialize;
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::UnboundedReceiver;
 use tracing::{debug, error};
+use url::Url;
 
 lazy_static::lazy_static! {
     static ref ID_COUNTER: AtomicU64 = {
@@ -20,29 +24,162 @@ lazy_static::lazy_static! {
 }
 
 pub struct HassIntegration {
+    http_client: reqwest::Client,
+    url: Url,
     ws: Arc<HAWebSocket>,
     id: String,
 }
 
 impl HassIntegration {
     pub async fn new(hass_url: &str, access_token: &str) -> Result<Self> {
-        let ws = HAWebSocket::connect(hass_url, access_token).await?;
+        let url = Url::parse(hass_url)?;
+        ensure!(
+            url.scheme() == "http" || url.scheme() == "https",
+            "unknown url scheme"
+        );
+        let ws_url = {
+            let mut ws_url = url.clone();
+            if let Err(e) = ws_url.set_scheme(match ws_url.scheme() {
+                "http" => "ws",
+                "https" => "wss",
+                _ => unreachable!(),
+            }) {
+                bail!("failed to update hass url: {e:?}");
+            }
+            ws_url.set_path("/api/websocket");
+            ws_url
+        };
+        let ws = HAWebSocket::connect(ws_url.to_string().as_ref(), access_token).await?;
         let new_id = ID_COUNTER.fetch_add(1, Ordering::SeqCst);
+        let http_client = reqwest::Client::builder()
+            .default_headers(
+                HeaderMap::try_from(&HashMap::from([(
+                    "Authorization".to_owned(),
+                    format!("Bearer {access_token}"),
+                )]))
+                .unwrap(),
+            )
+            .build()?;
         Ok(Self {
+            http_client,
+            url,
             ws: Arc::new(ws),
             id: format!("HassIntegration{new_id}"),
         })
     }
+    fn get_endpoint_from_api_route(&self, route: &str) -> Url {
+        let mut url = self.url.clone();
+        url.set_path(route);
+        url
+    }
+    fn get_device_type_from_entity_id(entity_id: &str, device_class: Option<&str>) -> DeviceType {
+        let typ = entity_id.split_once(".");
+        if let Some((typ, _)) = typ {
+            match typ {
+                "light" => DeviceType::Light,
+                "sensor" => DeviceType::Sensor,
+                "binary_sensor" => {
+                    match device_class {
+                        Some("door") => DeviceType::DoorSensor,
+                        Some(_) => DeviceType::Unknown,
+                        _ => DeviceType::Unknown,
+                    }
+                },
+                _ => DeviceType::Unknown,
+            }
+        } else {
+            DeviceType::Unknown
+        }
+    }
+}
+
+#[derive(Deserialize)]
+struct HassEntityState {
+    attributes: HashMap<String, serde_json::Value>,
+    entity_id: String,
+    state: serde_json::Value,
 }
 
 #[async_trait]
 impl Integration for HassIntegration {
-    async fn list_devices(&self) -> Vec<Device> {
-        todo!()
+    async fn list_devices(&self) -> Result<Vec<Device>> {
+        let res = self
+            .http_client
+            .get(self.get_endpoint_from_api_route("/api/states"))
+            .send()
+            .await?;
+
+        ensure!(
+            res.status() == StatusCode::OK,
+            "failed to list devices on hass: {}, {}",
+            res.status(),
+            res.text().await?,
+        );
+
+        let devices = res
+            .json::<Vec<HassEntityState>>()
+            .await?
+            .into_iter()
+            .map(|entity| {
+                Device {
+                    integration: self.get_id().to_owned(),
+                    typ: Self::get_device_type_from_entity_id(
+                        &entity.entity_id,
+                        entity.attributes.get("device_class").and_then(|c| c.as_str()),
+                    ),
+                    id: entity.entity_id,
+                    name: None, // TODO: get this property, if possible
+                    state: Some(
+                        entity
+                            .state
+                            .as_str()
+                            .expect("states that are not a string are not yet implemented")
+                            .to_owned(),
+                    ),
+                }
+            })
+            .collect();
+
+        Ok(devices)
     }
 
-    async fn get_device(&self, id: &str) -> Option<Device> {
-        todo!()
+    async fn get_device(&self, id: &str) -> Result<Option<Device>> {
+        let res = self
+            .http_client
+            .get(self.get_endpoint_from_api_route(&format!("/api/states/{id}")))
+            .send()
+            .await?;
+
+        if res.status() == StatusCode::NOT_FOUND {
+            return Ok(None);
+        }
+
+        ensure!(
+            res.status() == StatusCode::OK,
+            "failed to list devices on hass: {}, {}",
+            res.status(),
+            res.text().await?,
+        );
+
+        let res = res.json::<HassEntityState>().await?;
+
+        let device = Device {
+            integration: self.get_id().to_owned(),
+            typ: Self::get_device_type_from_entity_id(
+                &res.entity_id,
+                res.attributes.get("device_class").and_then(|c| c.as_str())
+            ),
+            id: res.entity_id,
+            name: None, // TODO: get this property, if possible
+            state: Some(
+                res.state
+                    .as_str()
+                    .expect("states that are not a string are not yet implemented")
+                    .to_owned(),
+            ),
+        };
+
+        Ok(Some(device))
     }
 
     fn subscribe(&self) -> UnboundedReceiver<RuntimeEvent> {
@@ -117,6 +254,7 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
                             integration: integration_name.to_owned(),
                             id: entity_id.to_owned(),
                             name,
+                            state: Some(new_state.to_string()),
                             typ: DeviceType::DoorSensor,
                         };
                         if old_state == "off" && new_state == "on" {
@@ -142,6 +280,7 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
                         integration: integration_name.to_owned(),
                         id: entity_id.to_owned(),
                         name,
+                        state: Some(new_state.to_string()),
                         typ: DeviceType::Light,
                     };
                     if old_state == "off" && new_state == "on" {
@@ -174,6 +313,7 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
                             integration: integration_name.to_owned(),
                             id: entity_id.to_owned(),
                             name,
+                            state: Some(new_state.to_string()),
                             typ: DeviceType::Sensor,
                         },
                         parameters,
