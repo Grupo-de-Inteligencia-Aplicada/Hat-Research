@@ -1,24 +1,16 @@
-automation "a" (PowerOutletOffEvent) {
-  run echo("off")
-}
-
-automation "b" (PowerOutletOnEvent) {
-  run echo("on")
-}
-
-// Example automation to turn on desk light when office light turns on
-automation "Turn on desk light when office light turns on" (LightOnEvent) {
-  if get_device() == "HassIntegration0@light.office_light"
-  run echo("turning on desk light because office light turned on!")
+// Example automation to turn on the lights and fan when detect motion
+automation "Automation to" (MotionSensorOnEvent) {
+  if get_device() == "HassIntegration0@binary_sensor.zy_m100_wifi_presence_sensor_motion"
   run turn_on_device("HassIntegration0@light.desk_light")
+  run turn_on_device("HassIntegration0@light.office_light")
   run turn_on_device("HassIntegration0@switch.smart_plug_wifi_socket_1")
 }
 
-// Example automation to turn off desk light when office light turns off
-automation "Turn off desk light when office light turns off" (LightOffEvent) {
-  if get_device() == "HassIntegration0@light.office_light"
-  run echo("turning off desk light because office light turned off!")
+// Example automation to turn off the lights and fan when not detect motion
+automation "b" (MotionSensorOffEvent) {
+  if get_device() == "HassIntegration0@binary_sensor.zy_m100_wifi_presence_sensor_motion"
   run turn_off_device("HassIntegration0@light.desk_light")
+  run turn_off_device("HassIntegration0@light.office_light")
   run turn_off_device("HassIntegration0@switch.smart_plug_wifi_socket_1")
 }
 

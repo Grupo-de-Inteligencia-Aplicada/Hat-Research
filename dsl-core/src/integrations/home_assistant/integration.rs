@@ -81,6 +81,7 @@ impl HassIntegration {
                 "sensor" => DeviceType::Sensor,
                 "binary_sensor" => match device_class {
                     Some("door") => DeviceType::DoorSensor,
+                    Some("motion") => DeviceType::MotionSensor,
                     Some(_) => DeviceType::Unknown,
                     _ => DeviceType::Unknown,
                 },
@@ -338,6 +339,30 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
                         if old_state == "on" && new_state == "off" {
                             return Some(RuntimeEvent {
                                 typ: EventType::DoorCloseEvent,
+                                datetime: time,
+                                device,
+                                parameters: Default::default(),
+                            });
+                        }
+                    } else if device_class == Some("motion") {
+                        let device = Device {
+                            integration: integration_name.to_owned(),
+                            id: entity_id.to_owned(),
+                            name,
+                            state: Some(new_state.to_string()),
+                            typ: DeviceType::MotionSensor,
+                        };
+                        if old_state == "off" && new_state == "on" {
+                            return Some(RuntimeEvent {
+                                typ: EventType::MotionSensorOnEvent,
+                                datetime: time,
+                                device,
+                                parameters: Default::default(),
+                            });
+                        }
+                        if old_state == "on" && new_state == "off" {
+                            return Some(RuntimeEvent {
+                                typ: EventType::MotionSensorOffEvent,
                                 datetime: time,
                                 device,
                                 parameters: Default::default(),

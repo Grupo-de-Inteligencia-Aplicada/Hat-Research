@@ -12,6 +12,8 @@ pub enum EventType {
     LightOffEvent,
     PowerOutletOnEvent,
     PowerOutletOffEvent,
+    MotionSensorOnEvent,
+    MotionSensorOffEvent,
     SensorValueChangeEvent,
 }
 
@@ -25,6 +27,8 @@ impl EventType {
             EventType::LightOffEvent => "LightOffEvent",
             EventType::PowerOutletOnEvent => "PowerOutletOnEvent",
             EventType::PowerOutletOffEvent => "PowerOutletOffEvent",
+            EventType::MotionSensorOnEvent => "MotionSensorOnEvent",
+            EventType::MotionSensorOffEvent => "MotionSensorOffEvent",
             EventType::SensorValueChangeEvent => "SensorValueChangeEvent",
         }
     }
