@@ -86,6 +86,10 @@ impl HassIntegration {
                         _ => DeviceType::Unknown,
                     }
                 },
+                "switch" => match device_class {
+                    Some("outlet") => DeviceType::PowerOutlet,
+                    _ => DeviceType::Unknown,
+                }
                 _ => DeviceType::Unknown,
             }
         } else {
@@ -375,7 +379,36 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
                         },
                         parameters,
                     });
-                }
+                },
+                "switch" => {
+                    let attribs = new_state_data.get("attributes")?;
+                    let device_class = attribs.get("device_class").and_then(|v| v.as_str());
+                    if device_class == Some("outlet") {
+                        let device = Device {
+                            integration: integration_name.to_owned(),
+                            id: entity_id.to_owned(),
+                            name,
+                            state: Some(new_state.to_string()),
+                            typ: DeviceType::PowerOutlet,
+                        };
+                        if old_state == "off" && new_state == "on" {
+                            return Some(RuntimeEvent {
+                                typ: EventType::PowerOutletOnEvent,
+                                datetime: time,
+                                device,
+                                parameters: Default::default(),
+                            });
+                        }
+                        if old_state == "on" && new_state == "off" {
+                            return Some(RuntimeEvent {
+                                typ: EventType::PowerOutletOffEvent,
+                                datetime: time,
+                                device,
+                                parameters: Default::default(),
+                            });
+                        }
+                    }
+                },
                 _ => {}
             }
         }

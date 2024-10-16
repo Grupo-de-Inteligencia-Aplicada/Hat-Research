@@ -10,6 +10,8 @@ pub enum EventType {
     DoorCloseEvent,
     LightOnEvent,
     LightOffEvent,
+    PowerOutletOnEvent,
+    PowerOutletOffEvent,
     SensorValueChangeEvent,
 }
 
@@ -21,6 +23,8 @@ impl EventType {
             EventType::DoorCloseEvent => "DoorCloseEvent",
             EventType::LightOnEvent => "LightOnEvent",
             EventType::LightOffEvent => "LightOffEvent",
+            EventType::PowerOutletOnEvent => "PowerOutletOnEvent",
+            EventType::PowerOutletOffEvent => "PowerOutletOffEvent",
             EventType::SensorValueChangeEvent => "SensorValueChangeEvent",
         }
     }
