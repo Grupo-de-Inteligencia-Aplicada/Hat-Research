@@ -1,9 +1,11 @@
+use std::sync::Arc;
+
 use crate::runtime::value::Value;
 use crate::runtime::HatRuntime;
 use crate::runtime::{function::Function, value::time::Time};
 use anyhow::{anyhow, bail, Context};
 use lazy_static::lazy_static;
-use tracing::info;
+use tracing::{error, info};
 
 lazy_static! {
     pub static ref DEFAULT_FUNCTIONS: Vec<Function> = {
@@ -79,28 +81,72 @@ lazy_static! {
                             .first()
                             .ok_or(anyhow!("missing device_id on turn_off_device function"))?;
                         if let Value::String(arg) = first {
-                            arg
+                            arg.clone()
                         }else {
                             bail!("device id must be a string")
                         }
                     };
 
-                    let (integration, device_id) = HatRuntime::parse_full_device_id(&full_device_id);
+                    let runtime = Arc::clone(&ctx.runtime);
 
-                    if let Some(integration) = integration {
-                        todo!()
-                    } else {
-                        todo!()
-                    }
+                    tokio::spawn(async move {
+                        let (integration, device_id) = HatRuntime::parse_full_device_id(&full_device_id);
+
+                        if let Some(integration) = integration {
+                            match runtime.get_integration(integration).await {
+                                Some(integration) => {
+                                    if let Err(e) = integration.turn_off_device(device_id).await {
+                                        error!("failed to turn off device {full_device_id}: {e:?}");
+                                    }
+                                },
+                                None => {
+                                    error!("failed to find integration of device {full_device_id}");
+                                }
+                            }
+                        } else {
+                            todo!()
+                        }
+                    });
+
+                    Ok(Value::Null)
                 },
             },
             Function {
                 name: "turn_on_device".to_owned(),
                 fun: |ctx, args| {
-                    let device_id = args
-                        .first()
-                        .ok_or(anyhow!("missing device_id on turn_off_device function"))?;
-                    Ok(Value::Boolean(true))
+                    let full_device_id = {
+                        let first = args
+                            .first()
+                            .ok_or(anyhow!("missing device_id on turn_on_device function"))?;
+                        if let Value::String(arg) = first {
+                            arg.clone()
+                        }else {
+                            bail!("device id must be a string")
+                        }
+                    };
+
+                    let runtime = Arc::clone(&ctx.runtime);
+
+                    tokio::spawn(async move {
+                        let (integration, device_id) = HatRuntime::parse_full_device_id(&full_device_id);
+
+                        if let Some(integration) = integration {
+                            match runtime.get_integration(integration).await {
+                                Some(integration) => {
+                                    if let Err(e) = integration.turn_on_device(device_id).await {
+                                        error!("failed to turn on device {full_device_id}: {e:?}");
+                                    }
+                                },
+                                None => {
+                                    error!("failed to find integration of device {full_device_id}");
+                                }
+                            }
+                        } else {
+                            todo!()
+                        }
+                    });
+
+                    Ok(Value::Null)
                 },
             },
         ]

@@ -187,7 +187,7 @@ impl Integration for HassIntegration {
         let device = self.get_device(device_id).await?
             .context("device not found")?;
         if device.state.as_deref() != Some("off") {
-            bail!("cannot turn on a device that is not off");
+            bail!("cannot turn on a device that is not off: {}.state = {:?}", device.id, device.state);
         }
         let splitted = device_id.split_once(".");
         if let Some((domain, _id)) = splitted {

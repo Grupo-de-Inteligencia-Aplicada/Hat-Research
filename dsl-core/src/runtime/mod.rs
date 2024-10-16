@@ -75,7 +75,7 @@ impl HatRuntime {
                             if automation.should_be_triggered_by(&event) {
                                 let mut context = AutomationContext {
                                     event: event.clone(),
-                                    runtime: &runtime_clone,
+                                    runtime: Arc::clone(&runtime_clone),
                                 };
                                 if let Err(e) = automation.trigger(&mut context) {
                                     error!("Failed to run automation {}: {e:?}", automation.name);

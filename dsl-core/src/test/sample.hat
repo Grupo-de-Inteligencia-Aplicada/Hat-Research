@@ -1,3 +1,17 @@
+// Example automation to turn on desk light when office light turns on
+automation "Turn on desk light when office light turns on" (LightOnEvent) {
+  if get_device() == "HassIntegration0@light.office_light"
+  run echo("turning on desk light because office light turned on!")
+  run turn_on_device("HassIntegration0@light.desk_light")
+}
+
+// Example automation to turn off desk light when office light turns off
+automation "Turn off desk light when office light turns off" (LightOffEvent) {
+  if get_device() == "HassIntegration0@light.office_light"
+  run echo("turning off desk light because office light turned off!")
+  run turn_off_device("HassIntegration0@light.desk_light")
+}
+
 // Exemplo de evento para iniciar rotina matinal quando detectar movimento no quarto
 automation "Iniciar rotina matinal" (MotionDetectEvent) {
   if get_device() == "SensorQuarto"
