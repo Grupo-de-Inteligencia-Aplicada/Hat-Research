@@ -157,17 +157,22 @@ impl HatRuntime {
         lock.get(integration).map(|(i, _)| Arc::clone(i))
     }
 
+    /// This function parses a full device ID with the format `{INTEGRATION_ID}@{DEVICE_ID}` or
+    /// just `{DEVICE}`.
+    /// Returns a tuple in the format: `(integration (if present), device_id)`
+    pub fn parse_full_device_id(full_device_id: &str) -> (Option<&str>, &str) {
+        if let Some((first, last)) = full_device_id.split_once("@") {
+            (Some(first), last)
+        } else {
+            (None, full_device_id)
+        }
+    }
+
     /// This function returns the Device, if it exists, that corresponds to the `device_id`.
     /// The `device_id` can be in the format: `{INTEGRATION_ID}@{DEVICE}`, or just `{DEVICE}`.
     /// On the last option, this function will search on all integrations for a device that matches the `device_id`.
-    pub async fn get_device(&self, device_id: &str) -> Result<Option<Device>> {
-        let (integration, device) = {
-            if let Some((first, last)) = device_id.split_once("@") {
-                (Some(first), last)
-            } else {
-                (None, device_id)
-            }
-        };
+    pub async fn get_device(&self, full_device_id: &str) -> Result<Option<Device>> {
+        let (integration, device) = Self::parse_full_device_id(full_device_id);
 
         if let Some(integration) = integration {
             if let Some(integration) = self.get_integration(integration).await {

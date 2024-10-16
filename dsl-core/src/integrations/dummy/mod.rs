@@ -58,6 +58,14 @@ impl Integration for DummyIntegration {
         }
     }
 
+    async fn turn_on_device(&self, _device_id: &str) -> Result<()> {
+        Ok(())
+    }
+
+    async fn turn_off_device(&self, _device_id: &str) -> Result<()> {
+        Ok(())
+    }
+
     fn subscribe(&self) -> UnboundedReceiver<Event> {
         let (tx, rx) = mpsc::unbounded_channel();
 

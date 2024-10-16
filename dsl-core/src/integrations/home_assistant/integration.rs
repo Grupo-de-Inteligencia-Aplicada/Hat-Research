@@ -3,12 +3,13 @@ use crate::integrations::home_assistant::events::{Event as HassEvent, EventData}
 use crate::runtime::device::DeviceType;
 use crate::runtime::event::{Event as RuntimeEvent, EventType};
 use crate::{integrations::Integration, runtime::device::Device};
-use anyhow::{bail, ensure, Result};
+use anyhow::{bail, ensure, Context, Result};
 use async_trait::async_trait;
 use chrono::{DateTime, TimeZone, Utc};
 use reqwest::header::HeaderMap;
 use reqwest::StatusCode;
 use serde::Deserialize;
+use serde_json::json;
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
@@ -180,6 +181,62 @@ impl Integration for HassIntegration {
         };
 
         Ok(Some(device))
+    }
+
+    async fn turn_on_device(&self, device_id: &str) -> Result<()> {
+        let device = self.get_device(device_id).await?
+            .context("device not found")?;
+        if device.state.as_deref() != Some("off") {
+            bail!("cannot turn on a device that is not off");
+        }
+        let splitted = device_id.split_once(".");
+        if let Some((domain, _id)) = splitted {
+            let res = self
+                .http_client
+                .post(self.get_endpoint_from_api_route(&format!("/api/services/{domain}/turn_on")))
+                .json(&json!({
+                    "entity_id": device_id
+                }))
+                .send()
+                .await?;
+            ensure!(
+                res.status() == StatusCode::OK,
+                "turn on request failed: {}, {}",
+                res.status(),
+                res.text().await?
+            );
+            Ok(())
+        } else {
+            bail!("device id does not contain home assistant domain")
+        }
+    }
+
+    async fn turn_off_device(&self, device_id: &str) -> Result<()> {
+        let device = self.get_device(device_id).await?
+            .context("device not found")?;
+        if device.state.as_deref() != Some("on") {
+            bail!("cannot turn off a device that is not on");
+        }
+        let splitted = device_id.split_once(".");
+        if let Some((domain, _id)) = splitted {
+            let res = self
+                .http_client
+                .post(self.get_endpoint_from_api_route(&format!("/api/services/{domain}/turn_off")))
+                .json(&json!({
+                    "entity_id": device_id
+                }))
+                .send()
+                .await?;
+            ensure!(
+                res.status() == StatusCode::OK,
+                "turn on request failed: {}, {}",
+                res.status(),
+                res.text().await?
+            );
+            Ok(())
+        } else {
+            bail!("device id does not contain home assistant domain")
+        }
     }
 
     fn subscribe(&self) -> UnboundedReceiver<RuntimeEvent> {

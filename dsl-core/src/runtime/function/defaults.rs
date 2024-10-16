@@ -1,6 +1,7 @@
 use crate::runtime::value::Value;
+use crate::runtime::HatRuntime;
 use crate::runtime::{function::Function, value::time::Time};
-use anyhow::{bail, Context};
+use anyhow::{anyhow, bail, Context};
 use lazy_static::lazy_static;
 use tracing::info;
 
@@ -68,6 +69,38 @@ lazy_static! {
                         }
                         None => Ok(Value::Time(Time::now())),
                     }
+                },
+            },
+            Function {
+                name: "turn_off_device".to_owned(),
+                fun: |ctx, args| {
+                    let full_device_id = {
+                        let first = args
+                            .first()
+                            .ok_or(anyhow!("missing device_id on turn_off_device function"))?;
+                        if let Value::String(arg) = first {
+                            arg
+                        }else {
+                            bail!("device id must be a string")
+                        }
+                    };
+
+                    let (integration, device_id) = HatRuntime::parse_full_device_id(&full_device_id);
+
+                    if let Some(integration) = integration {
+                        todo!()
+                    } else {
+                        todo!()
+                    }
+                },
+            },
+            Function {
+                name: "turn_on_device".to_owned(),
+                fun: |ctx, args| {
+                    let device_id = args
+                        .first()
+                        .ok_or(anyhow!("missing device_id on turn_off_device function"))?;
+                    Ok(Value::Boolean(true))
                 },
             },
         ]
