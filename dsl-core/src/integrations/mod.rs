@@ -1,8 +1,8 @@
 use crate::runtime::device::Device;
 use crate::runtime::event::Event;
+use anyhow::Result;
 use async_trait::async_trait;
 use tokio::sync::mpsc;
-use anyhow::Result;
 
 pub mod dummy;
 pub mod home_assistant;

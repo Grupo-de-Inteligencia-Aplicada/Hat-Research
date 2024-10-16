@@ -1,6 +1,7 @@
 use crate::integrations::Integration;
 use crate::runtime::device::{Device, DeviceType};
 use crate::runtime::event::{Event, EventType};
+use anyhow::Result;
 use async_trait::async_trait;
 use chrono::Utc;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -9,7 +10,6 @@ use tokio::sync::mpsc;
 use tokio::sync::mpsc::UnboundedReceiver;
 use tokio::time::sleep;
 use tracing::error;
-use anyhow::Result;
 
 lazy_static::lazy_static! {
     static ref ID_COUNTER: AtomicU64 = {

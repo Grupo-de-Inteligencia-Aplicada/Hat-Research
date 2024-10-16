@@ -82,7 +82,7 @@ lazy_static! {
                             .ok_or(anyhow!("missing device_id on turn_off_device function"))?;
                         if let Value::String(arg) = first {
                             arg.clone()
-                        }else {
+                        } else {
                             bail!("device id must be a string")
                         }
                     };
@@ -90,7 +90,8 @@ lazy_static! {
                     let runtime = Arc::clone(&ctx.runtime);
 
                     tokio::spawn(async move {
-                        let (integration, device_id) = HatRuntime::parse_full_device_id(&full_device_id);
+                        let (integration, device_id) =
+                            HatRuntime::parse_full_device_id(&full_device_id);
 
                         if let Some(integration) = integration {
                             match runtime.get_integration(integration).await {
@@ -98,7 +99,7 @@ lazy_static! {
                                     if let Err(e) = integration.turn_off_device(device_id).await {
                                         error!("failed to turn off device {full_device_id}: {e:?}");
                                     }
-                                },
+                                }
                                 None => {
                                     error!("failed to find integration of device {full_device_id}");
                                 }
@@ -120,7 +121,7 @@ lazy_static! {
                             .ok_or(anyhow!("missing device_id on turn_on_device function"))?;
                         if let Value::String(arg) = first {
                             arg.clone()
-                        }else {
+                        } else {
                             bail!("device id must be a string")
                         }
                     };
@@ -128,7 +129,8 @@ lazy_static! {
                     let runtime = Arc::clone(&ctx.runtime);
 
                     tokio::spawn(async move {
-                        let (integration, device_id) = HatRuntime::parse_full_device_id(&full_device_id);
+                        let (integration, device_id) =
+                            HatRuntime::parse_full_device_id(&full_device_id);
 
                         if let Some(integration) = integration {
                             match runtime.get_integration(integration).await {
@@ -136,7 +138,7 @@ lazy_static! {
                                     if let Err(e) = integration.turn_on_device(device_id).await {
                                         error!("failed to turn on device {full_device_id}: {e:?}");
                                     }
-                                },
+                                }
                                 None => {
                                     error!("failed to find integration of device {full_device_id}");
                                 }

@@ -79,17 +79,15 @@ impl HassIntegration {
             match typ {
                 "light" => DeviceType::Light,
                 "sensor" => DeviceType::Sensor,
-                "binary_sensor" => {
-                    match device_class {
-                        Some("door") => DeviceType::DoorSensor,
-                        Some(_) => DeviceType::Unknown,
-                        _ => DeviceType::Unknown,
-                    }
+                "binary_sensor" => match device_class {
+                    Some("door") => DeviceType::DoorSensor,
+                    Some(_) => DeviceType::Unknown,
+                    _ => DeviceType::Unknown,
                 },
                 "switch" => match device_class {
                     Some("outlet") => DeviceType::PowerOutlet,
                     _ => DeviceType::Unknown,
-                }
+                },
                 _ => DeviceType::Unknown,
             }
         } else {
@@ -130,7 +128,10 @@ impl Integration for HassIntegration {
                     integration: self.get_id().to_owned(),
                     typ: Self::get_device_type_from_entity_id(
                         &entity.entity_id,
-                        entity.attributes.get("device_class").and_then(|c| c.as_str()),
+                        entity
+                            .attributes
+                            .get("device_class")
+                            .and_then(|c| c.as_str()),
                     ),
                     id: entity.entity_id,
                     name: None, // TODO: get this property, if possible
@@ -172,7 +173,7 @@ impl Integration for HassIntegration {
             integration: self.get_id().to_owned(),
             typ: Self::get_device_type_from_entity_id(
                 &res.entity_id,
-                res.attributes.get("device_class").and_then(|c| c.as_str())
+                res.attributes.get("device_class").and_then(|c| c.as_str()),
             ),
             id: res.entity_id,
             name: None, // TODO: get this property, if possible
@@ -188,10 +189,16 @@ impl Integration for HassIntegration {
     }
 
     async fn turn_on_device(&self, device_id: &str) -> Result<()> {
-        let device = self.get_device(device_id).await?
+        let device = self
+            .get_device(device_id)
+            .await?
             .context("device not found")?;
         if device.state.as_deref() != Some("off") {
-            bail!("cannot turn on a device that is not off: {}.state = {:?}", device.id, device.state);
+            bail!(
+                "cannot turn on a device that is not off: {}.state = {:?}",
+                device.id,
+                device.state
+            );
         }
         let splitted = device_id.split_once(".");
         if let Some((domain, _id)) = splitted {
@@ -216,7 +223,9 @@ impl Integration for HassIntegration {
     }
 
     async fn turn_off_device(&self, device_id: &str) -> Result<()> {
-        let device = self.get_device(device_id).await?
+        let device = self
+            .get_device(device_id)
+            .await?
             .context("device not found")?;
         if device.state.as_deref() != Some("on") {
             bail!("cannot turn off a device that is not on");
@@ -379,7 +388,7 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
                         },
                         parameters,
                     });
-                },
+                }
                 "switch" => {
                     let attribs = new_state_data.get("attributes")?;
                     let device_class = attribs.get("device_class").and_then(|v| v.as_str());
@@ -408,7 +417,7 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
                             });
                         }
                     }
-                },
+                }
                 _ => {}
             }
         }

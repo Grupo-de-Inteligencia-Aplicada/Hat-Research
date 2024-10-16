@@ -17,7 +17,7 @@ impl Debug for AutomationContext {
     }
 }
 
-impl<'r> AutomationContext {
+impl AutomationContext {
     pub fn get_function(&self, name: &str) -> Option<Arc<Function>> {
         self.runtime
             .functions

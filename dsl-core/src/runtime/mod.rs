@@ -18,7 +18,7 @@ use std::sync::{Arc, Mutex};
 use thiserror::Error;
 use tokio::sync::{mpsc, oneshot, RwLock};
 use tokio::task::JoinHandle;
-use tracing::{debug, error, trace, warn};
+use tracing::{error, trace, warn};
 
 #[derive(Error, Debug)]
 pub enum RuntimeError {
