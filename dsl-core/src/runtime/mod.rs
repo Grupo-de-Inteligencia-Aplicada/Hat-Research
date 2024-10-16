@@ -18,7 +18,7 @@ use std::sync::{Arc, Mutex};
 use thiserror::Error;
 use tokio::sync::{mpsc, oneshot, RwLock};
 use tokio::task::JoinHandle;
-use tracing::{debug, error, warn};
+use tracing::{debug, error, trace, warn};
 
 #[derive(Error, Debug)]
 pub enum RuntimeError {
@@ -108,7 +108,7 @@ impl HatRuntime {
                     }
                     event = integration_events.recv() => {
                         if let Some(event) = event {
-                            debug!("Event from integration {integration_id}: {event:?}");
+                            trace!("Event from integration {integration_id}: {event:?}");
                             if executor_channel.send(
                                 ExecutorMessage::Event(event)
                             ).is_err() {
