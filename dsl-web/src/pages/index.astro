@@ -1,0 +1,123 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<script>
+  import * as Blockly from "blockly";
+  import defineBlocks from "../blocks.ts";
+
+  function setup() {
+    const generator = defineBlocks();
+
+    var toolbox = document.getElementById("toolbox") ?? undefined;
+
+    var options = {
+      toolbox: toolbox,
+      collapse: true,
+      comments: false,
+      disable: false,
+      maxBlocks: Infinity,
+      trashcan: true,
+      horizontalLayout: false,
+      toolboxPosition: "start",
+      css: true,
+      media: "https://blockly-demo.appspot.com/static/media/",
+      rtl: false,
+      scrollbars: false,
+      sounds: true,
+      oneBasedIndex: true,
+      grid: {
+        spacing: 29,
+        length: 1,
+        colour: "#888",
+        snap: true,
+      },
+      zoom: {
+        controls: true,
+        wheel: true,
+        startScale: 1,
+        maxScale: 3,
+        minScale: 0.3,
+        scaleSpeed: 1.2,
+      },
+    };
+
+    // Inject Blockly no elemento com ID blocklyDiv
+    var workspace = Blockly.inject("blocklyDiv", options);
+
+    const supportedEvents = new Set([
+      Blockly.Events.BLOCK_CHANGE,
+      Blockly.Events.BLOCK_CREATE,
+      Blockly.Events.BLOCK_DELETE,
+      Blockly.Events.BLOCK_MOVE,
+    ]);
+
+    function updateCode(event) {
+      if (workspace.isDragging()) return; // Don't update while changes are happening.
+      if (!supportedEvents.has(event.type)) return;
+
+      const code = generator.workspaceToCode(workspace);
+      console.log(code);
+    }
+
+    workspace.addChangeListener(updateCode);
+  }
+
+  document.addEventListener("DOMContentLoaded", setup);
+</script>
+
+<Layout title="Welcome to Astro.">
+  <main>
+    <div id="workspace" class="flex flex-row w-screen h-screen">
+      <xml id="toolbox" style="display: none">
+        <category name="Automation" colour="#E67E22">
+          <block type="automation"></block>
+        </category>
+        <category name="Events" colour="#E67E22">
+          <block type="event_DoorOpenEvent"></block>
+          <block type="event_DoorCloseEvent"></block>
+          <block type="event_LightOnEvent"></block>
+          <block type="event_LightOffEvent"></block>
+          <block type="event_PowerOutletOnEvent"></block>
+          <block type="event_PowerOutletOffEvent"></block>
+          <block type="event_MotionSensorOnEvent"></block>
+          <block type="event_MotionSensorOffEvent"></block>
+          <block type="event_SensorValueChangeEvent"></block>
+        </category>
+        <category name="Conditions" colour="#9B59B6">
+          <block type="condition"></block>
+        </category>
+        <category name="Actions" colour="#3498DB">
+          <block type="action"></block>
+        </category>
+        <category name="Functions" colour="#1ABC9C">
+          <block type="echo"></block>
+          <block type="get_device"></block>
+          <block type="get_integration"></block>
+          <block type="event_date"></block>
+          <block type="event_time"></block>
+          <block type="time_function"></block>
+          <block type="turn_on_device"></block>
+          <block type="turn_off_device"></block>
+          <block type="device_status"></block>
+          <block type="set_device_temperature"></block>
+          <block type="toggle_device"></block>
+        </category>
+        <category name="Constants" colour="#F1C40F">
+          <block type="const_string"></block>
+          <block type="const_number"></block>
+          <block type="const_boolean"></block>
+          <block type="const_null"></block>
+        </category>
+        <category name="Operations" colour="#E74C3C">
+          <block type="arithmetic_operation"></block>
+          <block type="comparison_operation"></block>
+          <block type="logical_operation"></block>
+          <block type="logical_not"></block>
+        </category>
+      </xml>
+
+      <div id="blocklyDiv" class="w-full h-wull"></div>
+    </div>
+  </main>
+</Layout>
