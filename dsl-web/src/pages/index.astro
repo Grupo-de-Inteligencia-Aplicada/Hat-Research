@@ -42,8 +42,30 @@ import Layout from "../layouts/Layout.astro";
       },
     };
 
-    // Inject Blockly no elemento com ID blocklyDiv
+    // Inject Blockly into the element with ID blocklyDiv
     var workspace = Blockly.inject("blocklyDiv", options);
+
+        
+    function converterWorkspace() {
+      const xml = Blockly.Xml.workspaceToDom(workspace);
+      const xmlText = Blockly.Xml.domToText(xml);
+      console.log("Testeeee XML é esse:");
+      console.log(xmlText);
+      return xmlText;
+    }
+     document.getElementById("converteXML").addEventListener("click", converterWorkspace);
+
+     
+     function xmlPWorkspace() {
+      const xmlText = prompt("teste xml para workspace:");
+      if (xmlText) {
+        const xml = Blockly.Xml.textToDom(xmlText);
+        Blockly.Xml.domToWorkspace(xml, workspace);
+      }
+    }
+     document.getElementById("converteXMLreverso").addEventListener("click", xmlPWorkspace);
+
+
 
     const supportedEvents = new Set([
       Blockly.Events.BLOCK_CHANGE,
@@ -117,7 +139,11 @@ import Layout from "../layouts/Layout.astro";
         </category>
       </xml>
 
-      <div id="blocklyDiv" class="w-full h-wull"></div>
+      <div id="blocklyDiv" class="w-full h-full"></div>
     </div>
+
+    <!-- Botões de teste -->
+    <button id="converteXML" class="btn"> XML é: </button>
+    <button id="converteXMLreverso" class="btn"> XML para workspace é </button>
   </main>
 </Layout>
