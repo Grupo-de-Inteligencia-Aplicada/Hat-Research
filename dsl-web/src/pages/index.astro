@@ -46,26 +46,17 @@ import Layout from "../layouts/Layout.astro";
     var workspace = Blockly.inject("blocklyDiv", options);
 
         
-    function converterWorkspace() {
-      const xml = Blockly.Xml.workspaceToDom(workspace);
-      const xmlText = Blockly.Xml.domToText(xml);
-      console.log("Testeeee XML é esse:");
-      console.log(xmlText);
-      return xmlText;
+    function getWorkspaceState() {
+      const dom = Blockly.Xml.workspaceToDom(workspace);
+      const xml = Blockly.Xml.domToText(dom);
+      return xml;
     }
-     document.getElementById("converteXML").addEventListener("click", converterWorkspace);
 
      
-     function xmlPWorkspace() {
-      const xmlText = prompt("teste xml para workspace:");
-      if (xmlText) {
-        const xml = Blockly.Xml.textToDom(xmlText);
-        Blockly.Xml.domToWorkspace(xml, workspace);
-      }
+    function setWorkspaceState(state) {
+      const dom = Blockly.Xml.textToDom(state);
+      Blockly.Xml.domToWorkspace(dom, workspace);
     }
-     document.getElementById("converteXMLreverso").addEventListener("click", xmlPWorkspace);
-
-
 
     const supportedEvents = new Set([
       Blockly.Events.BLOCK_CHANGE,
@@ -78,8 +69,8 @@ import Layout from "../layouts/Layout.astro";
       if (workspace.isDragging()) return; // Don't update while changes are happening.
       if (!supportedEvents.has(event.type)) return;
 
-      const code = generator.workspaceToCode(workspace);
-      console.log(code);
+      const state = getWorkspaceState();
+      console.log(String(state));
     }
 
     workspace.addChangeListener(updateCode);
@@ -141,9 +132,5 @@ import Layout from "../layouts/Layout.astro";
 
       <div id="blocklyDiv" class="w-full h-full"></div>
     </div>
-
-    <!-- Botões de teste -->
-    <button id="converteXML" class="btn"> XML é: </button>
-    <button id="converteXMLreverso" class="btn"> XML para workspace é </button>
   </main>
 </Layout>
