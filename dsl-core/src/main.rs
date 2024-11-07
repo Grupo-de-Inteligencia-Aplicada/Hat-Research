@@ -10,6 +10,7 @@ use crate::runtime::HatRuntime;
 use anyhow::Context;
 use clap::Parser;
 use integrations::home_assistant::HassIntegration;
+use tracing::info;
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 
 pub mod integrations;
@@ -81,6 +82,8 @@ async fn main() -> anyhow::Result<()> {
     let listener = tokio::net::TcpListener::bind(&args.address)
         .await
         .with_context(|| format!("failed to bind address: {}", args.address))?;
+
+    info!("Starting HTTP server at {}", args.address);
 
     axum::serve(listener, router)
         .await

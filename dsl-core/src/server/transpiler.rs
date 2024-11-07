@@ -1,10 +1,12 @@
 use axum::extract::State;
+use tracing::debug;
 
 use super::AppState;
 
 /// This function will convert a Blockly XML workspace into Hat source code
 #[axum::debug_handler]
 pub(super) async fn transpile_workspace_to_hat(State(_): State<AppState>, xml: String) -> String {
+    debug!("{xml}");
     todo!()
 }
 

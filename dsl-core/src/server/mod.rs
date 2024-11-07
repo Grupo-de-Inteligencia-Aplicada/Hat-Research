@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use axum::{routing::post, Router};
+use tower_http::cors::{Any, CorsLayer};
 
 use crate::runtime::HatRuntime;
 
@@ -12,6 +13,9 @@ struct AppState {
 }
 
 pub fn make_router(runtime: Arc<HatRuntime>) -> Router {
+    let cors = CorsLayer::new()
+        .allow_methods(Any)
+        .allow_origin(Any);
     Router::new()
         .route(
             "/transpile/into_xml",
@@ -21,5 +25,6 @@ pub fn make_router(runtime: Arc<HatRuntime>) -> Router {
             "/transpile/into_hat",
             post(transpiler::transpile_workspace_to_hat),
         )
+        .layer(cors)
         .with_state(AppState { runtime })
 }
