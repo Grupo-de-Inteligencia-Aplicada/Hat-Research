@@ -36,10 +36,9 @@ lazy_static::lazy_static! {
 }
 
 pub fn parse(
-    runtime: &HatRuntime,
     filename: String,
     code: &str,
-) -> std::result::Result<(), RuntimeError> {
+) -> std::result::Result<Vec<Automation>, RuntimeError> {
     // TODO: stop panicking
     let code_program = HatParser::parse(Rule::program, code);
 
@@ -119,7 +118,7 @@ pub fn parse(
         }
     };
 
-    let mut automations = runtime.automations.lock().unwrap();
+    let mut automations = Vec::new();
 
     for rule in program {
         if matches!(rule.as_rule(), Rule::automation_declaration) {
@@ -161,11 +160,11 @@ pub fn parse(
                 actions,
             };
 
-            automations.insert(name, automation);
+            automations.push(automation);
         }
     }
 
-    Ok(())
+    Ok(automations)
 }
 
 fn parse_string(rule: Pair<Rule>) -> Result<String> {

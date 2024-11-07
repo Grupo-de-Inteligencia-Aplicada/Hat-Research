@@ -144,7 +144,13 @@ impl HatRuntime {
     }
 
     pub fn parse(&self, filename: String, code: &str) -> std::result::Result<(), RuntimeError> {
-        parser::parse(self, filename, code)
+        let automations = parser::parse(filename, code)?;
+        let mut lock = self.automations.lock().unwrap();
+        for automation in automations {
+            let name = automation.name.clone();
+            lock.insert(name, automation);
+        }
+        Ok(())
     }
 
     pub fn register_function(&self, fun: Function) {
