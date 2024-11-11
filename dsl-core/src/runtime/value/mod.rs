@@ -31,7 +31,7 @@ impl Value {
 impl Display for Value {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let str = match self {
-            Value::String(s) => s.to_owned(),
+            Value::String(s) => format!("\"{s}\""),
             Value::Boolean(b) => b.to_string(),
             Value::Number(n) => n.to_string(),
             Value::Time(t) => t.to_string(),

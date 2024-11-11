@@ -13,9 +13,7 @@ struct AppState {
 }
 
 pub fn make_router(runtime: Arc<HatRuntime>) -> Router {
-    let cors = CorsLayer::new()
-        .allow_methods(Any)
-        .allow_origin(Any);
+    let cors = CorsLayer::new().allow_methods(Any).allow_origin(Any);
     Router::new()
         .route(
             "/transpile/into_xml",

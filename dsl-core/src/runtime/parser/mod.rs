@@ -35,10 +35,7 @@ lazy_static::lazy_static! {
     };
 }
 
-pub fn parse(
-    filename: String,
-    code: &str,
-) -> std::result::Result<Vec<Automation>, RuntimeError> {
+pub fn parse(filename: String, code: &str) -> std::result::Result<Vec<Automation>, RuntimeError> {
     // TODO: stop panicking
     let code_program = HatParser::parse(Rule::program, code);
 

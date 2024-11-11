@@ -66,12 +66,16 @@ import Layout from "../layouts/Layout.astro";
       Blockly.Events.BLOCK_MOVE,
     ]);
 
-    function updateCode(event) {
+    async function updateCode(event) {
       if (workspace.isDragging()) return; // Don't update while changes are happening.
       if (!supportedEvents.has(event.type)) return;
 
       const state = getWorkspaceState();
       console.log(String(state));
+      await fetch("http://localhost:5000/transpile/into_hat", {
+        method: "POST",
+        body: String(state),
+      });
     }
 
     workspace.addChangeListener(updateCode);

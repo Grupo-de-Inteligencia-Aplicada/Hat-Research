@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::runtime::context::AutomationContext;
 use crate::runtime::function::FunctionCall;
 use crate::runtime::value::Value;
@@ -39,6 +41,18 @@ impl Expression {
                     Operation::Lesser => Ok(Value::Boolean(lh_value < rh_value)),
                     Operation::LesserOrEquals => Ok(Value::Boolean(lh_value <= rh_value)),
                 }
+            }
+        }
+    }
+}
+
+impl Display for Expression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Constant(c) => write!(f, "{c}"),
+            Self::Function(fun) => write!(f, "{fun}"),
+            Self::BinaryOperation { lhs, op, rhs } => {
+                write!(f, "{} {} {}", lhs, op, rhs)
             }
         }
     }

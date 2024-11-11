@@ -1,5 +1,7 @@
 pub mod defaults;
 
+use std::fmt::Display;
+
 use crate::runtime::context::AutomationContext;
 use crate::runtime::parser::expression::Expression;
 use crate::runtime::value::Value;
@@ -40,5 +42,17 @@ impl FunctionCall {
             Some(fun) => fun.call(ctx, arguments),
             None => bail!("function {} not found!", self.name),
         }
+    }
+}
+
+impl Display for FunctionCall {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let arguments = self
+            .arguments
+            .iter()
+            .map(|expr| expr.to_string())
+            .collect::<Vec<_>>()
+            .join(", ");
+        write!(f, "{}({})", self.name, arguments,)
     }
 }

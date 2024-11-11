@@ -23,6 +23,6 @@ url = "2.5.2"
 reqwest = { version = "0.12.8", features = ["json"] }
 clap = { version = "4.5.20", features = ["derive"] }
 axum = { version = "0.7.7", features = ["macros"] }
-quick-xml = { version = "0.37.0", features = ["serde"] }
+quick-xml = { version = "0.37.0", features = ["serde", "serialize"] }
 tower-http = { version = "0.6.1", features = ["cors"] }
 http = "1.1.0"
