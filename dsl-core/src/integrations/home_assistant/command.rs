@@ -38,7 +38,7 @@ impl<'a> Command<'a> {
     }
 }
 
-impl<'a> Drop for Command<'a> {
+impl Drop for Command<'_> {
     fn drop(&mut self) {
         self.ws.drop_command(self.id);
     }

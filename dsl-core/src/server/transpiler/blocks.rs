@@ -36,18 +36,14 @@ impl Block {
     pub fn get_field(&self, name: &str) -> Option<&String> {
         self.fields
             .iter()
-            .filter(|field| field.name == name)
-            .next()
+            .find(|field| field.name == name)
             .map(|field| &field.text)
     }
     pub fn get_value(&self, name: &str) -> Option<&Value> {
-        self.values.iter().filter(|val| val.name == name).next()
+        self.values.iter().find(|val| val.name == name)
     }
     pub fn get_statement(&self, name: &str) -> Option<&Statement> {
-        self.statements
-            .iter()
-            .filter(|stmt| stmt.name == name)
-            .next()
+        self.statements.iter().find(|stmt| stmt.name == name)
     }
 }
 

@@ -1,7 +1,7 @@
 use crate::runtime::automation::Automation;
 use crate::runtime::function::FunctionCall;
 use crate::runtime::value::Value;
-use crate::runtime::{HatRuntime, RuntimeError};
+use crate::runtime::RuntimeError;
 use anyhow::{bail, Context, Result};
 use expression::Expression;
 use operation::Operation;

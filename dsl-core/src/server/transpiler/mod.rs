@@ -1,7 +1,6 @@
 use anyhow::{bail, Context, Result};
 use axum::{extract::State, response::IntoResponse};
 use http::StatusCode;
-use quick_xml::events::Event;
 use tracing::debug;
 
 use crate::runtime::{automation::Automation, parser::expression::Expression, value::Value};
@@ -71,7 +70,7 @@ pub(super) async fn transpile_workspace_to_hat(
     let code = generate_hat_code(automations);
 
     debug!("{code}");
-    (StatusCode::OK, format!("{code}"))
+    (StatusCode::OK, code.to_string())
 }
 
 /// This function will convert Hat source code into a Blockly XML workspace
