@@ -124,27 +124,34 @@ impl Integration for HassIntegration {
             .json::<Vec<HassEntityState>>()
             .await?
             .into_iter()
-            .map(|entity| Device {
-                integration: self.get_id().to_owned(),
-                typ: Self::get_device_type_from_entity_id(
-                    &entity.entity_id,
-                    entity
+            .filter_map(|entity| {
+                let typ = Self::get_device_type_from_entity_id(
+                        &entity.entity_id,
+                        entity
+                            .attributes
+                            .get("device_class")
+                            .and_then(|c| c.as_str()));
+
+                if matches!(typ, DeviceType::Unknown) {
+                    return None;
+                }
+
+                Some(Device {
+                    integration: self.get_id().to_owned(),
+                    typ,
+                    id: entity.entity_id,
+                    name: entity
                         .attributes
-                        .get("device_class")
-                        .and_then(|c| c.as_str()),
-                ),
-                id: entity.entity_id,
-                name: entity
-                    .attributes
-                    .get("friendly_name")
-                    .and_then(|f| f.as_str().map(|s| s.to_owned())),
-                state: Some(
-                    entity
-                        .state
-                        .as_str()
-                        .expect("states that are not a string are not yet implemented")
-                        .to_owned(),
-                ),
+                        .get("friendly_name")
+                        .and_then(|f| f.as_str().map(|s| s.to_owned())),
+                    state: Some(
+                        entity
+                            .state
+                            .as_str()
+                            .expect("states that are not a string are not yet implemented")
+                            .to_owned(),
+                    ),
+                })
             })
             .collect();
 
