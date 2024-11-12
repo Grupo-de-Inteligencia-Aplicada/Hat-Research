@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use axum::{routing::{get, post}, Router};
+use http::header::CONTENT_TYPE;
 use tower_http::cors::{Any, CorsLayer};
 
 use crate::runtime::HatRuntime;
@@ -15,7 +16,11 @@ struct AppState {
 }
 
 pub fn make_router(runtime: Arc<HatRuntime>) -> Router {
-    let cors = CorsLayer::new().allow_methods(Any).allow_origin(Any);
+    let cors = CorsLayer::new()
+        .allow_methods(Any)
+        .allow_origin(Any)
+        .allow_headers([CONTENT_TYPE]);
+
     Router::new()
         .route(
             "/transpile/into_xml",
