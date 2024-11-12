@@ -1,0 +1,59 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<script>
+  import * as Blockly from "blockly";
+  import {EditorView, basicSetup} from "codemirror";
+  import { setupBlockly } from '../blocks/index';
+  import generateToolbox from '../blocks/toolbox';
+
+  function setup() {
+    const workspace = setupBlockly();
+        
+    function getWorkspaceState() {
+      const dom = Blockly.Xml.workspaceToDom(workspace);
+      const xml = Blockly.Xml.domToText(dom);
+      return xml;
+    }
+
+     
+    function setWorkspaceState(state) {
+      const dom = Blockly.Xml.textToDom(state);
+      Blockly.Xml.domToWorkspace(dom, workspace);
+    }
+
+    const supportedEvents = new Set([
+      Blockly.Events.BLOCK_CHANGE,
+      Blockly.Events.BLOCK_CREATE,
+      Blockly.Events.BLOCK_DELETE,
+      Blockly.Events.BLOCK_MOVE,
+    ]);
+
+    async function updateCode(event) {
+      if (workspace.isDragging()) return; // Don't update while changes are happening.
+      if (!supportedEvents.has(event.type)) return;
+
+      const state = getWorkspaceState();
+      console.log(String(state));
+      await fetch("http://localhost:5000/transpile/into_hat", {
+        method: "POST",
+        body: String(state),
+      });
+    }
+
+    workspace.addChangeListener(updateCode);
+  }
+
+  document.addEventListener("DOMContentLoaded", setup);
+</script>
+
+<Layout title="Welcome to Astro.">
+  <main>
+    <div id="workspace" class="flex flex-row w-screen h-screen">
+      <div class="w-full h-full flex flex-row">
+        <div id="blocklyDiv" class="flex-1 grow-[1.5]"></div>
+      </div>
+    </div>
+  </main>
+</Layout>

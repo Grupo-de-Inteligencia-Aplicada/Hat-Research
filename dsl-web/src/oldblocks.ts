@@ -326,7 +326,7 @@ export default function defineBlocks() {
       "output": "Boolean",
       "colour": 160,
       "tooltip": "Boolean constant",
-      "helpUrl": ""
+      "helpUrl": "",
     },
 
     // Constant Null Block
