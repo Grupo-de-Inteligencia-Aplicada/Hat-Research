@@ -34,6 +34,10 @@ pub fn make_router(runtime: Arc<HatRuntime>) -> Router {
             "/devices",
             get(routes::devices::get_devices),
         )
+        .route(
+            "/possible_events",
+            get(routes::events::get_possible_events),
+        )
         .layer(cors)
         .with_state(AppState { runtime })
 }
