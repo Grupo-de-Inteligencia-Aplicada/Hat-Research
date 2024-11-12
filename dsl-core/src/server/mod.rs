@@ -1,11 +1,13 @@
 use std::sync::Arc;
 
-use axum::{routing::post, Router};
+use axum::{routing::{get, post}, Router};
 use tower_http::cors::{Any, CorsLayer};
 
 use crate::runtime::HatRuntime;
 
 mod transpiler;
+mod routes;
+mod error;
 
 #[derive(Clone)]
 struct AppState {
@@ -22,6 +24,10 @@ pub fn make_router(runtime: Arc<HatRuntime>) -> Router {
         .route(
             "/transpile/into_hat",
             post(transpiler::transpile_workspace_to_hat),
+        )
+        .route(
+            "/devices",
+            get(routes::devices::get_devices),
         )
         .layer(cors)
         .with_state(AppState { runtime })

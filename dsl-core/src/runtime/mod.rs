@@ -163,6 +163,11 @@ impl HatRuntime {
         lock.get(integration).map(|(i, _)| Arc::clone(i))
     }
 
+    pub async fn get_integrations(&self) -> Vec<Arc<dyn Integration>> {
+        let lock = self.integrations.read().await;
+        lock.values().map(|v| Arc::clone(&v.0)).collect()
+    }
+
     /// This function parses a full device ID with the format `{INTEGRATION_ID}@{DEVICE_ID}` or
     /// just `{DEVICE}`.
     /// Returns a tuple in the format: `(integration (if present), device_id)`
