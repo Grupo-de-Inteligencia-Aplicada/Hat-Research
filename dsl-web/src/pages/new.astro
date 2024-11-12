@@ -7,9 +7,12 @@ import Layout from "../layouts/Layout.astro";
   import {EditorView, basicSetup} from "codemirror";
   import { setupBlockly } from '../blocks/index';
   import generateToolbox from '../blocks/toolbox';
+  import { HatApi } from '../services/api';
 
-  function setup() {
-    const workspace = setupBlockly();
+  async function setup() {
+    const hatApi = new HatApi("http://localhost:5000");
+    const devices = await hatApi.listDevices();
+    const workspace = setupBlockly(devices);
         
     function getWorkspaceState() {
       const dom = Blockly.Xml.workspaceToDom(workspace);
@@ -17,7 +20,6 @@ import Layout from "../layouts/Layout.astro";
       return xml;
     }
 
-     
     function setWorkspaceState(state) {
       const dom = Blockly.Xml.textToDom(state);
       Blockly.Xml.domToWorkspace(dom, workspace);

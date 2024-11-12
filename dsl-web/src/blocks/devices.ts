@@ -1,9 +1,5 @@
 import * as Blockly from 'blockly';
-
-export interface Device {
-  id: string;
-  name: string;
-};
+import type { Device } from '../services/api';
 
 export default function setupDeviceBlocks(devices: Device[]) {
 

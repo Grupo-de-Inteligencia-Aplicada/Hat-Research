@@ -2,12 +2,12 @@ import * as Blockly from "blockly";
 import AutomationBlock from './automation';
 import setupEventBlocks, { type RuntimeEvent } from './events';
 import generateToolbox from "./toolbox";
-import type { Device } from "./devices";
 import setupDeviceBlocks from "./devices";
 import setupActionBlocks from './actions';
 import setupConditionBlocks from "./conditions";
+import type { Device } from "../services/api";
 
-export function setupBlockly() {
+export function setupBlockly(devices: Device[]) {
   const eventList: RuntimeEvent[] = [
     {
       name: "dummy",
@@ -18,24 +18,10 @@ export function setupBlockly() {
       label: "Door opened"
     },
   ];
-  const deviceList: Device[] = [
-    {
-      id: "HassIntegration0@light.office_light",
-      name: "Office Light"
-    },
-    {
-      id: "HassIntegration0@light.desk_light",
-      name: "Desk Light"
-    },
-    {
-      id: "HassIntegration0@binary_sensor.door_sensor",
-      name: "Office Door Sensor"
-    },
-  ];
 
-  const toolbox = generateToolbox(eventList, deviceList);
+  const toolbox = generateToolbox(eventList, devices);
   setupEventBlocks(eventList);
-  setupDeviceBlocks(deviceList);
+  setupDeviceBlocks(devices);
   setupActionBlocks();
   setupConditionBlocks();
 
