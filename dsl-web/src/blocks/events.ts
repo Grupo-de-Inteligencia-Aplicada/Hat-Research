@@ -1,16 +1,12 @@
 import * as Blockly from "blockly";
-
-export interface RuntimeEvent {
-  name: string;
-  label: string;
-};
+import type { RuntimeEvent } from "../services/api";
 
 export default function defineEventBlocks(events: RuntimeEvent[]) {
   Blockly.defineBlocksWithJsonArray(events.map(e => ({
-    "type": "event_" + e.name,
+    "type": "event_" + e.event,
     "tooltip": "",
     "helpUrl": "",
-    "message0": e.label + " %1",
+    "message0": e.description + " %1",
     "args0": [
       {
         "type": "input_dummy",

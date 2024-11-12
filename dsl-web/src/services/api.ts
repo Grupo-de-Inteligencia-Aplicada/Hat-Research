@@ -19,6 +19,11 @@ export interface Device {
   state: string | null;
 }
 
+export interface RuntimeEvent {
+  event: string;
+  description: string;
+};
+
 export class HatApi {
   private baseUrl: string;
 
@@ -75,6 +80,11 @@ export class HatApi {
   async listDevices(): Promise<Device[]> {
     const devices = await this.get("/devices");
     return devices;
+  }
+
+  async listPossibleEvents(): Promise<RuntimeEvent[]> {
+    const events = await this.get("/possible_events");
+    return events;
   }
 }
 

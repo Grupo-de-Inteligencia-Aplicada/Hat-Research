@@ -1,5 +1,4 @@
-import type { Device } from "./devices";
-import type { RuntimeEvent } from "./events";
+import type { Device, RuntimeEvent } from "../services/api";
 
 export default function generateToolbox(events: RuntimeEvent[], devices: Device[]) {
   return {
@@ -21,7 +20,7 @@ export default function generateToolbox(events: RuntimeEvent[], devices: Device[
         "colour": 70,
         "contents": events.map(e => ({
           "kind": "block",
-          "type": "event_" + e.name
+          "type": "event_" + e.event
         }))
       },
       {
