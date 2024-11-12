@@ -1,5 +1,24 @@
 import * as Blockly from 'blockly';
-import type { Device } from '../services/api';
+import type { Device, DeviceType } from '../services/api';
+
+function getIconFor(typ: DeviceType): string {
+  switch (typ) {
+    case 'Dummy':
+      return "";
+    case 'DoorSensor':
+      return "🚪";
+    case 'Light':
+      return "💡";
+    case 'Sensor':
+      return "📟";
+    case 'PowerOutlet':
+      return "🔌";
+    case 'MotionSensor':
+      return "📡";
+    case 'Unknown':
+      return "";
+  }
+}
 
 export default function setupDeviceBlocks(devices: Device[]) {
 
@@ -7,7 +26,7 @@ export default function setupDeviceBlocks(devices: Device[]) {
     "type": "device_" + d.id,
     "tooltip": "",
     "helpUrl": "",
-    "message0": d.name + " %1",
+    "message0": getIconFor(d.typ) + " " + d.name + " %1",
     "args0": [
       {
         "type": "input_dummy",

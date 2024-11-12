@@ -11,6 +11,16 @@ export const DeviceTypes = [
 
 export type DeviceType = typeof DeviceTypes[number];
 
+export const deviceTypePriorities: Record<DeviceType, number> = {
+  DoorSensor: 3,
+  PowerOutlet: 3,
+  MotionSensor: 3,
+  Light: 2,
+  Sensor: 1,
+  Dummy: 0,
+  Unknown: 0
+};
+
 export interface Device {
   integration: string;
   id: string;

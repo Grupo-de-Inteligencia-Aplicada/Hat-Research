@@ -1,6 +1,8 @@
-import type { Device, RuntimeEvent } from "../services/api";
+import { deviceTypePriorities, type Device, type RuntimeEvent } from "../services/api";
 
 export default function generateToolbox(events: RuntimeEvent[], devices: Device[]) {
+  devices.sort((a, b) => (deviceTypePriorities[b.typ] - deviceTypePriorities[a.typ]));
+
   return {
     "kind": "categoryToolbox",
     "contents": [
