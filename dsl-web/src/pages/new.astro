@@ -8,6 +8,7 @@ import Layout from "../layouts/Layout.astro";
   import { setupBlockly } from '../blocks/index';
   import generateToolbox from '../blocks/toolbox';
   import { HatApi } from '../services/api';
+  import { javascriptGenerator } from 'blockly/javascript';
 
   async function setup() {
     const hatApi = new HatApi("http://localhost:5000");
@@ -37,12 +38,14 @@ import Layout from "../layouts/Layout.astro";
       if (workspace.isDragging()) return; // Don't update while changes are happening.
       if (!supportedEvents.has(event.type)) return;
 
-      const state = getWorkspaceState();
-      console.log(String(state));
-      await fetch("http://localhost:5000/transpile/into_hat", {
-        method: "POST",
-        body: String(state),
-      });
+      //const state = getWorkspaceState();
+      //console.log(String(state));
+      //await fetch("http://localhost:5000/transpile/into_hat", {
+      //  method: "POST",
+      //  body: String(state),
+      //});
+      const code = javascriptGenerator.workspaceToCode(workspace);
+      console.log(code);
     }
 
     workspace.addChangeListener(updateCode);

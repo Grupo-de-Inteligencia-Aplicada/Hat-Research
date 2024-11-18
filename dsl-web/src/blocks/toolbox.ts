@@ -42,6 +42,7 @@ export default function generateToolbox(events: RuntimeEvent[], devices: Device[
         "colour": 120,
         "contents": [
           "condition_and",
+          "condition_or",
           "condition_event_was_from_device"
         ].map(a => ({
           "kind": "block",

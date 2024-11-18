@@ -1,4 +1,5 @@
 import * as Blockly from 'blockly';
+import { javascriptGenerator, Order } from 'blockly/javascript';
 import type { Device, DeviceType } from '../services/api';
 
 function getIconFor(typ: DeviceType): string {
@@ -36,5 +37,11 @@ export default function setupDeviceBlocks(devices: Device[]) {
     "output": "device_block",
     "colour": 190
   })))
+
+  devices.forEach(d => {
+    javascriptGenerator.forBlock['device_' + d.id] = (block, generator) => {
+      return [d.id, Order.ATOMIC];
+    };
+  });
 
 }

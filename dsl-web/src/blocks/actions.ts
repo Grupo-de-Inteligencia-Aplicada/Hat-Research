@@ -1,4 +1,5 @@
 import * as Blockly from 'blockly';
+import {javascriptGenerator, Order} from 'blockly/javascript';
 
 export default function setupActionBlocks() {
   Blockly.defineBlocksWithJsonArray([
@@ -35,4 +36,13 @@ export default function setupActionBlocks() {
       "colour": 10
     },
   ]);
+
+  javascriptGenerator.forBlock['action_turn_on_device'] = (block, generator) => {
+    const device = generator.valueToCode(block, 'NAME', Order.ATOMIC);
+    return `run turn_on_device("${device}")\n`;
+  };
+  javascriptGenerator.forBlock['action_turn_off_device'] = (block, generator) => {
+    const device = generator.valueToCode(block, 'NAME', Order.ATOMIC);
+    return `run turn_off_device("${device}")\n`;
+  };
 }

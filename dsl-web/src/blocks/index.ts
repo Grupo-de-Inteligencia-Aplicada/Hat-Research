@@ -1,11 +1,11 @@
 import * as Blockly from "blockly";
-import AutomationBlock from './automation';
 import setupEventBlocks from './events';
 import generateToolbox from "./toolbox";
 import setupDeviceBlocks from "./devices";
 import setupActionBlocks from './actions';
 import setupConditionBlocks from "./conditions";
 import type { Device, RuntimeEvent } from "../services/api";
+import setupAutomationBlock from "./automation";
 
 export function setupBlockly(devices: Device[], possibleEvents: RuntimeEvent[]) {
   const toolbox = generateToolbox(possibleEvents, devices);
@@ -13,10 +13,7 @@ export function setupBlockly(devices: Device[], possibleEvents: RuntimeEvent[]) 
   setupDeviceBlocks(devices);
   setupActionBlocks();
   setupConditionBlocks();
-
-  Blockly.defineBlocksWithJsonArray([
-    AutomationBlock
-  ]);
+  setupAutomationBlock();
 
   let options = {
     toolbox,
