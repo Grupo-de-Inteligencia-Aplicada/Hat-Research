@@ -10,6 +10,8 @@ import Layout from "../layouts/Layout.astro";
   import { HatApi, type ApiError } from "../services/api";
   import { javascriptGenerator } from "blockly/javascript";
 
+  const lastState = window.localStorage.getItem('workspace');
+
   async function setup() {
     const hatApi = new HatApi("http://localhost:5000");
     const devices = await hatApi.listDevices();
@@ -23,9 +25,11 @@ import Layout from "../layouts/Layout.astro";
     }
 
     function setWorkspaceState(state) {
-      const dom = Blockly.Xml.textToDom(state);
+      const dom = Blockly.utils.xml.textToDom(state);
       Blockly.Xml.domToWorkspace(dom, workspace);
     }
+
+    setWorkspaceState(lastState);
 
     const supportedEvents = new Set([
       Blockly.Events.BLOCK_CHANGE,
@@ -39,7 +43,11 @@ import Layout from "../layouts/Layout.astro";
       if (!supportedEvents.has(event.type)) return;
 
       const code = javascriptGenerator.workspaceToCode(workspace);
+      const state = getWorkspaceState();
       console.log(code);
+
+      window.localStorage.setItem('workspace', state);
+
       try {
         const result = await hatApi.updateSource(code);
         setCodeStatus({ updated: true });
