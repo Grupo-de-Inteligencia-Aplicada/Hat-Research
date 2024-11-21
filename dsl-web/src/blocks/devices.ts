@@ -21,10 +21,14 @@ function getIconFor(typ: DeviceType): string {
   }
 }
 
+export function getBlockTypeFor(device: Device) {
+  return `device_${device.integration}@${device.id}`
+}
+
 export default function setupDeviceBlocks(devices: Device[]) {
 
   Blockly.defineBlocksWithJsonArray(devices.map(d => ({
-    "type": "device_" + d.id,
+    "type": getBlockTypeFor(d),
     "tooltip": "",
     "helpUrl": "",
     "message0": getIconFor(d.typ) + " " + d.name + " %1",
@@ -39,8 +43,8 @@ export default function setupDeviceBlocks(devices: Device[]) {
   })))
 
   devices.forEach(d => {
-    javascriptGenerator.forBlock['device_' + d.id] = (block, generator) => {
-      return [d.id, Order.ATOMIC];
+    javascriptGenerator.forBlock[getBlockTypeFor(d)] = (block, generator) => {
+      return [`${d.integration}@${d.id}`, Order.ATOMIC];
     };
   });
 

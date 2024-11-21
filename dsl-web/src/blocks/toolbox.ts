@@ -1,5 +1,6 @@
 import { deviceTypePriorities, type Device, type RuntimeEvent } from "../services/api";
 import { binaryConditionBlocks } from './conditions';
+import { getBlockTypeFor } from "./devices";
 
 export default function generateToolbox(events: RuntimeEvent[], devices: Device[]) {
   devices.sort((a, b) => (deviceTypePriorities[b.typ] - deviceTypePriorities[a.typ]));
@@ -33,7 +34,7 @@ export default function generateToolbox(events: RuntimeEvent[], devices: Device[
         "colour": 190,
         "contents": devices.map(d => ({
           "kind": "block",
-          "type": "device_" + d.id,
+          "type": getBlockTypeFor(d),
         }))
       },
       {
