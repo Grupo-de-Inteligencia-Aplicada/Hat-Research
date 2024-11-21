@@ -34,6 +34,13 @@ export interface RuntimeEvent {
   description: string;
 };
 
+export interface ApiError {
+  code: number,
+  errors: {
+    description: string
+  }[]
+}
+
 export class HatApi {
   private baseUrl: string;
 
@@ -54,21 +61,34 @@ export class HatApi {
         'Content-Type': 'application/json',
         ...headers
       },
-      body: body ? JSON.stringify(body) : undefined
+      body,
     };
 
+    let response;
     try {
-      const response = await fetch(url, options);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('API request error:', error);
+      response = await fetch(url, options);
+    } catch (e) {
+      console.error(`Failed to fetch ${endpoint}:`, e)
+      let error: ApiError = {
+        code: 408,
+        errors: [{ description: String(e) }]
+      };
       throw error;
     }
+
+    if (!response.ok) {
+      let error: ApiError = {
+        code: response.status,
+        errors: [{ description: 'Request failed' }]
+      };
+      try {
+        const json = await response.json();
+        error.errors = json.errors;
+      } catch (_) { }
+      throw error;
+    }
+
+    return await response.json();
   }
 
   async get(endpoint: string, headers: Record<string, string> = {}): Promise<any> {
@@ -95,6 +115,10 @@ export class HatApi {
   async listPossibleEvents(): Promise<RuntimeEvent[]> {
     const events = await this.get("/possible_events");
     return events;
+  }
+
+  async updateSource(source: string): Promise<void> {
+    return this.post('/update_code', source);
   }
 }
 
