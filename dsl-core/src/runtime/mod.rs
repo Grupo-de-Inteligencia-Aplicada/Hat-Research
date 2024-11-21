@@ -153,6 +153,17 @@ impl HatRuntime {
         Ok(())
     }
 
+    pub fn replace_source(&self, filename: String, code: &str) -> std::result::Result<(), RuntimeError> {
+        let automations = parser::parse(filename, code)?;
+        let mut lock = self.automations.lock().unwrap();
+        lock.clear();
+        for automation in automations {
+            let name = automation.name.clone();
+            lock.insert(name, automation);
+        }
+        Ok(())
+    }
+
     pub fn register_function(&self, fun: Function) {
         let mut lock = self.functions.write().unwrap();
         lock.insert(fun.name.clone(), Arc::new(fun));

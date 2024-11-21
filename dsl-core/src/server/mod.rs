@@ -38,6 +38,10 @@ pub fn make_router(runtime: Arc<HatRuntime>) -> Router {
             "/possible_events",
             get(routes::events::get_possible_events),
         )
+        .route(
+            "/update_code",
+            post(routes::update_code::update_code),
+        )
         .layer(cors)
         .with_state(AppState { runtime })
 }
