@@ -29,7 +29,7 @@ import Layout from "../layouts/Layout.astro";
       Blockly.Xml.domToWorkspace(dom, workspace);
     }
 
-    setWorkspaceState(lastState);
+    if (lastState) setWorkspaceState(lastState);
 
     const supportedEvents = new Set([
       Blockly.Events.BLOCK_CHANGE,
