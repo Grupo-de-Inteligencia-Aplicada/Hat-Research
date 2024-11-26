@@ -9,6 +9,7 @@ import Layout from "../layouts/Layout.astro";
   import generateToolbox from "../blocks/toolbox";
   import { HatApi, type ApiError } from "../services/api";
   import { javascriptGenerator } from "blockly/javascript";
+  import '@blockly/field-colour-hsv-sliders';
 
   const lastState = window.localStorage.getItem('workspace');
 

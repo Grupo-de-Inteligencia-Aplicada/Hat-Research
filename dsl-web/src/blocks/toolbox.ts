@@ -59,6 +59,7 @@ export default function generateToolbox(events: RuntimeEvent[], devices: Device[
         "contents": [
           "action_turn_on_device",
           "action_turn_off_device",
+          "action_set_light_color",
         ].map(a => ({
           "kind": "block",
           "type": a
