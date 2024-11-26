@@ -56,6 +56,27 @@ export default function setupActionBlocks() {
       "previousStatement": "action_block",
       "nextStatement": "action_block",
       "colour": 15
+    },
+    {
+      "type": "action_set_light_brightness",
+      "tooltip": "",
+      "helpUrl": "",
+      "message0": "Set light %1 brightness to %2",
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "LIGHT_DEVICE",
+          "check": "device_Light"
+        },
+        {
+          "type": "field_slider",
+          "name": "BRIGHTNESS",
+          "value": 50,
+        },
+      ],
+      "previousStatement": "action_block",
+      "nextStatement": "action_block",
+      "colour": 15
     }
 
   ]);
@@ -72,5 +93,10 @@ export default function setupActionBlocks() {
     const device = generator.valueToCode(block, 'LIGHT_DEVICE', Order.ATOMIC);
     const color = block.getFieldValue('COLOR');
     return `run set_light_color("${device}", "${color}")\n`;
+  };
+  javascriptGenerator.forBlock['action_set_light_brightness'] = (block, generator) => {
+    const device = generator.valueToCode(block, 'LIGHT_DEVICE', Order.ATOMIC);
+    const bri = block.getFieldValue('BRIGHTNESS');
+    return `run set_light_brightness("${device}", ${bri})\n`;
   };
 }
