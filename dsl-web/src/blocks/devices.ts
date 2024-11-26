@@ -1,6 +1,8 @@
 import * as Blockly from 'blockly';
 import { javascriptGenerator, Order } from 'blockly/javascript';
-import type { Device, DeviceType } from '../services/api';
+import { DeviceTypes, type Device, type DeviceType } from '../services/api';
+
+export const DeviceBlockTypes = DeviceTypes.map(typ => `device_${typ}`);
 
 function getIconFor(typ: DeviceType): string {
   switch (typ) {
@@ -38,7 +40,7 @@ export default function setupDeviceBlocks(devices: Device[]) {
         "name": ""
       }
     ],
-    "output": "device_block",
+    "output": "device_" + d.typ,
     "colour": 190
   })))
 

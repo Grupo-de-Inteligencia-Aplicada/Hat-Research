@@ -1,5 +1,6 @@
 import * as Blockly from 'blockly';
 import { javascriptGenerator, Order } from 'blockly/javascript';
+import { DeviceBlockTypes } from './devices';
 
 export const binaryConditionBlocks = [
   {
@@ -60,12 +61,36 @@ export default function setupConditionBlocks() {
         {
           "type": "input_value",
           "name": "NAME",
-          "check": "device_block"
+          "check": DeviceBlockTypes,
         }
       ],
       "output": "Boolean",
       "colour": 225
     },
+    {
+      "type": "event_time_between",
+      "tooltip": "",
+      "helpUrl": "",
+      "message0": "Event took place between %1 and %2 %3",
+      "args0": [
+        {
+          "type": "field_input",
+          "name": "START_TIME",
+          "text": "7:00"
+        },
+        {
+          "type": "field_input",
+          "name": "END_TIME",
+          "text": "8:00"
+        },
+        {
+          "type": "input_dummy",
+          "name": ""
+        }
+      ],
+      "output": "Boolean",
+      "colour": 225
+    }
   ]);
 
   javascriptGenerator.forBlock['condition_event_was_from_device'] = (block, generator) => {
@@ -73,4 +98,14 @@ export default function setupConditionBlocks() {
 
     return ['get_device() == "' + device + '"', Order.ATOMIC];
   };
+
+  javascriptGenerator.forBlock['event_time_between'] = function (block) {
+    const start_time = block.getFieldValue('START_TIME');
+    const end_time = block.getFieldValue('END_TIME');
+
+    return [
+      `event_time() >= time("${start_time}") and event_time() <= time("${end_time}")`,
+      Order.ATOMIC
+    ];
+  }
 }

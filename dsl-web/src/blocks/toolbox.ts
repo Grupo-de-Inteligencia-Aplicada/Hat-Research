@@ -43,7 +43,8 @@ export default function generateToolbox(events: RuntimeEvent[], devices: Device[
         "name": "Condições",
         "colour": 120,
         "contents": [
-          "condition_event_was_from_device"
+          "condition_event_was_from_device",
+          "event_time_between"
         ].concat(binaryConditionBlocks.map(blockDef => `condition_${blockDef.type}`))
           .map(a => ({
             "kind": "block",

@@ -1,5 +1,6 @@
 import * as Blockly from 'blockly';
 import {javascriptGenerator, Order} from 'blockly/javascript';
+import { DeviceBlockTypes } from './devices';
 
 export default function setupActionBlocks() {
   Blockly.defineBlocksWithJsonArray([
@@ -12,7 +13,7 @@ export default function setupActionBlocks() {
         {
           "type": "input_value",
           "name": "NAME",
-          "check": "device_block"
+          "check": DeviceBlockTypes,
         }
       ],
       "previousStatement": "action_block",
@@ -28,7 +29,7 @@ export default function setupActionBlocks() {
         {
           "type": "input_value",
           "name": "NAME",
-          "check": "device_block"
+          "check": DeviceBlockTypes,
         }
       ],
       "previousStatement": "action_block",
