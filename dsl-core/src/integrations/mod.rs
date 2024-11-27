@@ -13,6 +13,8 @@ pub trait Integration: Send + Sync {
     async fn get_device(&self, id: &str) -> Result<Option<Device>>;
     async fn turn_on_device(&self, device_id: &str) -> Result<()>;
     async fn turn_off_device(&self, device_id: &str) -> Result<()>;
+    async fn set_light_color_rgb(&self, device_id: &str, color: [u8; 3]) -> Result<()>;
+    async fn set_light_brightness(&self, device_id: &str, brightness: u8) -> Result<()>;
     fn subscribe(&self) -> mpsc::UnboundedReceiver<Event>;
     fn get_id(&self) -> &str;
 }

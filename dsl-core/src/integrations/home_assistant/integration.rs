@@ -9,7 +9,7 @@ use chrono::{DateTime, TimeZone, Utc};
 use reqwest::header::HeaderMap;
 use reqwest::StatusCode;
 use serde::Deserialize;
-use serde_json::json;
+use serde_json::{json, Value};
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
@@ -97,9 +97,9 @@ impl HassIntegration {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 struct HassEntityState {
-    attributes: HashMap<String, serde_json::Value>,
+    attributes: serde_json::Map<String, serde_json::Value>,
     entity_id: String,
     state: serde_json::Value,
 }
@@ -151,6 +151,7 @@ impl Integration for HassIntegration {
                             .expect("states that are not a string are not yet implemented")
                             .to_owned(),
                     ),
+                    attributes: entity.attributes,
                 })
             })
             .collect();
@@ -192,6 +193,7 @@ impl Integration for HassIntegration {
                     .expect("states that are not a string are not yet implemented")
                     .to_owned(),
             ),
+            attributes: res.attributes,
         };
 
         Ok(Some(device))
@@ -301,6 +303,56 @@ impl Integration for HassIntegration {
         rx
     }
 
+    async fn set_light_color_rgb(&self, device_id: &str, color: [u8; 3]) -> Result<()> {
+        let splitted = device_id.split_once(".");
+        if let Some((domain, _id)) = splitted {
+            ensure!(domain == "light", "device is not a light");
+            let res = self
+                .http_client
+                .post(self.get_endpoint_from_api_route("/api/services/light/turn_on"))
+                .json(&json!({
+                    "entity_id": device_id,
+                    "rgb_color": color,
+                }))
+                .send()
+                .await?;
+            ensure!(
+                res.status() == StatusCode::OK,
+                "turn on request failed: {}, {}",
+                res.status(),
+                res.text().await?
+            );
+            Ok(())
+        } else {
+            bail!("device id does not contain home assistant domain")
+        }
+    }
+
+    async fn set_light_brightness(&self, device_id: &str, brightness: u8) -> Result<()> {
+        let splitted = device_id.split_once(".");
+        if let Some((domain, _id)) = splitted {
+            ensure!(domain == "light", "device is not a light");
+            let res = self
+                .http_client
+                .post(self.get_endpoint_from_api_route("/api/services/light/turn_on"))
+                .json(&json!({
+                    "entity_id": device_id,
+                    "brightness": brightness,
+                }))
+                .send()
+                .await?;
+            ensure!(
+                res.status() == StatusCode::OK,
+                "turn on request failed: {}, {}",
+                res.status(),
+                res.text().await?
+            );
+            Ok(())
+        } else {
+            bail!("device id does not contain home assistant domain")
+        }
+    }
+
     fn get_id(&self) -> &str {
         &self.id
     }
@@ -318,7 +370,10 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
             let entity_type = entity_id.split(".").next()?;
             let new_state = new_state_data.get("state")?;
             let old_state = old_state_data.get("state")?;
-            let attribs = new_state_data.get("attributes")?;
+            let attribs = match new_state_data.get("attributes").cloned() {
+                Some(Value::Object(map)) => map,
+                _ => Default::default(),
+            };
             let name = attribs
                 .get("friendly_name")
                 .and_then(|v| v.as_str())
@@ -326,7 +381,6 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
 
             match entity_type {
                 "binary_sensor" => {
-                    let attribs = new_state_data.get("attributes")?;
                     let device_class = attribs.get("device_class").and_then(|v| v.as_str());
                     if device_class == Some("door") {
                         let device = Device {
@@ -335,6 +389,7 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
                             name,
                             state: Some(new_state.to_string()),
                             typ: DeviceType::DoorSensor,
+                            attributes: attribs,
                         };
                         if old_state == "off" && new_state == "on" {
                             return Some(RuntimeEvent {
@@ -359,6 +414,7 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
                             name,
                             state: Some(new_state.to_string()),
                             typ: DeviceType::MotionSensor,
+                            attributes: attribs,
                         };
                         if old_state == "off" && new_state == "on" {
                             return Some(RuntimeEvent {
@@ -385,6 +441,7 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
                         name,
                         state: Some(new_state.to_string()),
                         typ: DeviceType::Light,
+                        attributes: attribs,
                     };
                     if old_state == "off" && new_state == "on" {
                         return Some(RuntimeEvent {
@@ -418,12 +475,12 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
                             name,
                             state: Some(new_state.to_string()),
                             typ: DeviceType::Sensor,
+                            attributes: attribs,
                         },
                         parameters,
                     });
                 }
                 "switch" => {
-                    let attribs = new_state_data.get("attributes")?;
                     let device_class = attribs.get("device_class").and_then(|v| v.as_str());
                     if device_class == Some("outlet") {
                         let device = Device {
@@ -432,6 +489,7 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
                             name,
                             state: Some(new_state.to_string()),
                             typ: DeviceType::PowerOutlet,
+                            attributes: attribs,
                         };
                         if old_state == "off" && new_state == "on" {
                             return Some(RuntimeEvent {

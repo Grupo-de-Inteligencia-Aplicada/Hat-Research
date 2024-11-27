@@ -18,6 +18,7 @@ pub struct Device {
     pub name: Option<String>,
     pub typ: DeviceType,
     pub state: Option<String>,
+    pub attributes: serde_json::Map<String, serde_json::Value>,
 }
 
 impl Device {

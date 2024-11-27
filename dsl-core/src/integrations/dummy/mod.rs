@@ -40,6 +40,7 @@ impl Integration for DummyIntegration {
             name: Some("Dummy Device".into()),
             state: Some("dummy-state".into()),
             typ: DeviceType::Dummy,
+            attributes: Default::default(),
         }]
         .into())
     }
@@ -52,6 +53,7 @@ impl Integration for DummyIntegration {
                 typ: DeviceType::Dummy,
                 state: Some("dummy-state".into()),
                 name: Some("Dummy Device".into()),
+                attributes: Default::default(),
             }))
         } else {
             Ok(None)
@@ -82,6 +84,7 @@ impl Integration for DummyIntegration {
                         name: Some("Dummy Device".into()),
                         state: Some("dummy-state".into()),
                         typ: DeviceType::Dummy,
+                        attributes: Default::default(),
                     },
                     parameters: Default::default(),
                 });
@@ -94,6 +97,14 @@ impl Integration for DummyIntegration {
         });
 
         rx
+    }
+
+    async fn set_light_color_rgb(&self, _device_id: &str, _color: [u8; 3]) -> Result<()> {
+        unimplemented!()
+    }
+
+    async fn set_light_brightness(&self, _device_id: &str, _brightness: u8) -> Result<()> {
+        unimplemented!()
     }
 
     fn get_id(&self) -> &str {
