@@ -61,7 +61,7 @@ export default function setupActionBlocks() {
       "type": "action_set_light_brightness",
       "tooltip": "",
       "helpUrl": "",
-      "message0": "Set light %1 brightness to %2",
+      "message0": "Set light %1 brightness to %2%",
       "args0": [
         {
           "type": "input_value",
@@ -72,6 +72,9 @@ export default function setupActionBlocks() {
           "type": "field_slider",
           "name": "BRIGHTNESS",
           "value": 50,
+          "min": 0,
+          "max": 100,
+          "precision": 0.01
         },
       ],
       "previousStatement": "action_block",
@@ -96,7 +99,8 @@ export default function setupActionBlocks() {
   };
   javascriptGenerator.forBlock['action_set_light_brightness'] = (block, generator) => {
     const device = generator.valueToCode(block, 'LIGHT_DEVICE', Order.ATOMIC);
-    const bri = block.getFieldValue('BRIGHTNESS');
+    const bri_percent = block.getFieldValue('BRIGHTNESS');
+    const bri = (bri_percent / 100) * 255;
     return `run set_light_brightness("${device}", ${bri})\n`;
   };
 }
