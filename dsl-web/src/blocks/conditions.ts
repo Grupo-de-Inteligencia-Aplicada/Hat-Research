@@ -47,7 +47,7 @@ export default function setupConditionBlocks() {
     javascriptGenerator.forBlock[blockType] = (block, generator) => {
       const firstCondition = generator.valueToCode(block, 'CONDITION1', Order.ATOMIC);
       const secondCondition = generator.valueToCode(block, 'CONDITION2', Order.ATOMIC);
-      return [`${firstCondition} ${blockDefinition.code} ${secondCondition}`, Order.ATOMIC];
+      return [`(${firstCondition}) ${blockDefinition.code} (${secondCondition})`, Order.ATOMIC];
     };
   });
 
@@ -96,7 +96,7 @@ export default function setupConditionBlocks() {
   javascriptGenerator.forBlock['condition_event_was_from_device'] = (block, generator) => {
     const device = generator.valueToCode(block, 'NAME', Order.ATOMIC);
 
-    return ['get_device() == "' + device + '"', Order.ATOMIC];
+    return ['(get_device() == "' + device + '")', Order.ATOMIC];
   };
 
   javascriptGenerator.forBlock['event_time_between'] = function (block) {
