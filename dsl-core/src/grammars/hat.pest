@@ -67,7 +67,8 @@ automation_action = {
 
 atom = {
     function |
-    const_atom
+    const_atom |
+    ( "(" ~ expr ~ ")" )
 }
 
 const_atom = _{
@@ -107,7 +108,6 @@ lesser = { "<" }
 lesser_eq = { "<=" }
 
 expr = { atom ~ (bin_op ~ atom)* }
-
 
 stmt = _{ event_declaration | automation_declaration }
 
