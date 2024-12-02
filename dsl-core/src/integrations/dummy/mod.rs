@@ -77,7 +77,7 @@ impl Integration for DummyIntegration {
             loop {
                 let result = tx.send(Event {
                     typ: EventType::Dummy,
-                    datetime: Utc::now(),
+                    datetime: Utc::now().into(),
                     device: Device {
                         integration: integration_name.to_string(),
                         id: "dummy-device-2707".into(),

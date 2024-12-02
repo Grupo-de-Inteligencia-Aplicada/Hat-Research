@@ -5,7 +5,7 @@ use crate::runtime::event::{Event as RuntimeEvent, EventType};
 use crate::{integrations::Integration, runtime::device::Device};
 use anyhow::{bail, ensure, Context, Result};
 use async_trait::async_trait;
-use chrono::{DateTime, TimeZone, Utc};
+use chrono::{DateTime, Local, TimeZone, Utc};
 use reqwest::header::HeaderMap;
 use reqwest::StatusCode;
 use serde::Deserialize;
@@ -360,7 +360,7 @@ impl Integration for HassIntegration {
 
 fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<RuntimeEvent> {
     let time = DateTime::parse_from_rfc3339(&hass_event.time_fired).ok()?;
-    let time = Utc.from_utc_datetime(&time.naive_utc());
+    let time: DateTime<Local> = Utc.from_utc_datetime(&time.naive_utc()).into();
     match &hass_event.data {
         EventData::StateChanged {
             entity_id,

@@ -1,5 +1,5 @@
 use crate::runtime::device::Device;
-use chrono::Utc;
+use chrono::{Local, Utc};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -67,7 +67,7 @@ impl EventType {
 #[derive(Debug, Clone)]
 pub struct Event {
     pub typ: EventType,
-    pub datetime: chrono::DateTime<Utc>,
+    pub datetime: chrono::DateTime<Local>,
     pub device: Device,
     pub parameters: HashMap<String, String>,
 }
