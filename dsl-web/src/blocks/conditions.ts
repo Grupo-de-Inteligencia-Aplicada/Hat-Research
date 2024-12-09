@@ -90,7 +90,37 @@ export default function setupConditionBlocks() {
       ],
       "output": "Boolean",
       "colour": 225
-    }
+    },
+    {
+      "type": "condition_device_is_on",
+      "tooltip": "",
+      "helpUrl": "",
+      "message0": "Device %1 is on",
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "NAME",
+          "check": DeviceBlockTypes,
+        }
+      ],
+      "output": "Boolean",
+      "colour": 225
+    },
+    {
+      "type": "condition_device_is_off",
+      "tooltip": "",
+      "helpUrl": "",
+      "message0": "Device %1 is off",
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "NAME",
+          "check": DeviceBlockTypes,
+        }
+      ],
+      "output": "Boolean",
+      "colour": 225
+    },
   ]);
 
   javascriptGenerator.forBlock['condition_event_was_from_device'] = (block, generator) => {
@@ -108,4 +138,16 @@ export default function setupConditionBlocks() {
       Order.ATOMIC
     ];
   }
+
+  javascriptGenerator.forBlock['condition_device_is_on'] = (block, generator) => {
+    const device = generator.valueToCode(block, 'NAME', Order.ATOMIC);
+
+    return ['(device_is_on("' + device + '")', Order.ATOMIC];
+  };
+
+  javascriptGenerator.forBlock['condition_device_is_off'] = (block, generator) => {
+    const device = generator.valueToCode(block, 'NAME', Order.ATOMIC);
+
+    return ['(device_is_off("' + device + '")', Order.ATOMIC];
+  };
 }
