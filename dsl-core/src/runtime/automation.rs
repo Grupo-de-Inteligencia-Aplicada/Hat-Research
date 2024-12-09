@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use super::event::Event;
 use crate::runtime::context::AutomationContext;
 use crate::runtime::parser::expression::Expression;
@@ -22,9 +24,9 @@ impl Automation {
         false
     }
 
-    pub fn trigger(&self, ctx: &mut AutomationContext) -> Result<()> {
+    pub async fn trigger(&self, ctx: Arc<AutomationContext>) -> Result<()> {
         for condition in &self.conditions {
-            let result = condition.evaluate(ctx).with_context(|| {
+            let result = condition.evaluate(Arc::clone(&ctx)).await.with_context(|| {
                 format!("failed to evaluate expression in condition {condition:?}")
             })?;
 
@@ -34,7 +36,8 @@ impl Automation {
         }
         for action in &self.actions {
             action
-                .evaluate(ctx)
+                .evaluate(Arc::clone(&ctx))
+                .await
                 .with_context(|| format!("action of automation {} failed", self.name))?;
         }
         Ok(())

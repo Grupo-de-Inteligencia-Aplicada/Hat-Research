@@ -43,7 +43,7 @@ pub enum RuntimeError {
 type IntegrationAndStopChannel = (Arc<dyn Integration>, oneshot::Sender<()>);
 
 pub struct HatRuntime {
-    automations: Mutex<HashMap<String, Automation>>,
+    automations: Mutex<HashMap<String, Arc<Automation>>>,
     integrations: RwLock<HashMap<String, IntegrationAndStopChannel>>,
     executor_channel: mpsc::UnboundedSender<ExecutorMessage>,
     executor_handle: tokio::sync::Mutex<Option<JoinHandle<()>>>,
@@ -67,21 +67,29 @@ impl HatRuntime {
         let runtime_clone = Arc::clone(&runtime);
         let handle = tokio::spawn(async move {
             while let Some(message) = rx.recv().await {
+                let rt = Arc::clone(&runtime_clone);
                 match message {
                     ExecutorMessage::Event(event) => {
-                        let automations = runtime_clone.automations.lock().unwrap();
+                        tokio::spawn(async move {
+                            let filtered_automations = {
+                                let automations = rt.automations.lock().unwrap();
+                                automations
+                                    .values()
+                                    .filter(|a| a.should_be_triggered_by(&event))
+                                    .map(|a| Arc::clone(a))
+                                    .collect::<Vec<_>>()
+                            };
 
-                        for (_name, automation) in automations.iter() {
-                            if automation.should_be_triggered_by(&event) {
-                                let mut context = AutomationContext {
+                            for automation in filtered_automations {
+                                let context = Arc::new(AutomationContext {
                                     event: event.clone(),
-                                    runtime: Arc::clone(&runtime_clone),
-                                };
-                                if let Err(e) = automation.trigger(&mut context) {
+                                    runtime: Arc::clone(&rt),
+                                });
+                                if let Err(e) = automation.trigger(context).await {
                                     error!("Failed to run automation {}: {e:?}", automation.name);
                                 }
                             }
-                        }
+                        });
                     }
                 }
             }
@@ -148,18 +156,22 @@ impl HatRuntime {
         let mut lock = self.automations.lock().unwrap();
         for automation in automations {
             let name = automation.name.clone();
-            lock.insert(name, automation);
+            lock.insert(name, Arc::new(automation));
         }
         Ok(())
     }
 
-    pub fn replace_source(&self, filename: String, code: &str) -> std::result::Result<(), RuntimeError> {
+    pub fn replace_source(
+        &self,
+        filename: String,
+        code: &str,
+    ) -> std::result::Result<(), RuntimeError> {
         let automations = parser::parse(filename, code)?;
         let mut lock = self.automations.lock().unwrap();
         lock.clear();
         for automation in automations {
             let name = automation.name.clone();
-            lock.insert(name, automation);
+            lock.insert(name, Arc::new(automation));
         }
         Ok(())
     }

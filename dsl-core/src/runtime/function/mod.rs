@@ -1,14 +1,14 @@
 pub mod defaults;
 
-use std::fmt::Display;
+use std::{fmt::Display, future::Future, pin::Pin, sync::Arc};
 
 use crate::runtime::context::AutomationContext;
 use crate::runtime::parser::expression::Expression;
 use crate::runtime::value::Value;
 
-use anyhow::{bail, Result};
+use anyhow::{bail, Context, Result};
 
-pub(crate) type NativeFunctionType = fn(&mut AutomationContext, Vec<Value>) -> Result<Value>;
+pub(crate) type NativeFunctionType = fn(Arc<AutomationContext>, Vec<Value>) -> Pin<Box<dyn Future<Output = Result<Value>> + Send>>;
 
 #[derive(Debug, Clone)]
 pub struct Function {
@@ -17,8 +17,8 @@ pub struct Function {
 }
 
 impl Function {
-    pub fn call(&self, ctx: &mut AutomationContext, args: Vec<Value>) -> Result<Value> {
-        (self.fun)(ctx, args)
+    pub async fn call(&self, ctx: Arc<AutomationContext>, args: Vec<Value>) -> Result<Value> {
+        (self.fun)(ctx, args).await
     }
 }
 
@@ -29,19 +29,34 @@ pub struct FunctionCall {
 }
 
 impl FunctionCall {
-    pub fn evaluate(&self, ctx: &mut AutomationContext) -> Result<Value> {
-        let arguments = self
-            .arguments
-            .iter()
-            .map(|expr| expr.evaluate(ctx))
-            .collect::<Result<Vec<Value>>>()?;
+    pub fn evaluate<'a>(
+        &'a self,
+        ctx: Arc<AutomationContext>,
+    ) -> Pin<Box<dyn Future<Output = Result<Value>> + Send + 'a>> {
+        Box::pin(async move {
+            let mut arguments = Vec::with_capacity(self.arguments.len());
 
-        let fun = ctx.get_function(&self.name);
+            for (idx, arg) in self.arguments.iter().enumerate() {
+                let result = arg
+                    .evaluate(Arc::clone(&ctx))
+                    .await
+                    .with_context(|| {
+                        format!(
+                            "failed to evaluate argument {} of function {}",
+                            idx + 1,
+                            self.name
+                        )
+                    })?;
+                arguments.push(result);
+            }
 
-        match fun {
-            Some(fun) => fun.call(ctx, arguments),
-            None => bail!("function {} not found!", self.name),
-        }
+            let fun = ctx.get_function(&self.name);
+
+            match fun {
+                Some(fun) => fun.call(ctx, arguments).await,
+                None => bail!("function {} not found!", self.name),
+            }
+        })
     }
 }
 

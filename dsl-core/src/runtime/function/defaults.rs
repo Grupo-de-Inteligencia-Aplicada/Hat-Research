@@ -12,7 +12,7 @@ lazy_static! {
         vec![
             Function {
                 name: "echo".to_owned(),
-                fun: |_ctx, args| {
+                fun: |_ctx, args| Box::pin(async move {
                     let args = args
                         .into_iter()
                         .map(|arg| arg.to_string())
@@ -20,27 +20,27 @@ lazy_static! {
                         .join(" ");
                     info!("[ECHO] {args}");
                     Ok(Value::Null)
-                },
+                }),
             },
             Function {
                 name: "get_device".to_owned(),
-                fun: |ctx, _args| Ok(ctx.event.device.full_id().into()),
+                fun: (|ctx, _args| Box::pin(async move { Ok(ctx.event.device.full_id().into()) })),
             },
             Function {
                 name: "get_integration".to_owned(),
-                fun: |ctx, _args| Ok(ctx.event.device.integration.clone().into()),
+                fun: (|ctx, _args| Box::pin(async move { Ok(ctx.event.device.integration.clone().into()) })),
             },
             Function {
                 name: "event_date".to_owned(),
-                fun: |ctx, _args| Ok(ctx.event.datetime.to_rfc3339().into()),
+                fun: (|ctx, _args| Box::pin(async move { Ok(ctx.event.datetime.to_rfc3339().into()) })),
             },
             Function {
                 name: "event_time".to_owned(),
-                fun: |ctx, _args| Ok(Time::from(ctx.event.datetime).into()),
+                fun: (|ctx, _args| Box::pin(async move { Ok(Time::from(ctx.event.datetime).into()) })),
             },
             Function {
                 name: "time".to_owned(),
-                fun: |_ctx, args| {
+                fun: (|_ctx, args| Box::pin(async move {
                     let arg = args.first();
                     match arg {
                         Some(arg) => {
@@ -71,11 +71,11 @@ lazy_static! {
                         }
                         None => Ok(Value::Time(Time::now())),
                     }
-                },
+                })),
             },
             Function {
                 name: "turn_off_device".to_owned(),
-                fun: |ctx, args| {
+                fun: (|ctx, args| Box::pin( async move {
                     let full_device_id = {
                         let first = args
                             .first()
@@ -110,11 +110,11 @@ lazy_static! {
                     });
 
                     Ok(Value::Null)
-                },
+                })),
             },
             Function {
                 name: "turn_on_device".to_owned(),
-                fun: |ctx, args| {
+                fun: (|ctx, args| Box::pin(async move {
                     let full_device_id = {
                         let first = args
                             .first()
@@ -149,11 +149,11 @@ lazy_static! {
                     });
 
                     Ok(Value::Null)
-                },
+                })),
             },
             Function {
                 name: "set_light_color".to_owned(),
-                fun: |ctx, args| {
+                fun: (|ctx, args| Box::pin(async move {
                     let full_device_id = {
                         let first = args
                             .first()
@@ -203,11 +203,11 @@ lazy_static! {
                     });
 
                     Ok(Value::Null)
-                },
+                })),
             },
             Function {
                 name: "set_light_brightness".to_owned(),
-                fun: |ctx, args| {
+                fun: (|ctx, args| Box::pin(async move {
                     let full_device_id = {
                         let first = args
                             .first()
@@ -251,7 +251,13 @@ lazy_static! {
                     });
 
                     Ok(Value::Null)
-                },
+                })),
+            },
+            Function {
+                name: "is_device_on".to_owned(),
+                fun: (|ctx, args| Box::pin(async move {
+                    todo!()
+                })),
             },
         ]
     };
