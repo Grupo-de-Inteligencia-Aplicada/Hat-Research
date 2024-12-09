@@ -76,7 +76,7 @@ impl HatRuntime {
                                 automations
                                     .values()
                                     .filter(|a| a.should_be_triggered_by(&event))
-                                    .map(|a| Arc::clone(a))
+                                    .map(Arc::clone)
                                     .collect::<Vec<_>>()
                             };
 

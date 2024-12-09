@@ -8,7 +8,8 @@ use crate::runtime::value::Value;
 
 use anyhow::{bail, Context, Result};
 
-pub(crate) type NativeFunctionType = fn(Arc<AutomationContext>, Vec<Value>) -> Pin<Box<dyn Future<Output = Result<Value>> + Send>>;
+pub(crate) type NativeFunctionType =
+    fn(Arc<AutomationContext>, Vec<Value>) -> Pin<Box<dyn Future<Output = Result<Value>> + Send>>;
 
 #[derive(Debug, Clone)]
 pub struct Function {
@@ -37,16 +38,13 @@ impl FunctionCall {
             let mut arguments = Vec::with_capacity(self.arguments.len());
 
             for (idx, arg) in self.arguments.iter().enumerate() {
-                let result = arg
-                    .evaluate(Arc::clone(&ctx))
-                    .await
-                    .with_context(|| {
-                        format!(
-                            "failed to evaluate argument {} of function {}",
-                            idx + 1,
-                            self.name
-                        )
-                    })?;
+                let result = arg.evaluate(Arc::clone(&ctx)).await.with_context(|| {
+                    format!(
+                        "failed to evaluate argument {} of function {}",
+                        idx + 1,
+                        self.name
+                    )
+                })?;
                 arguments.push(result);
             }
 

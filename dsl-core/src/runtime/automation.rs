@@ -26,9 +26,12 @@ impl Automation {
 
     pub async fn trigger(&self, ctx: Arc<AutomationContext>) -> Result<()> {
         for condition in &self.conditions {
-            let result = condition.evaluate(Arc::clone(&ctx)).await.with_context(|| {
-                format!("failed to evaluate expression in condition {condition:?}")
-            })?;
+            let result = condition
+                .evaluate(Arc::clone(&ctx))
+                .await
+                .with_context(|| {
+                    format!("failed to evaluate expression in condition {condition:?}")
+                })?;
 
             if !result.as_bool() {
                 return Ok(());

@@ -126,11 +126,12 @@ impl Integration for HassIntegration {
             .into_iter()
             .filter_map(|entity| {
                 let typ = Self::get_device_type_from_entity_id(
-                        &entity.entity_id,
-                        entity
-                            .attributes
-                            .get("device_class")
-                            .and_then(|c| c.as_str()));
+                    &entity.entity_id,
+                    entity
+                        .attributes
+                        .get("device_class")
+                        .and_then(|c| c.as_str()),
+                );
 
                 if matches!(typ, DeviceType::Unknown) {
                     return None;

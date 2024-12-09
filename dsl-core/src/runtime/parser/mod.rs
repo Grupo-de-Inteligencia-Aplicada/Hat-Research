@@ -212,9 +212,7 @@ fn parse_atom(rule: Pair<Rule>) -> Result<Expression> {
                         arguments: parameters,
                     }))
                 }
-                Rule::expr => {
-                    parse_expression(inner.into_inner())
-                },
+                Rule::expr => parse_expression(inner.into_inner()),
                 _ => bail!("unknown atom rule: {inner:?}"),
             }
         }

@@ -18,7 +18,9 @@ pub struct EventInfo<'a> {
 }
 
 #[axum::debug_handler]
-pub async fn get_possible_events(State(state): State<AppState>) -> ApiResult<Json<Vec<EventInfo<'static>>>> {
+pub async fn get_possible_events(
+    State(state): State<AppState>,
+) -> ApiResult<Json<Vec<EventInfo<'static>>>> {
     let integrations = state.runtime.get_integrations().await;
 
     let futures = integrations
@@ -39,7 +41,8 @@ pub async fn get_possible_events(State(state): State<AppState>) -> ApiResult<Jso
         devices.append(&mut result);
     }
 
-    let types = devices.into_iter()
+    let types = devices
+        .into_iter()
         .map(|d| d.typ)
         .collect::<HashSet<_>>()
         .into_iter()

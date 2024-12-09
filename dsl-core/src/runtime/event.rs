@@ -1,5 +1,5 @@
 use crate::runtime::device::Device;
-use chrono::{Local, Utc};
+use chrono::Local;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
