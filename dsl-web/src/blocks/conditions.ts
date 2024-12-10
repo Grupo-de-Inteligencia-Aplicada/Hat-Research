@@ -142,12 +142,12 @@ export default function setupConditionBlocks() {
   javascriptGenerator.forBlock['condition_device_is_on'] = (block, generator) => {
     const device = generator.valueToCode(block, 'NAME', Order.ATOMIC);
 
-    return ['device_is_on("' + device + '")', Order.ATOMIC];
+    return ['is_device_on("' + device + '")', Order.ATOMIC];
   };
 
   javascriptGenerator.forBlock['condition_device_is_off'] = (block, generator) => {
     const device = generator.valueToCode(block, 'NAME', Order.ATOMIC);
 
-    return ['device_is_off("' + device + '")', Order.ATOMIC];
+    return ['is_device_off("' + device + '")', Order.ATOMIC];
   };
 }
