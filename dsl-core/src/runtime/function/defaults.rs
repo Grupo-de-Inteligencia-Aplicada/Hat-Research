@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use std::time::Duration;
 
 use crate::runtime::value::Value;
 use crate::runtime::HatRuntime;
@@ -323,6 +324,21 @@ lazy_static! {
                             }
                         } else {
                             bail!("first argument must be the device id")
+                        }
+                    })
+                }),
+            },
+            Function {
+                name: "wait".to_owned(),
+                fun: (|_ctx, args| {
+                    Box::pin(async move {
+                        if let Some(Value::Number(seconds)) = args.first() {
+                            let millis = (seconds * 1000.0) as u64;
+                            let duration = Duration::from_millis(millis);
+                            tokio::time::sleep(duration).await;
+                            Ok(Value::Null)
+                        } else {
+                            bail!("first argument must be the seconds to wait")
                         }
                     })
                 }),
