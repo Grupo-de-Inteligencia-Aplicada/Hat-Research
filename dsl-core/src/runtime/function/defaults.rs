@@ -289,7 +289,43 @@ lazy_static! {
             },
             Function {
                 name: "is_device_on".to_owned(),
-                fun: (|ctx, args| Box::pin(async move { todo!() })),
+                fun: (|ctx, args| {
+                    Box::pin(async move {
+                        if let Some(Value::String(arg)) = args.first() {
+                            if let Some(dev) = ctx.runtime.get_device(arg).await? {
+                                if matches!(dev.state.as_deref(), Some("on")) {
+                                    Ok(Value::Boolean(true))
+                                } else {
+                                    Ok(Value::Boolean(false))
+                                }
+                            } else {
+                                bail!("device {arg} not found!");
+                            }
+                        } else {
+                            bail!("first argument must be the device id")
+                        }
+                    })
+                }),
+            },
+            Function {
+                name: "is_device_off".to_owned(),
+                fun: (|ctx, args| {
+                    Box::pin(async move {
+                        if let Some(Value::String(arg)) = args.first() {
+                            if let Some(dev) = ctx.runtime.get_device(arg).await? {
+                                if matches!(dev.state.as_deref(), Some("off")) {
+                                    Ok(Value::Boolean(true))
+                                } else {
+                                    Ok(Value::Boolean(false))
+                                }
+                            } else {
+                                bail!("device {arg} not found!");
+                            }
+                        } else {
+                            bail!("first argument must be the device id")
+                        }
+                    })
+                }),
             },
         ]
     };
