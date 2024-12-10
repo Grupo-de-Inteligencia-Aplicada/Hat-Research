@@ -9,10 +9,10 @@ import Layout from "../layouts/Layout.astro";
   import generateToolbox from "../blocks/toolbox";
   import { HatApi, type ApiError } from "../services/api";
   import { javascriptGenerator } from "blockly/javascript";
-  import '@blockly/field-colour-hsv-sliders';
-  import '@blockly/field-slider';
+  import "@blockly/field-colour-hsv-sliders";
+  import "@blockly/field-slider";
 
-  const lastState = window.localStorage.getItem('workspace');
+  const lastState = window.localStorage.getItem("workspace");
 
   async function setup() {
     const hatApi = new HatApi("http://localhost:5000");
@@ -48,7 +48,7 @@ import Layout from "../layouts/Layout.astro";
       const state = getWorkspaceState();
       console.log(code);
 
-      window.localStorage.setItem('workspace', state);
+      window.localStorage.setItem("workspace", state);
 
       try {
         const result = await hatApi.updateSource(code);
@@ -80,6 +80,12 @@ import Layout from "../layouts/Layout.astro";
 
   document.addEventListener("DOMContentLoaded", setup);
 </script>
+
+<style is:global>
+  svg[display="none"] {
+    display: none;
+  }
+</style>
 
 <Layout title="Welcome to Astro.">
   <main>
