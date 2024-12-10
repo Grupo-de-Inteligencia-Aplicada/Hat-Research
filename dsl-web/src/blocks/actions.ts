@@ -80,7 +80,27 @@ export default function setupActionBlocks() {
       "previousStatement": "action_block",
       "nextStatement": "action_block",
       "colour": 15
+    },
+    {
+      "type": "action_wait",
+      "tooltip": "",
+      "helpUrl": "",
+      "message0": "Wait %1 seconds",
+      "args0": [
+        {
+          "type": "field_slider",
+          "name": "SECONDS",
+          "value": 50,
+          "min": 0,
+          "max": 100,
+          "precision": 0.01
+        },
+      ],
+      "previousStatement": "action_block",
+      "nextStatement": "action_block",
+      "colour": 15
     }
+
 
   ]);
 
@@ -102,5 +122,9 @@ export default function setupActionBlocks() {
     const bri_percent = block.getFieldValue('BRIGHTNESS');
     const bri = (bri_percent / 100) * 255;
     return `run set_light_brightness("${device}", ${bri})\n`;
+  };
+  javascriptGenerator.forBlock['action_wait'] = (block, _generator) => {
+    const secs = block.getFieldValue('SECONDS');
+    return `run wait(${secs})\n`;
   };
 }
