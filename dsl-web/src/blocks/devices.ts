@@ -7,19 +7,21 @@ export const DeviceBlockTypes = DeviceTypes.map(typ => `device_${typ}`);
 function getIconFor(typ: DeviceType): string {
   switch (typ) {
     case 'Dummy':
-      return "";
+      return "❓";
     case 'DoorSensor':
       return "🚪";
     case 'Light':
       return "💡";
     case 'Sensor':
-      return "📟";
+      return "🖲️";
     case 'PowerOutlet':
       return "🔌";
     case 'MotionSensor':
-      return "📡";
+      return "🎛️";
     case 'Unknown':
-      return "";
+      return "❔";
+    default:
+      return "⚙️";
   }
 }
 
