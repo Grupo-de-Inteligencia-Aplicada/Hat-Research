@@ -15,6 +15,7 @@ export default function generateToolbox(events: RuntimeEvent[], devices: Device[
         "colour": 210,
         "contents": [
           { "kind": "block", "type": "automation" },
+          { "kind": "block", "type": "automation_time_based" },
         ]
       },
       {
