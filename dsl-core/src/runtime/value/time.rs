@@ -3,10 +3,11 @@ use std::{
     ops::{Deref, DerefMut},
 };
 
-use chrono::{DateTime, Local, NaiveTime, Utc};
+use chrono::{DateTime, Local, NaiveTime, SubsecRound, Utc};
 use serde::{Deserialize, Serialize};
+use tracing::debug;
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialOrd, Serialize, Deserialize)]
 pub struct Time(NaiveTime);
 
 /// Represents a time of the day *IN LOCAL TIMEZONE*
@@ -17,6 +18,13 @@ impl Time {
     pub fn from_hms_opt(hour: u32, min: u32, sec: u32) -> Option<Self> {
         let inner = NaiveTime::from_hms_opt(hour, min, sec)?;
         Some(Self(inner))
+    }
+}
+
+/// Time comparisons in Hat will allways round values up to seconds
+impl PartialEq for Time {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.round_subsecs(0) == other.0.round_subsecs(0)
     }
 }
 

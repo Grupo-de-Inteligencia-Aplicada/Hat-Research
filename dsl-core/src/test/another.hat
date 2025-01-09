@@ -1,4 +1,9 @@
 
+automation "Print hello2" (ClockTickEvent) {
+  if event_time() == time("14:04:30")
+  run echo("YESS" + event_time())
+}
+
 automation "Print hello" (ClockTickEvent) {
-  run echo("hello")
+  run echo("hello" + event_time())
 }
