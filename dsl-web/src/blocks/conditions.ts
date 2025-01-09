@@ -123,6 +123,35 @@ export default function setupConditionBlocks() {
       "output": "Boolean",
       "colour": 225
     },
+    {
+      "type": "condition_motion_sensor",
+      "tooltip": "",
+      "helpUrl": "",
+      "message0": "Motion sensor %2 %1 detecting movement",
+      "args0": [
+        {
+          "type": "field_dropdown",
+          "name": "CONDITION",
+          "options": [
+            [
+              "is",
+              "IS"
+            ],
+            [
+              "is not",
+              "ISNOT"
+            ]
+          ]
+        },
+        {
+          "type": "input_value",
+          "name": "DEVICE",
+          "check": "device_MotionSensor",
+        }
+      ],
+      "output": "Boolean",
+      "colour": 225
+    },
   ]);
 
   javascriptGenerator.forBlock['condition_event_was_from_device'] = (block, generator) => {
@@ -151,5 +180,13 @@ export default function setupConditionBlocks() {
     const device = generator.valueToCode(block, 'NAME', Order.ATOMIC);
 
     return ['is_device_off("' + device + '")', Order.ATOMIC];
+  };
+
+  javascriptGenerator.forBlock['condition_motion_sensor'] = (block, generator) => {
+    const conditionValue = block.getFieldValue('CONDITION');
+    const fn = conditionValue == 'IS' ? 'is_device_on' : 'is_device_off';
+    const device = generator.valueToCode(block, 'DEVICE', Order.ATOMIC);
+
+    return [`${fn}("${device}")`, Order.ATOMIC];
   };
 }

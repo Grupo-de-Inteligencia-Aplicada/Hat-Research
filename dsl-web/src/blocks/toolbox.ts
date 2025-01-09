@@ -38,6 +38,7 @@ export default function generateToolbox(events: RuntimeEvent[], devices: Device[
           "event_time_between",
           "condition_device_is_on",
           "condition_device_is_off",
+          "condition_motion_sensor",
         ].concat(binaryConditionBlocks.map(blockDef => `condition_${blockDef.type}`))
           .map(a => ({
             "kind": "block",
