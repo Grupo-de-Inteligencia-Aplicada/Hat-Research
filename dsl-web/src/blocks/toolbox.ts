@@ -31,16 +31,6 @@ export default function generateToolbox(events: RuntimeEvent[], devices: Device[
       {
         "kind": "category",
         "flyoutOpen": true,
-        "name": "Dispositivos",
-        "colour": 190,
-        "contents": devices.map(d => ({
-          "kind": "block",
-          "type": getBlockTypeFor(d),
-        }))
-      },
-      {
-        "kind": "category",
-        "flyoutOpen": true,
         "name": "Condições",
         "colour": 120,
         "contents": [
@@ -68,6 +58,16 @@ export default function generateToolbox(events: RuntimeEvent[], devices: Device[
         ].map(a => ({
           "kind": "block",
           "type": a
+        }))
+      },
+      {
+        "kind": "category",
+        "flyoutOpen": true,
+        "name": "Dispositivos",
+        "colour": 190,
+        "contents": devices.map(d => ({
+          "kind": "block",
+          "type": getBlockTypeFor(d),
         }))
       },
     ]
