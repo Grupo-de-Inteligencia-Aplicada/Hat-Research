@@ -7,6 +7,7 @@ pub mod parser;
 pub mod value;
 
 use self::event::Event;
+use crate::integrations::clock::ClockIntegration;
 use crate::integrations::Integration;
 use crate::runtime::automation::Automation;
 use crate::runtime::context::AutomationContext;
@@ -99,6 +100,8 @@ impl HatRuntime {
             let mut executor_handle = runtime.executor_handle.lock().await;
             *executor_handle = Some(handle);
         }
+
+        runtime.integrate(ClockIntegration).await;
 
         runtime
     }

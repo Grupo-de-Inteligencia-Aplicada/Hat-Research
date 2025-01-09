@@ -1,10 +1,4 @@
-automation "Turn on desk light" (LightOnEvent) {
-  run echo(get_device())
-  run turn_on_device("light.desk_light")
-}
 
-
-automation "Turn on office light" (LightOffEvent) {
-  if get_device() == "light.office_light"
-  run turn_off_device("light.desk_light")
+automation "Print hello" (ClockTickEvent) {
+  run echo("hello")
 }

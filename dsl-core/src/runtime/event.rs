@@ -17,6 +17,7 @@ pub enum EventType {
     MotionSensorOnEvent,
     MotionSensorOffEvent,
     SensorValueChangeEvent,
+    ClockTickEvent,
 }
 
 impl EventType {
@@ -45,6 +46,7 @@ impl EventType {
             MotionSensorOnEvent => "MotionSensorOnEvent",
             MotionSensorOffEvent => "MotionSensorOffEvent",
             SensorValueChangeEvent => "SensorValueChangeEvent",
+            ClockTickEvent => "ClockTickEvent",
         }
     }
     pub const fn get_description(&self) -> &'static str {
@@ -60,6 +62,7 @@ impl EventType {
             MotionSensorOnEvent => "Movement detected",
             MotionSensorOffEvent => "Movement not detected",
             SensorValueChangeEvent => "Sensor value updated",
+            ClockTickEvent => "Run every second",
         }
     }
 }

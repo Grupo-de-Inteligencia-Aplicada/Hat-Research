@@ -6,6 +6,7 @@ use tokio::sync::mpsc;
 
 pub mod dummy;
 pub mod home_assistant;
+pub(crate) mod clock;
 
 #[async_trait]
 pub trait Integration: Send + Sync {
