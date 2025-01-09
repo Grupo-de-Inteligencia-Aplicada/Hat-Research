@@ -343,6 +343,25 @@ lazy_static! {
                     })
                 }),
             },
+            Function {
+                name: "get_device_state".to_owned(),
+                fun: (|ctx, args| {
+                    Box::pin(async move {
+                        if let Some(Value::String(arg)) = args.first() {
+                            if let Some(dev) = ctx.runtime.get_device(arg).await? {
+                                Ok(match dev.state {
+                                    Some(state) => Value::String(state),
+                                    None => Value::Null,
+                                })
+                            } else {
+                                bail!("device {arg} not found!");
+                            }
+                        } else {
+                            bail!("first argument must be the device id")
+                        }
+                    })
+                }),
+            },
         ]
     };
 }
