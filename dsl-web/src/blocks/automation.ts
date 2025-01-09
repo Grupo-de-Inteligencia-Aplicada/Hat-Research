@@ -129,7 +129,8 @@ export default function setupAutomationBlock() {
 
   javascriptGenerator.forBlock['automation'] = (block, generator) => {
     const name = block.getFieldValue('NAME');
-    const event = generator.valueToCode(block, 'EVENT', Order.ATOMIC);
+    const eventValue = generator.valueToCode(block, 'EVENT', Order.ATOMIC).trim();
+    const event = eventValue.length == 0 ? "None" : eventValue;
     const condition = generator.valueToCode(block, 'CONDITIONS', Order.ATOMIC);
     const body = generator.statementToCode(block, 'ACTIONS');
     return 'automation "' + name + '" (' + event + ') {' + (condition ? '\n  if ' + condition : '') + '\n' + body + '}\n\n';
@@ -140,7 +141,7 @@ export default function setupAutomationBlock() {
     const time = block.getFieldValue('EVENT_TIME');
     const condition = generator.valueToCode(block, 'CONDITIONS', Order.ATOMIC);
     const body = generator.statementToCode(block, 'ACTIONS');
-    return 'automation "' + name + '" (ClockTickEvent) {\n  if event_time() == time("' + time + '")' + (condition ? '\n  if ' + condition : '') + '\n' + body + '}\n\n';
+    return 'automation "' + name + '" (ClockTickEvent) {\n  if event_time() == time("' + time + ')' + (condition ? '\n  if ' + condition : '') + '\n' + body + '}\n\n';
   };
 }
 

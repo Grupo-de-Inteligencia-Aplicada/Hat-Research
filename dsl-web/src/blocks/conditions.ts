@@ -45,8 +45,10 @@ export default function setupConditionBlocks() {
     }]);
 
     javascriptGenerator.forBlock[blockType] = (block, generator) => {
-      const firstCondition = generator.valueToCode(block, 'CONDITION1', Order.ATOMIC);
-      const secondCondition = generator.valueToCode(block, 'CONDITION2', Order.ATOMIC);
+      const firstConditionValue = generator.valueToCode(block, 'CONDITION1', Order.ATOMIC).trim();
+      const firstCondition = firstConditionValue.length == 0 ? 'false' : firstConditionValue;
+      const secondConditionValue = generator.valueToCode(block, 'CONDITION2', Order.ATOMIC).trim();
+      const secondCondition = secondConditionValue.length == 0 ? 'false' : secondConditionValue;
       return [`(${firstCondition}) ${blockDefinition.code} (${secondCondition})`, Order.ATOMIC];
     };
   });
