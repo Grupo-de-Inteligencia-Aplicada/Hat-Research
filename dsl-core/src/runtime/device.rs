@@ -8,6 +8,8 @@ pub enum DeviceType {
     Sensor,
     PowerOutlet,
     MotionSensor,
+    Toggle,
+    Button,
     Unknown,
 }
 

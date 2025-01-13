@@ -18,6 +18,9 @@ pub enum EventType {
     MotionSensorOffEvent,
     SensorValueChangeEvent,
     ClockTickEvent,
+    ToggleOnEvent,
+    ToggleOffEvent,
+    ButtonPressedEvent,
 }
 
 impl EventType {
@@ -30,6 +33,8 @@ impl EventType {
             DeviceType::Sensor => &[SensorValueChangeEvent],
             DeviceType::PowerOutlet => &[PowerOutletOnEvent, PowerOutletOffEvent],
             DeviceType::MotionSensor => &[MotionSensorOnEvent, MotionSensorOffEvent],
+            DeviceType::Toggle => &[ToggleOnEvent, ToggleOffEvent],
+            DeviceType::Button => &[ButtonPressedEvent],
             DeviceType::Unknown => &[],
         }
     }
@@ -47,6 +52,9 @@ impl EventType {
             MotionSensorOffEvent => "MotionSensorOffEvent",
             SensorValueChangeEvent => "SensorValueChangeEvent",
             ClockTickEvent => "ClockTickEvent",
+            ToggleOnEvent => "ToggleOnEvent",
+            ToggleOffEvent => "ToggleOffEvent",
+            ButtonPressedEvent => "ButtonPressedEvent",
         }
     }
     pub const fn get_description(&self) -> &'static str {
@@ -63,6 +71,9 @@ impl EventType {
             MotionSensorOffEvent => "Movement not detected",
             SensorValueChangeEvent => "Sensor value updated",
             ClockTickEvent => "Run every second",
+            ToggleOnEvent => "Toggle button turned on",
+            ToggleOffEvent => "Toggle button turned off",
+            ButtonPressedEvent => "Button was pressed",
         }
     }
 }
