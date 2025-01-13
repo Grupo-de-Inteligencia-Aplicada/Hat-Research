@@ -109,7 +109,8 @@ export class HatApi {
 
   async listDevices(): Promise<Device[]> {
     const devices = await this.get("/devices");
-    return devices;
+    const filteredDevices = (devices as Device[]).filter(isDeviceBacklisted);
+    return filteredDevices;
   }
 
   async listPossibleEvents(): Promise<RuntimeEvent[]> {
@@ -122,4 +123,13 @@ export class HatApi {
   }
 }
 
-
+function isDeviceBacklisted(device: Device) {
+  if (device.id.includes("fleap_iphone")) {
+    return false;
+  }
+  if (device.id.includes("a35_isabel")) {
+    return false;
+  }
+  if (device.integration.includes("DummyIntegration")) return false;
+  return true;
+}
