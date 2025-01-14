@@ -56,17 +56,17 @@ impl EventType {
         use EventType::*;
         match self {
             Dummy => "Dummy",
-            DoorOpenEvent => "Door opened",
-            DoorCloseEvent => "Door closed",
-            LightOnEvent => "Light turned on",
-            LightOffEvent => "Light turned off",
-            SwitchTurnedOnEvent => "Switch turned on",
-            SwitchTurnedOffEvent => "Switch turned off",
-            MotionSensorOnEvent => "Movement detected",
-            MotionSensorOffEvent => "Movement not detected",
-            SensorValueChangeEvent => "Sensor value updated",
+            DoorOpenEvent => "Porta abriu",
+            DoorCloseEvent => "Porta fechou",
+            LightOnEvent => "Luz foi ligada",
+            LightOffEvent => "Luz foi apagada",
+            SwitchTurnedOnEvent => "Interruptor foi ligado",
+            SwitchTurnedOffEvent => "Interruptor foi desligado",
+            MotionSensorOnEvent => "Movimento foi detectado",
+            MotionSensorOffEvent => "Movimento não é mais detectado",
+            SensorValueChangeEvent => "Valor de sensor mudou",
             ClockTickEvent => "Run every second",
-            ButtonPressedEvent => "Button was pressed",
+            ButtonPressedEvent => "Botão foi apertado",
         }
     }
 }
