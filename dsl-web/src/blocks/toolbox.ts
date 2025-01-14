@@ -48,7 +48,7 @@ export default function generateToolbox(events: RuntimeEvent[], devices: Device[
       {
         "kind": "category",
         "flyoutOpen": true,
-        "name": "Actions",
+        "name": "Ações",
         "colour": 10,
         "contents": [
           "action_turn_on_device",

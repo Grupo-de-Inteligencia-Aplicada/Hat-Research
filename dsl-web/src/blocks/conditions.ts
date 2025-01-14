@@ -5,12 +5,12 @@ import { DeviceBlockTypes } from './devices';
 export const binaryConditionBlocks = [
   {
     "type": "and",
-    "message": "and",
+    "message": "e",
     "code": "and",
   },
   {
     "type": "or",
-    "message": "or",
+    "message": "ou",
     "code": "or",
   },
 ];
@@ -58,7 +58,7 @@ export default function setupConditionBlocks() {
       "type": "condition_event_was_from_device",
       "tooltip": "",
       "helpUrl": "",
-      "message0": "Event was from %1",
+      "message0": "Evento veio do dispositivo %1",
       "args0": [
         {
           "type": "input_value",
@@ -73,17 +73,17 @@ export default function setupConditionBlocks() {
       "type": "event_time_between",
       "tooltip": "",
       "helpUrl": "",
-      "message0": "Event took place between %1 and %2 %3",
+      "message0": "Evento aconteceu entre %1 e %2 %3",
       "args0": [
         {
           "type": "field_input",
           "name": "START_TIME",
-          "text": "7:00"
+          "text": "17:00"
         },
         {
           "type": "field_input",
           "name": "END_TIME",
-          "text": "8:00"
+          "text": "18:00"
         },
         {
           "type": "input_dummy",
@@ -97,7 +97,7 @@ export default function setupConditionBlocks() {
       "type": "condition_device_is_on",
       "tooltip": "",
       "helpUrl": "",
-      "message0": "Device %1 is on",
+      "message0": "Dispositivo %1 está ativo",
       "args0": [
         {
           "type": "input_value",
@@ -112,7 +112,7 @@ export default function setupConditionBlocks() {
       "type": "condition_device_is_off",
       "tooltip": "",
       "helpUrl": "",
-      "message0": "Device %1 is off",
+      "message0": "Dispositivo %1 está inativo",
       "args0": [
         {
           "type": "input_value",
@@ -127,7 +127,7 @@ export default function setupConditionBlocks() {
       "type": "condition_motion_sensor",
       "tooltip": "",
       "helpUrl": "",
-      "message0": "Motion sensor %2 %1 detecting movement",
+      "message0": "Sensor de movimento %2 %1 está detectando movimento",
       "args0": [
         {
           "type": "field_dropdown",

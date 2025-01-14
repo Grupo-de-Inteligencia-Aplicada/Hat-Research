@@ -8,7 +8,7 @@ export default function setupActionBlocks() {
       "type": "action_turn_on_device",
       "tooltip": "",
       "helpUrl": "",
-      "message0": "Turn on %1",
+      "message0": "Ligar %1",
       "args0": [
         {
           "type": "input_value",
@@ -24,7 +24,7 @@ export default function setupActionBlocks() {
       "type": "action_turn_off_device",
       "tooltip": "",
       "helpUrl": "",
-      "message0": "Turn off %1",
+      "message0": "Desligar %1",
       "args0": [
         {
           "type": "input_value",
@@ -40,7 +40,7 @@ export default function setupActionBlocks() {
       "type": "action_set_light_color",
       "tooltip": "",
       "helpUrl": "",
-      "message0": "Set light %1 color to %2",
+      "message0": "Configurar cor da luz %1 para %2",
       "args0": [
         {
           "type": "input_value",
@@ -61,7 +61,7 @@ export default function setupActionBlocks() {
       "type": "action_set_light_brightness",
       "tooltip": "",
       "helpUrl": "",
-      "message0": "Set light %1 brightness to %2%",
+      "message0": "Configurar brilho da luz %1 para %2%",
       "args0": [
         {
           "type": "input_value",

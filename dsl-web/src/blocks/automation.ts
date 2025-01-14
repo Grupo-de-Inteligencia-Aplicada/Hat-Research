@@ -5,9 +5,9 @@ export default function setupAutomationBlock() {
   Blockly.defineBlocksWithJsonArray([
     {
       "type": "automation",
-      "tooltip": "",
+      "tooltip": "helloe ",
       "helpUrl": "",
-      "message0": "Automation %1 %2 %3 Trigger when %4 %5 %6 And if %7 %8 %9 %10 Then run %11 %12",
+      "message0": "Automação %1 %2 %3 Disparar quando %4 %5 %6 E se %7 %8 %9 %10 Então, fazer %11 %12",
       "args0": [
         {
           "type": "field_input",
@@ -68,7 +68,7 @@ export default function setupAutomationBlock() {
       "type": "automation_time_based",
       "tooltip": "",
       "helpUrl": "",
-      "message0": "Automation %1 %2 %3 Trigger at %4 %5 %6 And if %7 %8 %9 %10 Then run %11 %12",
+      "message0": "Automação %1 %2 %3 Disparar às %4 %5 %6 E se %7 %8 %9 %10 Então, fazer %11 %12",
       "args0": [
         {
           "type": "field_input",
@@ -90,7 +90,7 @@ export default function setupAutomationBlock() {
         {
           "type": "field_input",
           "name": "EVENT_TIME",
-          "text": "8:00"
+          "text": "18:00"
         },
         {
           "type": "input_end_row",
