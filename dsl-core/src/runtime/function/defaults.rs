@@ -380,6 +380,24 @@ lazy_static! {
                     })
                 }),
             },
+            Function {
+                name: "string".to_owned(),
+                fun: (|_, args| {
+                    Box::pin(async move {
+                        if let Some(arg) = args.into_iter().next() {
+                            match arg {
+                                Value::String(arg) => Ok(Value::String(arg)),
+                                Value::Boolean(arg) => Ok(Value::String(arg.to_string())),
+                                Value::Number(n) => Ok(Value::String(n.to_string())),
+                                Value::Time(t) => Ok(Value::String(t.to_string())),
+                                Value::Null => Ok(Value::String("null".into())),
+                            }
+                        } else {
+                            bail!("first argument is missing")
+                        }
+                    })
+                }),
+            },
         ]
     };
 }
