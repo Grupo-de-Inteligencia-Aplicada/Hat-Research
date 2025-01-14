@@ -152,6 +152,41 @@ export default function setupConditionBlocks() {
       "output": "Boolean",
       "colour": 225
     },
+    {
+      "type": "condition_sensor_value",
+      "tooltip": "",
+      "helpUrl": "",
+      "message0": "Valor do sensor %1 é %2 %3",
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "DEVICE",
+          "check": [
+            "device_MotionSensor",
+            "device_Sensor"
+          ],
+        },
+        {
+          "type": "field_dropdown",
+          "name": "CONDITION",
+          "options": [
+            ["igual a", "=="],
+            ["maior que", ">"],
+            ["menor que", "<"],
+            ["maior ou igual a", ">="],
+            ["menor ou igual a", "<="],
+          ]
+        },
+        {
+          "type": "field_number",
+          "name": "VALUE",
+          "value": 50,
+          "precision": 0.1
+        }
+      ],
+      "output": "Boolean",
+      "colour": 225
+    },
   ]);
 
   javascriptGenerator.forBlock['condition_event_was_from_device'] = (block, generator) => {
@@ -188,5 +223,27 @@ export default function setupConditionBlocks() {
     const device = generator.valueToCode(block, 'DEVICE', Order.ATOMIC);
 
     return [`${fn}("${device}")`, Order.ATOMIC];
+  };
+
+  javascriptGenerator.forBlock['condition_sensor_value'] = (block, generator) => {
+    const value = block.getFieldValue('VALUE');
+    const device = generator.valueToCode(block, 'DEVICE', Order.ATOMIC);
+    const conditionValue = block.getFieldValue('CONDITION');
+
+    switch (conditionValue) {
+      case '==':
+        return [`string(get_device_state("${device}")) == "${value}"`, Order.ATOMIC];
+      case '>':
+        return [`number(get_device_state("${device}")) > number("${value}")`, Order.ATOMIC];
+      case '<':
+        return [`number(get_device_state("${device}")) < number("${value}")`, Order.ATOMIC];
+      case '>=':
+        return [`number(get_device_state("${device}")) >= number("${value}")`, Order.ATOMIC];
+      case '<=':
+        return [`number(get_device_state("${device}")) <= number("${value}")`, Order.ATOMIC];
+      default:
+        return [`get_device_state("${device}") ${conditionValue} "${value}"`, Order.ATOMIC];
+    }
+
   };
 }
