@@ -117,7 +117,7 @@ export class HatApi {
 
   async listPossibleEvents(): Promise<RuntimeEvent[]> {
     const events = await this.get("/possible_events");
-    return events;
+    return (events as RuntimeEvent[]).filter(e => e.event != "Dummy");
   }
 
   async updateSource(source: string): Promise<void> {
