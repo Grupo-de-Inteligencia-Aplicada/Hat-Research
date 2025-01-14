@@ -91,6 +91,7 @@ impl HassIntegration {
                 },
                 "input_boolean" => DeviceType::Switch,
                 "input_button" => DeviceType::Button,
+                "input_number" => DeviceType::Sensor,
                 _ => DeviceType::Unknown,
             }
         } else {
@@ -540,6 +541,22 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
                             parameters: Default::default(),
                         });
                     }
+                }
+                "input_number" => {
+                    let device = Device {
+                        integration: integration_name.to_owned(),
+                        id: entity_id.to_owned(),
+                        name,
+                        state: Some(new_state.to_string()),
+                        typ: DeviceType::Sensor,
+                        attributes: attribs,
+                    };
+                    return Some(RuntimeEvent {
+                        typ: EventType::SensorValueChangeEvent,
+                        datetime: time,
+                        device,
+                        parameters: Default::default(),
+                    });
                 }
                 "input_button" => {
                     let device = Device {
