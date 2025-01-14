@@ -515,6 +515,32 @@ fn parse_event(integration_name: &str, hass_event: &HassEvent) -> Option<Runtime
                         }
                     }
                 }
+                "input_boolean" => {
+                    let device = Device {
+                        integration: integration_name.to_owned(),
+                        id: entity_id.to_owned(),
+                        name,
+                        state: Some(new_state.to_string()),
+                        typ: DeviceType::Switch,
+                        attributes: attribs,
+                    };
+                    if old_state == "off" && new_state == "on" {
+                        return Some(RuntimeEvent {
+                            typ: EventType::SwitchTurnedOnEvent,
+                            datetime: time,
+                            device,
+                            parameters: Default::default(),
+                        });
+                    }
+                    if old_state == "on" && new_state == "off" {
+                        return Some(RuntimeEvent {
+                            typ: EventType::SwitchTurnedOffEvent,
+                            datetime: time,
+                            device,
+                            parameters: Default::default(),
+                        });
+                    }
+                }
                 "input_button" => {
                     let device = Device {
                         integration: integration_name.to_owned(),
