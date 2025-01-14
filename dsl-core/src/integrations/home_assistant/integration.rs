@@ -189,7 +189,10 @@ impl Integration for HassIntegration {
                 res.attributes.get("device_class").and_then(|c| c.as_str()),
             ),
             id: res.entity_id,
-            name: None, // TODO: get this property, if possible
+            name: res
+                .attributes
+                .get("friendly_name")
+                .and_then(|f| f.as_str().map(|s| s.to_owned())),
             state: Some(
                 res.state
                     .as_str()
