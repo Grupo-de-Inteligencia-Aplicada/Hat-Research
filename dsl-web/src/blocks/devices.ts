@@ -14,10 +14,12 @@ function getIconFor(typ: DeviceType): string {
       return "💡";
     case 'Sensor':
       return "🖲️";
-    case 'PowerOutlet':
-      return "🔌";
     case 'MotionSensor':
       return "🎛️";
+    case 'Switch':
+      return "🎚️";
+    case 'Button':
+      return "🔴";
     case 'Unknown':
       return "❔";
     default:

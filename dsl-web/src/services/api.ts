@@ -4,8 +4,9 @@ export const DeviceTypes = [
   "DoorSensor",
   "Light",
   "Sensor",
-  "PowerOutlet",
+  "Switch",
   "MotionSensor",
+  "Button",
   "Unknown",
 ] as const;
 
@@ -13,8 +14,9 @@ export type DeviceType = typeof DeviceTypes[number];
 
 export const deviceTypePriorities: Record<DeviceType, number> = {
   DoorSensor: 3,
-  PowerOutlet: 3,
+  Switch: 3,
   MotionSensor: 3,
+  Button: 3,
   Light: 2,
   Sensor: 1,
   Dummy: 0,
