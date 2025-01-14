@@ -34,6 +34,7 @@ pub fn make_router(runtime: Arc<HatRuntime>) -> Router {
             post(transpiler::transpile_workspace_to_hat),
         )
         .route("/devices", get(routes::devices::get_devices))
+        .route("/device", get(routes::devices::get_device))
         .route("/possible_events", get(routes::events::get_possible_events))
         .route("/update_code", post(routes::update_code::update_code))
         .layer(cors)
