@@ -362,6 +362,24 @@ lazy_static! {
                     })
                 }),
             },
+            Function {
+                name: "number".to_owned(),
+                fun: (|_, args| {
+                    Box::pin(async move {
+                        if let Some(arg) = args.first() {
+                            match arg {
+                                Value::String(arg) => Ok(Value::Number(arg.parse::<f64>()?)),
+                                Value::Boolean(arg) => Ok(Value::Number(if *arg { 1f64 } else { 0f64 })),
+                                Value::Number(n) => Ok(Value::Number(*n)),
+                                Value::Time(_) => bail!("cannot convert time into a number"),
+                                Value::Null => bail!("cannot convert null into a number"),
+                            }
+                        } else {
+                            bail!("first argument is missing")
+                        }
+                    })
+                }),
+            },
         ]
     };
 }
