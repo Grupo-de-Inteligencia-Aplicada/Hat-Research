@@ -1,11 +1,12 @@
 import * as Blockly from 'blockly';
 import { javascriptGenerator, Order } from 'blockly/javascript';
+import { DEFAULT_TOOLTIP } from '.';
 
 export default function setupAutomationBlock() {
   Blockly.defineBlocksWithJsonArray([
     {
       "type": "automation",
-      "tooltip": "helloe ",
+      "tooltip": DEFAULT_TOOLTIP,
       "helpUrl": "",
       "message0": "Automação %1 %2 %3 Disparar quando %4 %5 %6 E se %7 %8 %9 %10 Então, fazer %11 %12",
       "args0": [
@@ -66,7 +67,7 @@ export default function setupAutomationBlock() {
     },
     {
       "type": "automation_time_based",
-      "tooltip": "",
+      "tooltip": DEFAULT_TOOLTIP,
       "helpUrl": "",
       "message0": "Automação %1 %2 %3 Disparar às %4 %5 %6 E se %7 %8 %9 %10 Então, fazer %11 %12",
       "args0": [

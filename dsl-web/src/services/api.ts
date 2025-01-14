@@ -115,6 +115,11 @@ export class HatApi {
     return filteredDevices;
   }
 
+  async getDevice(id: string): Promise<Device> {
+    const device = await this.get("/device?id=" + encodeURI(id));
+    return device;
+  }
+
   async listPossibleEvents(): Promise<RuntimeEvent[]> {
     const events = await this.get("/possible_events");
     return (events as RuntimeEvent[]).filter(e => e.event != "Dummy");

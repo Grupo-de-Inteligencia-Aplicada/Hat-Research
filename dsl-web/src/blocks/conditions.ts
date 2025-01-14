@@ -1,6 +1,7 @@
 import * as Blockly from 'blockly';
 import { javascriptGenerator, Order } from 'blockly/javascript';
 import { DeviceBlockTypes } from './devices';
+import { DEFAULT_TOOLTIP } from '.';
 
 export const binaryConditionBlocks = [
   {
@@ -21,7 +22,7 @@ export default function setupConditionBlocks() {
 
     Blockly.defineBlocksWithJsonArray([{
       "type": blockType,
-      "tooltip": "",
+      "tooltip": DEFAULT_TOOLTIP,
       "helpUrl": "",
       "message0": "%1 " + blockDefinition.message + " %2 %3",
       "args0": [
@@ -56,7 +57,7 @@ export default function setupConditionBlocks() {
   Blockly.defineBlocksWithJsonArray([
     {
       "type": "condition_event_was_from_device",
-      "tooltip": "",
+      "tooltip": DEFAULT_TOOLTIP,
       "helpUrl": "",
       "message0": "Evento veio do dispositivo %1",
       "args0": [
@@ -71,7 +72,7 @@ export default function setupConditionBlocks() {
     },
     {
       "type": "event_time_between",
-      "tooltip": "",
+      "tooltip": DEFAULT_TOOLTIP,
       "helpUrl": "",
       "message0": "Evento aconteceu entre %1 e %2 %3",
       "args0": [
@@ -95,7 +96,7 @@ export default function setupConditionBlocks() {
     },
     {
       "type": "condition_device_is_on",
-      "tooltip": "",
+      "tooltip": DEFAULT_TOOLTIP,
       "helpUrl": "",
       "message0": "Dispositivo %1 está ativo",
       "args0": [
@@ -110,7 +111,7 @@ export default function setupConditionBlocks() {
     },
     {
       "type": "condition_device_is_off",
-      "tooltip": "",
+      "tooltip": DEFAULT_TOOLTIP,
       "helpUrl": "",
       "message0": "Dispositivo %1 está inativo",
       "args0": [
@@ -125,7 +126,7 @@ export default function setupConditionBlocks() {
     },
     {
       "type": "condition_motion_sensor",
-      "tooltip": "",
+      "tooltip": DEFAULT_TOOLTIP,
       "helpUrl": "",
       "message0": "Sensor de movimento %2 %1 está detectando movimento",
       "args0": [
@@ -154,7 +155,7 @@ export default function setupConditionBlocks() {
     },
     {
       "type": "condition_sensor_value",
-      "tooltip": "",
+      "tooltip": DEFAULT_TOOLTIP,
       "helpUrl": "",
       "message0": "Valor do sensor %1 é %2 %3",
       "args0": [

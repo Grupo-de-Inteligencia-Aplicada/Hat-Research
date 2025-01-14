@@ -1,10 +1,11 @@
 import * as Blockly from 'blockly';
 import { javascriptGenerator, Order } from 'blockly/javascript';
 import { DeviceTypes, type Device, type DeviceType } from '../services/api';
+import { DEFAULT_TOOLTIP } from '.';
 
 export const DeviceBlockTypes = DeviceTypes.map(typ => `device_${typ}`);
 
-function getIconFor(typ: DeviceType): string {
+export function getIconFor(typ: DeviceType): string {
   switch (typ) {
     case 'Dummy':
       return "❓";
@@ -27,7 +28,7 @@ function getIconFor(typ: DeviceType): string {
   }
 }
 
-function getLabelFor(typ: DeviceType): string {
+export function getLabelFor(typ: DeviceType): string {
   switch (typ) {
     case 'Dummy':
       return "";
@@ -58,7 +59,7 @@ export default function setupDeviceBlocks(devices: Device[]) {
 
   Blockly.defineBlocksWithJsonArray(devices.map(d => ({
     "type": getBlockTypeFor(d),
-    "tooltip": "",
+    "tooltip": DEFAULT_TOOLTIP,
     "helpUrl": "",
     "message0": `${getIconFor(d.typ)} (${getLabelFor(d.typ)}) ${d.name} %1`,
     "args0": [

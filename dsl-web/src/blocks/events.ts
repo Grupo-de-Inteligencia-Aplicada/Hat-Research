@@ -1,11 +1,12 @@
 import * as Blockly from "blockly";
 import { javascriptGenerator, Order } from 'blockly/javascript';
 import type { RuntimeEvent } from "../services/api";
+import { DEFAULT_TOOLTIP } from ".";
 
 export default function defineEventBlocks(events: RuntimeEvent[]) {
   Blockly.defineBlocksWithJsonArray(events.map(e => ({
     "type": "event_" + e.event,
-    "tooltip": "",
+    "tooltip": DEFAULT_TOOLTIP,
     "helpUrl": "",
     "message0": e.description + " %1",
     "args0": [

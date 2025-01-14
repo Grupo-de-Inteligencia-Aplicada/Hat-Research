@@ -18,7 +18,7 @@ import Layout from "../layouts/Layout.astro";
     const hatApi = new HatApi("http://localhost:5000");
     const devices = await hatApi.listDevices();
     const possibleEvents = await hatApi.listPossibleEvents();
-    const workspace = setupBlockly(devices, possibleEvents);
+    const workspace = setupBlockly(hatApi, devices, possibleEvents);
 
     function getWorkspaceState() {
       const dom = Blockly.Xml.workspaceToDom(workspace);

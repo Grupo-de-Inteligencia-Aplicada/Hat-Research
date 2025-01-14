@@ -1,12 +1,13 @@
 import * as Blockly from 'blockly';
 import { javascriptGenerator, Order } from 'blockly/javascript';
 import { DeviceBlockTypes } from './devices';
+import { DEFAULT_TOOLTIP } from '.';
 
 export default function setupActionBlocks() {
   Blockly.defineBlocksWithJsonArray([
     {
       "type": "action_turn_on_device",
-      "tooltip": "",
+      "tooltip": DEFAULT_TOOLTIP,
       "helpUrl": "",
       "message0": "Ligar %1",
       "args0": [
@@ -22,7 +23,7 @@ export default function setupActionBlocks() {
     },
     {
       "type": "action_turn_off_device",
-      "tooltip": "",
+      "tooltip": DEFAULT_TOOLTIP,
       "helpUrl": "",
       "message0": "Desligar %1",
       "args0": [
@@ -38,7 +39,7 @@ export default function setupActionBlocks() {
     },
     {
       "type": "action_set_light_color",
-      "tooltip": "",
+      "tooltip": DEFAULT_TOOLTIP,
       "helpUrl": "",
       "message0": "Configurar cor da luz %1 para %2",
       "args0": [
@@ -59,7 +60,7 @@ export default function setupActionBlocks() {
     },
     {
       "type": "action_set_light_brightness",
-      "tooltip": "",
+      "tooltip": DEFAULT_TOOLTIP,
       "helpUrl": "",
       "message0": "Configurar brilho da luz %1 para %2%",
       "args0": [
@@ -83,7 +84,7 @@ export default function setupActionBlocks() {
     },
     {
       "type": "action_wait",
-      "tooltip": "",
+      "tooltip": DEFAULT_TOOLTIP,
       "helpUrl": "",
       "message0": "Wait %1 seconds",
       "args0": [
