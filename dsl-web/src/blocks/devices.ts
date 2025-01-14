@@ -27,6 +27,29 @@ function getIconFor(typ: DeviceType): string {
   }
 }
 
+function getLabelFor(typ: DeviceType): string {
+  switch (typ) {
+    case 'Dummy':
+      return "";
+    case 'DoorSensor':
+      return "Sensor Abertura";
+    case 'Light':
+      return "Luz";
+    case 'Sensor':
+      return "Sensor";
+    case 'MotionSensor':
+      return "Sensor movimento";
+    case 'Switch':
+      return "Interruptor";
+    case 'Button':
+      return "Botão";
+    case 'Unknown':
+      return "Desconhecido";
+    default:
+      return "";
+  }
+}
+
 export function getBlockTypeFor(device: Device) {
   return `device_${device.integration}@${device.id}`
 }
@@ -37,7 +60,7 @@ export default function setupDeviceBlocks(devices: Device[]) {
     "type": getBlockTypeFor(d),
     "tooltip": "",
     "helpUrl": "",
-    "message0": getIconFor(d.typ) + " " + d.name + " %1",
+    "message0": `${getIconFor(d.typ)} (${getLabelFor(d.typ)}) ${d.name} %1`,
     "args0": [
       {
         "type": "input_dummy",
