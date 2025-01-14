@@ -6,9 +6,8 @@ pub enum DeviceType {
     DoorSensor,
     Light,
     Sensor,
-    PowerOutlet,
+    Switch,
     MotionSensor,
-    Toggle,
     Button,
     Unknown,
 }
