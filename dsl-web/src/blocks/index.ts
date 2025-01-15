@@ -7,8 +7,6 @@ import setupConditionBlocks from "./conditions";
 import type { ApiError, Device, HatApi, RuntimeEvent } from "../services/api";
 import setupAutomationBlock from "./automation";
 
-export const DEFAULT_TOOLTIP = "tooltip";
-
 export function setupBlockly(api: HatApi, devices: Device[], possibleEvents: RuntimeEvent[]) {
   const toolbox = generateToolbox(possibleEvents, devices);
   setupEventBlocks(possibleEvents);
@@ -61,6 +59,9 @@ export function setupBlockly(api: HatApi, devices: Device[], possibleEvents: Run
           text.innerHTML = `Evento relacionado aos dispotivos\ndo tipo: ${getIconFor(event.relatedDeviceType)} ${getLabelFor(event.relatedDeviceType)}`;
         }
       }
+    } else {
+      const tooltip = Blockly.Tooltip.getTooltipOfObject(element);
+      text.innerHTML = tooltip;
     }
 
     if (text.innerHTML.trim().length != 0) {

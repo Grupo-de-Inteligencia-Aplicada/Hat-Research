@@ -1,18 +1,19 @@
 import * as Blockly from 'blockly';
 import { javascriptGenerator, Order } from 'blockly/javascript';
 import { DeviceBlockTypes } from './devices';
-import { DEFAULT_TOOLTIP } from '.';
 
 export const binaryConditionBlocks = [
   {
     "type": "and",
     "message": "e",
     "code": "and",
+    "tooltip": "Esse bloco verifica se as duas condições são verdadeiras.\nSe as duas condições forem verdadeiras, essa também será.",
   },
   {
     "type": "or",
     "message": "ou",
     "code": "or",
+    "tooltip": "Esse bloco verifica se pelo menos uma das condições é verdadeira.\nSe pelo menos uma for verdadeira, essa também será.",
   },
 ];
 
@@ -22,7 +23,7 @@ export default function setupConditionBlocks() {
 
     Blockly.defineBlocksWithJsonArray([{
       "type": blockType,
-      "tooltip": DEFAULT_TOOLTIP,
+      "tooltip": blockDefinition.tooltip,
       "helpUrl": "",
       "message0": "%1 " + blockDefinition.message + " %2 %3",
       "args0": [
@@ -57,7 +58,7 @@ export default function setupConditionBlocks() {
   Blockly.defineBlocksWithJsonArray([
     {
       "type": "condition_event_was_from_device",
-      "tooltip": DEFAULT_TOOLTIP,
+      "tooltip": "Essa condição verifica se quem disparou a automação foi especificamente um dispositivo.",
       "helpUrl": "",
       "message0": "Evento veio do dispositivo %1",
       "args0": [
@@ -71,8 +72,8 @@ export default function setupConditionBlocks() {
       "colour": 225
     },
     {
-      "type": "event_time_between",
-      "tooltip": DEFAULT_TOOLTIP,
+      "type": "condition_event_time_between",
+      "tooltip": "Essa condição verifica se o evento que disparou essa automação aconteceu em determinado período do dia.",
       "helpUrl": "",
       "message0": "Evento aconteceu entre %1 e %2 %3",
       "args0": [
@@ -96,7 +97,7 @@ export default function setupConditionBlocks() {
     },
     {
       "type": "condition_device_is_on",
-      "tooltip": DEFAULT_TOOLTIP,
+      "tooltip": "Essa condição verifica se o dispositivo selecionado está ativo/ligado.",
       "helpUrl": "",
       "message0": "Dispositivo %1 está ativo",
       "args0": [
@@ -111,7 +112,7 @@ export default function setupConditionBlocks() {
     },
     {
       "type": "condition_device_is_off",
-      "tooltip": DEFAULT_TOOLTIP,
+      "tooltip": "Essa condicão verifica se o dispositivo selecionado está inativo/desligado.",
       "helpUrl": "",
       "message0": "Dispositivo %1 está inativo",
       "args0": [
@@ -126,7 +127,7 @@ export default function setupConditionBlocks() {
     },
     {
       "type": "condition_motion_sensor",
-      "tooltip": DEFAULT_TOOLTIP,
+      "tooltip": "Essa condição verifica se um detector de movimento está atualmente detectando movimento.",
       "helpUrl": "",
       "message0": "Sensor de movimento %2 %1 está detectando movimento",
       "args0": [
@@ -155,7 +156,7 @@ export default function setupConditionBlocks() {
     },
     {
       "type": "condition_sensor_value",
-      "tooltip": DEFAULT_TOOLTIP,
+      "tooltip": "Essa condição verifica o valor atual em um sensor.",
       "helpUrl": "",
       "message0": "Valor do sensor %1 é %2 %3",
       "args0": [
@@ -196,7 +197,7 @@ export default function setupConditionBlocks() {
     return ['(get_device() == "' + device + '")', Order.ATOMIC];
   };
 
-  javascriptGenerator.forBlock['event_time_between'] = function (block) {
+  javascriptGenerator.forBlock['condition_event_time_between'] = function (block) {
     const start_time = block.getFieldValue('START_TIME');
     const end_time = block.getFieldValue('END_TIME');
 
