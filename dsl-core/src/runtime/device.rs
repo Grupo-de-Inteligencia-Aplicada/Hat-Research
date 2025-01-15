@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
+use strum::VariantArray;
 
-#[derive(Hash, Debug, Clone, Copy, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Hash, Debug, Clone, Copy, Eq, PartialEq, Serialize, Deserialize, VariantArray)]
 pub enum DeviceType {
     Dummy,
     DoorSensor,

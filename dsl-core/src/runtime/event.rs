@@ -1,6 +1,7 @@
 use crate::runtime::device::Device;
 use chrono::Local;
 use serde::{Deserialize, Serialize};
+use strum::VariantArray;
 use std::collections::HashMap;
 
 use super::device::DeviceType;
@@ -34,6 +35,17 @@ impl EventType {
             DeviceType::Button => &[ButtonPressedEvent],
             DeviceType::Unknown => &[],
         }
+    }
+    pub fn get_related_device_type(&self) -> Option<DeviceType> {
+        for dt in DeviceType::VARIANTS {
+            let events = Self::get_events_related_to(*dt);
+            for e in events {
+                if e == self {
+                    return Some(*dt);
+                }
+            }
+        }
+        return None;
     }
     pub const fn as_str(&self) -> &'static str {
         use EventType::*;

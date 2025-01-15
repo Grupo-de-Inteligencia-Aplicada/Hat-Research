@@ -4,7 +4,7 @@ use axum::{extract::State, Json};
 use serde::Serialize;
 
 use crate::{
-    runtime::event::EventType,
+    runtime::{device::DeviceType, event::EventType},
     server::{
         error::{ApiResult, RaiseInternalError},
         AppState,
@@ -15,6 +15,8 @@ use crate::{
 pub struct EventInfo<'a> {
     event: EventType,
     description: &'a str,
+    #[serde(rename = "relatedDeviceType")]
+    related_device_type: Option<DeviceType>,
 }
 
 #[axum::debug_handler]
@@ -51,6 +53,7 @@ pub async fn get_possible_events(
         .map(|event| EventInfo {
             event,
             description: event.get_description(),
+            related_device_type: event.get_related_device_type(),
         })
         .collect::<Vec<_>>();
 
