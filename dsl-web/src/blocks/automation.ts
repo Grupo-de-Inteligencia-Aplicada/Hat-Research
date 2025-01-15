@@ -25,7 +25,7 @@ export default function setupAutomationBlock() {
         {
           "type": "field_input",
           "name": "NAME",
-          "text": "Automation name"
+          "text": "Nome da automação"
         },
         {
           "type": "input_dummy",
@@ -75,7 +75,8 @@ export default function setupAutomationBlock() {
           "check": "action_block"
         }
       ],
-      "colour": 210
+      "colour": 210,
+      "extensions": ["automation_name_validator"],
     },
     {
       "type": "automation_time_based",
@@ -90,7 +91,7 @@ export default function setupAutomationBlock() {
         {
           "type": "field_input",
           "name": "NAME",
-          "text": "Automation name"
+          "text": "Nome da automação"
         },
         {
           "type": "input_dummy",
@@ -106,7 +107,7 @@ export default function setupAutomationBlock() {
         },
         {
           "type": "field_input",
-          "name": "EVENT_TIME",
+          "name": "TIME0",
           "text": "18:00"
         },
         {
@@ -140,7 +141,8 @@ export default function setupAutomationBlock() {
           "check": "action_block"
         }
       ],
-      "colour": 210
+      "colour": 210,
+      "extensions": ["time_validator", "automation_name_validator"],
     },
   ]);
 
@@ -155,10 +157,10 @@ export default function setupAutomationBlock() {
 
   javascriptGenerator.forBlock['automation_time_based'] = (block, generator) => {
     const name = block.getFieldValue('NAME');
-    const time = block.getFieldValue('EVENT_TIME');
+    const time = block.getFieldValue('TIME0');
     const condition = generator.valueToCode(block, 'CONDITIONS', Order.ATOMIC);
     const body = generator.statementToCode(block, 'ACTIONS');
-    return 'automation "' + name + '" (ClockTickEvent) {\n  if event_time() == time("' + time + ')' + (condition ? '\n  if ' + condition : '') + '\n' + body + '}\n\n';
+    return 'automation "' + name + '" (ClockTickEvent) {\n  if event_time() == time("' + time + '")' + (condition ? '\n  if ' + condition : '') + '\n' + body + '}\n\n';
   };
 }
 

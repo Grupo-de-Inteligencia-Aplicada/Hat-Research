@@ -4,10 +4,61 @@ import generateToolbox from "./toolbox";
 import setupDeviceBlocks, { getIconFor, getLabelFor } from "./devices";
 import setupActionBlocks from './actions';
 import setupConditionBlocks from "./conditions";
-import type { ApiError, Device, HatApi, RuntimeEvent } from "../services/api";
+import type { Device, HatApi, RuntimeEvent } from "../services/api";
 import setupAutomationBlock from "./automation";
+import { validateTime } from "../utils";
+
+let globalWorkspace: Blockly.Workspace | undefined;
+
+function setupExtensions() {
+  Blockly.Extensions.register(
+    'automation_name_validator',
+    function () { // this refers to the block that the extension is being run on
+      var thisBlock = (this as any) as Blockly.Block;
+      thisBlock.getField('NAME')?.setValidator(name => {
+        if (globalWorkspace) {
+          const allAutomations = globalWorkspace.getBlocksByType('automation')
+            .concat(globalWorkspace.getBlocksByType('automation_time_based')) as Blockly.Block[];
+
+          const allNames = allAutomations
+            .filter(block => block != thisBlock)
+            .map(block => block.getFieldValue('NAME') as string);
+
+          console.log(allNames, name);
+          if (allNames.includes(name)) {
+            let idx = 1;
+            while (allNames.includes(`Automação ${idx}`)) {
+              idx += 1;
+            }
+            return `Automação ${idx}`;
+          } else {
+            return name;
+          }
+        }
+      });
+    });
+  Blockly.Extensions.register(
+    'time_validator',
+    function () { // this refers to the block that the extension is being run on
+      var thisBlock = (this as any) as Blockly.Block;
+      let idx = 0;
+      while (true) {
+        const fieldName = `TIME${idx}`;
+        const field = thisBlock.getField(fieldName);
+        if (field) {
+          field.setValidator(validateTime);
+        } else {
+          break;
+        }
+        idx += 1;
+      }
+    });
+}
 
 export function setupBlockly(api: HatApi, devices: Device[], possibleEvents: RuntimeEvent[]) {
+
+  setupExtensions();
+
   const toolbox = generateToolbox(possibleEvents, devices);
   setupEventBlocks(possibleEvents);
   setupDeviceBlocks(devices);
@@ -22,6 +73,8 @@ export function setupBlockly(api: HatApi, devices: Device[], possibleEvents: Run
   };
 
   let workspace = Blockly.inject("blocklyDiv", options);
+
+  globalWorkspace = workspace;
 
   const customTooltip = function (div, element) {
     if (element instanceof Blockly.BlockSvg) {

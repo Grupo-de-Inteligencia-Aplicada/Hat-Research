@@ -79,12 +79,12 @@ export default function setupConditionBlocks() {
       "args0": [
         {
           "type": "field_input",
-          "name": "START_TIME",
+          "name": "TIME0",
           "text": "17:00"
         },
         {
           "type": "field_input",
-          "name": "END_TIME",
+          "name": "TIME1",
           "text": "18:00"
         },
         {
@@ -93,7 +93,8 @@ export default function setupConditionBlocks() {
         }
       ],
       "output": "Boolean",
-      "colour": 225
+      "colour": 225,
+      "extensions": ["time_validator"],
     },
     {
       "type": "condition_device_is_on",
@@ -198,8 +199,8 @@ export default function setupConditionBlocks() {
   };
 
   javascriptGenerator.forBlock['condition_event_time_between'] = function (block) {
-    const start_time = block.getFieldValue('START_TIME');
-    const end_time = block.getFieldValue('END_TIME');
+    const start_time = block.getFieldValue('TIME0');
+    const end_time = block.getFieldValue('TIME1');
 
     return [
       `event_time() >= time("${start_time}") and event_time() <= time("${end_time}")`,
