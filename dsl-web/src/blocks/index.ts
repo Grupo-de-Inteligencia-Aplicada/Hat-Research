@@ -79,7 +79,6 @@ export function setupBlockly(api: HatApi, devices: Device[], possibleEvents: Run
   // Register the function in the Blockly.Tooltip so that Blockly calls it
   // when needed.
   Blockly.Tooltip.setCustomTooltip(customTooltip);
-  Blockly.registry
 
   return workspace;
 }
