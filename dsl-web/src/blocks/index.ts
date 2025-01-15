@@ -4,7 +4,7 @@ import generateToolbox from "./toolbox";
 import setupDeviceBlocks, { getLabelFor } from "./devices";
 import setupActionBlocks from './actions';
 import setupConditionBlocks from "./conditions";
-import type { Device, HatApi, RuntimeEvent } from "../services/api";
+import type { ApiError, Device, HatApi, RuntimeEvent } from "../services/api";
 import setupAutomationBlock from "./automation";
 
 export const DEFAULT_TOOLTIP = "tooltip";
@@ -33,25 +33,32 @@ export function setupBlockly(api: HatApi, devices: Device[], possibleEvents: Run
     }
     const text = document.createElement('pre');
 
-    text.style.padding = "15px";
-    text.style.fontFamily = 'inherit';
-    text.style.whiteSpace = 'pre-wrap';
-    text.style.maxWidth = '400px';
-    text.style.overflow = 'none';
 
     const blockType = element.type as string;
 
     if (blockType.startsWith('device_')) {
+
+      text.style.padding = "15px";
+      text.style.fontFamily = 'inherit';
+      text.style.whiteSpace = 'pre-wrap';
+      text.style.maxWidth = '400px';
+      text.style.overflow = 'none';
+
       const deviceId = blockType.substring("device_".length);
 
-      text.innerHTML = "Loading...";
+      text.innerHTML = "Carregando...";
 
       (async () => {
-        const device = await api.getDevice(deviceId);
-        text.innerHTML = "";
-        text.innerHTML += `Nome: ${device.name}\n`;
-        text.innerHTML += `Tipo: ${getLabelFor(device.typ)}\n`;
-        text.innerHTML += `Valor atual: ${device.state}\n`;
+        try {
+          const device = await api.getDevice(deviceId);
+          text.innerHTML = "";
+          text.innerHTML += `Nome: ${device.name}\n`;
+          text.innerHTML += `Tipo: ${getLabelFor(device.typ)}\n`;
+          text.innerHTML += `Valor atual: ${device.state}\n`;
+        } catch (e) {
+          console.error('Request failed:', e);
+          text.innerHTML = "Falha ao fazer requisição!"
+        }
       })();
     }
 
