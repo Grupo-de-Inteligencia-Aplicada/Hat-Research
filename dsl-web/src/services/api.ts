@@ -34,6 +34,7 @@ export interface Device {
 export interface RuntimeEvent {
   event: string;
   description: string;
+  relatedDeviceType: DeviceType,
 };
 
 export interface ApiError {

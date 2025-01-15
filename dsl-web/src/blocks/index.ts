@@ -1,7 +1,7 @@
 import * as Blockly from "blockly";
 import setupEventBlocks from './events';
 import generateToolbox from "./toolbox";
-import setupDeviceBlocks, { getLabelFor } from "./devices";
+import setupDeviceBlocks, { getIconFor, getLabelFor } from "./devices";
 import setupActionBlocks from './actions';
 import setupConditionBlocks from "./conditions";
 import type { ApiError, Device, HatApi, RuntimeEvent } from "../services/api";
@@ -37,13 +37,6 @@ export function setupBlockly(api: HatApi, devices: Device[], possibleEvents: Run
     const blockType = element.type as string;
 
     if (blockType.startsWith('device_')) {
-
-      text.style.padding = "15px";
-      text.style.fontFamily = 'inherit';
-      text.style.whiteSpace = 'pre-wrap';
-      text.style.maxWidth = '400px';
-      text.style.overflow = 'none';
-
       const deviceId = blockType.substring("device_".length);
 
       text.innerHTML = "Carregando...";
@@ -60,6 +53,22 @@ export function setupBlockly(api: HatApi, devices: Device[], possibleEvents: Run
           text.innerHTML = "Falha ao fazer requisição!"
         }
       })();
+    } else if (blockType.startsWith("event_")) {
+      const eventType = blockType.substring("event_".length);
+
+      for (const event of possibleEvents) {
+        if (event.event == eventType) {
+          text.innerHTML = `Evento relacionado aos dispotivos\ndo tipo: ${getIconFor(event.relatedDeviceType)} ${getLabelFor(event.relatedDeviceType)}`;
+        }
+      }
+    }
+
+    if (text.innerHTML.trim().length != 0) {
+      text.style.padding = "15px";
+      text.style.fontFamily = 'inherit';
+      text.style.whiteSpace = 'pre-wrap';
+      text.style.maxWidth = '400px';
+      text.style.overflow = 'none';
     }
 
     const container = document.createElement('div');
