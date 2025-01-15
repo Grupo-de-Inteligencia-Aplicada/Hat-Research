@@ -85,7 +85,7 @@ export default function setupActionBlocks() {
       "type": "action_wait",
       "tooltip": "Essa ação vai esperar o tempo selecionado antes de continuar executando as próximas ações.",
       "helpUrl": "",
-      "message0": "Wait %1 seconds",
+      "message0": "Esperar %1 segundo(s)",
       "args0": [
         {
           "type": "field_slider",
