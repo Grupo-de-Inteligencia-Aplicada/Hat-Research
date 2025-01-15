@@ -235,7 +235,7 @@ export default function setupConditionBlocks() {
 
     switch (conditionValue) {
       case '==':
-        return [`string(get_device_state("${device}")) == "${value}"`, Order.ATOMIC];
+        return [`number(get_device_state("${device}")) == number("${value}")`, Order.ATOMIC];
       case '>':
         return [`number(get_device_state("${device}")) > number("${value}")`, Order.ATOMIC];
       case '<':
@@ -245,7 +245,7 @@ export default function setupConditionBlocks() {
       case '<=':
         return [`number(get_device_state("${device}")) <= number("${value}")`, Order.ATOMIC];
       default:
-        return [`get_device_state("${device}") ${conditionValue} "${value}"`, Order.ATOMIC];
+        return null;
     }
 
   };
