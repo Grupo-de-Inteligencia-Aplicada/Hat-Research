@@ -100,7 +100,7 @@ export default function setupConditionBlocks() {
       "type": "condition_device_is_on",
       "tooltip": "Essa condição verifica se o dispositivo selecionado está ativo/ligado.",
       "helpUrl": "",
-      "message0": "Dispositivo %1 está ativo",
+      "message0": "Dispositivo %1 está ligado/ativo",
       "args0": [
         {
           "type": "input_value",
@@ -115,7 +115,7 @@ export default function setupConditionBlocks() {
       "type": "condition_device_is_off",
       "tooltip": "Essa condicão verifica se o dispositivo selecionado está inativo/desligado.",
       "helpUrl": "",
-      "message0": "Dispositivo %1 está inativo",
+      "message0": "Dispositivo %1 está desligado/inativo",
       "args0": [
         {
           "type": "input_value",
