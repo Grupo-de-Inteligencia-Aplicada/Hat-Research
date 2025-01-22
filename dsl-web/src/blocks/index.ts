@@ -7,6 +7,7 @@ import setupConditionBlocks from "./conditions";
 import type { Device, HatApi, RuntimeEvent } from "../services/api";
 import setupAutomationBlock from "./automation";
 import { validateTime } from "../utils";
+import { registerRenderer } from "./renderer";
 
 let globalWorkspace: Blockly.Workspace | undefined;
 
@@ -59,6 +60,7 @@ export function setupBlockly(api: HatApi, devices: Device[], possibleEvents: Run
 
   setupExtensions();
 
+  registerRenderer();
   const toolbox = generateToolbox(possibleEvents, devices);
   setupEventBlocks(possibleEvents);
   setupDeviceBlocks(devices);
@@ -69,7 +71,7 @@ export function setupBlockly(api: HatApi, devices: Device[], possibleEvents: Run
   let options = {
     toolbox,
     trashcan: true,
-    renderer: 'zelos',
+    renderer: 'custom_renderer',
   };
 
   let workspace = Blockly.inject("blocklyDiv", options);
