@@ -33,14 +33,14 @@ export default function generateToolbox(events: RuntimeEvent[], devices: Device[
         "flyoutOpen": true,
         "name": "Condições",
         "colour": 120,
-        "contents": [
+        "contents": binaryConditionBlocks.map(blockDef => `condition_${blockDef.type}`).concat([
           "condition_event_was_from_device",
           "condition_event_time_between",
           "condition_device_is_on",
           "condition_device_is_off",
           "condition_motion_sensor",
           "condition_sensor_value",
-        ].concat(binaryConditionBlocks.map(blockDef => `condition_${blockDef.type}`))
+        ])
           .map(a => ({
             "kind": "block",
             "type": a
