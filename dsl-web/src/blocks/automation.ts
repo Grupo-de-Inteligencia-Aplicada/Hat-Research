@@ -20,7 +20,7 @@ export default function setupAutomationBlock() {
                   
                   Evento que dispara ela acontece → Verifica a condição → Se verdadeira, executa as ações, uma a uma.`),
       "helpUrl": "",
-      "message0": "Automação %1 %2 %3 Disparar quando %4 %5 %6 E se %7 %8 %9 %10 Então, fazer %11 %12",
+      "message0": "Nome da automação: %1 %2 %3 Evento: %4 %5 %6 Condição: %7 %8 %9 Ações: %10",
       "args0": [
         {
           "type": "field_input",
@@ -28,16 +28,12 @@ export default function setupAutomationBlock() {
           "text": "Nome da automação"
         },
         {
-          "type": "input_dummy",
-          "name": ""
+          "type": "input_end_row",
+          "name": "",
         },
         {
           "type": "input_end_row",
-          "name": ""
-        },
-        {
-          "type": "input_dummy",
-          "name": ""
+          "name": "",
         },
         {
           "type": "input_value",
@@ -46,15 +42,11 @@ export default function setupAutomationBlock() {
         },
         {
           "type": "input_end_row",
-          "name": ""
-        },
-        {
-          "type": "input_dummy",
-          "name": ""
+          "name": "",
         },
         {
           "type": "input_end_row",
-          "name": ""
+          "name": "",
         },
         {
           "type": "input_value",
@@ -63,11 +55,11 @@ export default function setupAutomationBlock() {
         },
         {
           "type": "input_end_row",
-          "name": ""
+          "name": "",
         },
         {
-          "type": "input_dummy",
-          "name": ""
+          "type": "input_end_row",
+          "name": "",
         },
         {
           "type": "input_statement",
@@ -148,11 +140,19 @@ export default function setupAutomationBlock() {
 
   javascriptGenerator.forBlock['automation'] = (block, generator) => {
     const name = block.getFieldValue('NAME');
-    const eventValue = generator.valueToCode(block, 'EVENT', Order.ATOMIC).trim();
+
+    const rawDeviceEventJson = generator.valueToCode(block, 'EVENT', Order.ATOMIC).trim();
+    const {event: eventValue, deviceId}: {
+      event: string,
+      deviceId: string,
+    } = rawDeviceEventJson.length == 0 ? { event: "None", deviceId: "None"} : JSON.parse(rawDeviceEventJson);
     const event = eventValue.length == 0 ? "None" : eventValue;
+
+    const deviceCondition = `\n  if (get_device() == "${deviceId}")`;
     const condition = generator.valueToCode(block, 'CONDITIONS', Order.ATOMIC);
+
     const body = generator.statementToCode(block, 'ACTIONS');
-    return 'automation "' + name + '" (' + event + ') {' + (condition ? '\n  if ' + condition : '') + '\n' + body + '}\n\n';
+    return 'automation "' + name + '" (' + event + ') {' + deviceCondition + (condition ? '\n  if ' + condition : '') + '\n' + body + '}\n\n';
   };
 
   javascriptGenerator.forBlock['automation_time_based'] = (block, generator) => {

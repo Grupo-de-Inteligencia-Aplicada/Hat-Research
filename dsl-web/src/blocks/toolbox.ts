@@ -23,9 +23,9 @@ export default function generateToolbox(events: RuntimeEvent[], devices: Device[
         "flyoutOpen": true,
         "name": "Eventos",
         "colour": 70,
-        "contents": events.map(e => ({
+        "contents": devices.map(d => ({
           "kind": "block",
-          "type": "event_" + e.event
+          "type": "event_dev_" + d.id
         }))
       },
       {

@@ -62,7 +62,7 @@ export function setupBlockly(api: HatApi, devices: Device[], possibleEvents: Run
 
   registerRenderer();
   const toolbox = generateToolbox(possibleEvents, devices);
-  setupEventBlocks(possibleEvents);
+  setupEventBlocks(devices, possibleEvents);
   setupDeviceBlocks(devices);
   setupActionBlocks();
   setupConditionBlocks();
