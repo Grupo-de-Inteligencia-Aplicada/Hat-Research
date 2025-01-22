@@ -43,7 +43,7 @@ export default function setupConditionBlocks() {
         }
       ],
       "output": "Boolean",
-      "colour": 120
+      "colour": 225
     }]);
 
     javascriptGenerator.forBlock[blockType] = (block, generator) => {
