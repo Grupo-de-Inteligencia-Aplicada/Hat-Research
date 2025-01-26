@@ -1,6 +1,7 @@
 import * as Blockly from 'blockly';
 import { javascriptGenerator, Order } from 'blockly/javascript';
 import { DeviceTypes, type Device, type DeviceType } from '../services/api';
+import { DEVICE_BLOCK_COLOR } from './colors';
 
 export const DeviceBlockTypes = DeviceTypes.map(typ => `device_${typ}`);
 
@@ -68,7 +69,7 @@ export default function setupDeviceBlocks(devices: Device[]) {
       }
     ],
     "output": "device_" + d.typ,
-    "colour": 190
+    "colour": DEVICE_BLOCK_COLOR,
   })))
 
   devices.forEach(d => {

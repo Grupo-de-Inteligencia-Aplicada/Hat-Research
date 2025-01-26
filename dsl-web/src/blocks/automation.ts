@@ -1,6 +1,7 @@
 import * as Blockly from 'blockly';
 import { javascriptGenerator, Order } from 'blockly/javascript';
 import { stripLines } from '../utils';
+import { AUTOMATION_BLOCK_COLOR } from './colors';
 
 export default function setupAutomationBlock() {
   Blockly.defineBlocksWithJsonArray([
@@ -67,7 +68,7 @@ export default function setupAutomationBlock() {
           "check": "action_block"
         }
       ],
-      "colour": 210,
+      "colour": AUTOMATION_BLOCK_COLOR,
       "extensions": ["automation_name_validator"],
     },
     {
@@ -133,7 +134,7 @@ export default function setupAutomationBlock() {
           "check": "action_block"
         }
       ],
-      "colour": 210,
+      "colour": AUTOMATION_BLOCK_COLOR,
       "extensions": ["time_validator", "automation_name_validator"],
     },
   ]);

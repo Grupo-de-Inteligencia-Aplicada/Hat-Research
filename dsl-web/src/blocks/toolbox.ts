@@ -1,4 +1,5 @@
 import { deviceTypePriorities, type Device, type RuntimeEvent } from "../services/api";
+import * as Colors from "./colors";
 import { binaryConditionBlocks } from './conditions';
 import { getBlockTypeFor } from "./devices";
 
@@ -12,7 +13,7 @@ export default function generateToolbox(events: RuntimeEvent[], devices: Device[
         "kind": "category",
         "flyoutOpen": true,
         "name": "Automação",
-        "colour": 210,
+        "colour": Colors.AUTOMATION_BLOCK_COLOR,
         "contents": [
           { "kind": "block", "type": "automation" },
           { "kind": "block", "type": "automation_time_based" },
@@ -22,7 +23,7 @@ export default function generateToolbox(events: RuntimeEvent[], devices: Device[
         "kind": "category",
         "flyoutOpen": true,
         "name": "Eventos",
-        "colour": 70,
+        "colour": Colors.EVENT_BLOCK_COLOR,
         "contents": devices.map(d => ({
           "kind": "block",
           "type": "event_dev_" + d.id
@@ -32,7 +33,7 @@ export default function generateToolbox(events: RuntimeEvent[], devices: Device[
         "kind": "category",
         "flyoutOpen": true,
         "name": "Condições",
-        "colour": 120,
+        "colour": Colors.CONDITION_BLOCK_COLOR,
         "contents": binaryConditionBlocks.map(blockDef => `condition_${blockDef.type}`).concat([
           "condition_event_was_from_device",
           "condition_event_time_between",
@@ -50,7 +51,7 @@ export default function generateToolbox(events: RuntimeEvent[], devices: Device[
         "kind": "category",
         "flyoutOpen": true,
         "name": "Ações",
-        "colour": 10,
+        "colour": Colors.ACTION_BLOCK_COLOR,
         "contents": [
           "action_turn_on_device",
           "action_turn_off_device",
@@ -66,7 +67,7 @@ export default function generateToolbox(events: RuntimeEvent[], devices: Device[
         "kind": "category",
         "flyoutOpen": true,
         "name": "Dispositivos",
-        "colour": 190,
+        "colour": Colors.DEVICE_BLOCK_COLOR,
         "contents": devices.map(d => ({
           "kind": "block",
           "type": getBlockTypeFor(d),

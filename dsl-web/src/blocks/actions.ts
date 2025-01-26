@@ -1,6 +1,7 @@
 import * as Blockly from 'blockly';
 import { javascriptGenerator, Order } from 'blockly/javascript';
 import { DeviceBlockTypes } from './devices';
+import { ACTION_BLOCK_COLOR } from './colors';
 
 export default function setupActionBlocks() {
   Blockly.defineBlocksWithJsonArray([
@@ -18,7 +19,7 @@ export default function setupActionBlocks() {
       ],
       "previousStatement": "action_block",
       "nextStatement": "action_block",
-      "colour": 10
+      "colour": ACTION_BLOCK_COLOR,
     },
     {
       "type": "action_turn_off_device",
@@ -34,7 +35,7 @@ export default function setupActionBlocks() {
       ],
       "previousStatement": "action_block",
       "nextStatement": "action_block",
-      "colour": 10
+      "colour": ACTION_BLOCK_COLOR,
     },
     {
       "type": "action_set_light_color",
@@ -55,7 +56,7 @@ export default function setupActionBlocks() {
       ],
       "previousStatement": "action_block",
       "nextStatement": "action_block",
-      "colour": 15
+      "colour": ACTION_BLOCK_COLOR,
     },
     {
       "type": "action_set_light_brightness",
@@ -79,7 +80,7 @@ export default function setupActionBlocks() {
       ],
       "previousStatement": "action_block",
       "nextStatement": "action_block",
-      "colour": 15
+      "colour": ACTION_BLOCK_COLOR,
     },
     {
       "type": "action_wait",
@@ -98,7 +99,7 @@ export default function setupActionBlocks() {
       ],
       "previousStatement": "action_block",
       "nextStatement": "action_block",
-      "colour": 15
+      "colour": ACTION_BLOCK_COLOR,
     }
 
 

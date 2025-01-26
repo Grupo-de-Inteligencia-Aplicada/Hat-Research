@@ -1,6 +1,7 @@
 import * as Blockly from 'blockly';
 import { javascriptGenerator, Order } from 'blockly/javascript';
 import { DeviceBlockTypes } from './devices';
+import { CONDITION_BLOCK_COLOR } from './colors';
 
 export const binaryConditionBlocks = [
   {
@@ -43,7 +44,7 @@ export default function setupConditionBlocks() {
         }
       ],
       "output": "Boolean",
-      "colour": 225
+      "colour": CONDITION_BLOCK_COLOR,
     }]);
 
     javascriptGenerator.forBlock[blockType] = (block, generator) => {
@@ -69,7 +70,7 @@ export default function setupConditionBlocks() {
         }
       ],
       "output": "Boolean",
-      "colour": 225
+      "colour": CONDITION_BLOCK_COLOR,
     },
     {
       "type": "condition_event_time_between",
@@ -93,7 +94,7 @@ export default function setupConditionBlocks() {
         }
       ],
       "output": "Boolean",
-      "colour": 225,
+      "colour": CONDITION_BLOCK_COLOR,
       "extensions": ["time_validator"],
     },
     {
@@ -109,7 +110,7 @@ export default function setupConditionBlocks() {
         }
       ],
       "output": "Boolean",
-      "colour": 225
+      "colour": CONDITION_BLOCK_COLOR,
     },
     {
       "type": "condition_device_is_off",
@@ -124,7 +125,7 @@ export default function setupConditionBlocks() {
         }
       ],
       "output": "Boolean",
-      "colour": 225
+      "colour": CONDITION_BLOCK_COLOR,
     },
     {
       "type": "condition_motion_sensor",
@@ -153,7 +154,7 @@ export default function setupConditionBlocks() {
         }
       ],
       "output": "Boolean",
-      "colour": 225
+      "colour": CONDITION_BLOCK_COLOR,
     },
     {
       "type": "condition_sensor_value",
@@ -188,7 +189,7 @@ export default function setupConditionBlocks() {
         }
       ],
       "output": "Boolean",
-      "colour": 225
+      "colour": CONDITION_BLOCK_COLOR,
     },
   ]);
 
