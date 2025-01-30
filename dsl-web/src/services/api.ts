@@ -112,7 +112,7 @@ export class HatApi {
 
   async listDevices(): Promise<Device[]> {
     const devices = await this.get("/devices");
-    const filteredDevices = (devices as Device[]).filter(isDeviceBacklisted);
+    const filteredDevices = (devices as Device[]).filter((dev) => !isDeviceBlacklisted(dev));
     return filteredDevices;
   }
 
@@ -131,13 +131,13 @@ export class HatApi {
   }
 }
 
-function isDeviceBacklisted(device: Device) {
+function isDeviceBlacklisted(device: Device) {
   if (device.id.includes("fleap_iphone")) {
-    return false;
+    return true;
   }
   if (device.id.includes("a35_isabel")) {
-    return false;
+    return true;
   }
-  if (device.integration.includes("DummyIntegration")) return false;
-  return true;
+  if (device.integration.includes("DummyIntegration")) return true;
+  return false;
 }
