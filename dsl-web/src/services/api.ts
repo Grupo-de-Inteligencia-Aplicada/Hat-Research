@@ -131,7 +131,9 @@ export class HatApi {
   }
 }
 
+// Function to blacklist devices that should be hidden during the experiment
 function isDeviceBlacklisted(device: Device) {
+  if (device.name?.includes("Sun ")) return true;
   if (device.id.includes("fleap_iphone")) {
     return true;
   }
