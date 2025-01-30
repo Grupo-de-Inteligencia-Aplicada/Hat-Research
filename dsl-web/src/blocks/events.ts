@@ -34,7 +34,7 @@ export default function defineEventBlocks(devices: Device[], events: RuntimeEven
       const event = block.getFieldValue('EVENT');
       return [JSON.stringify({
         event: event,
-        deviceId: d.id
+        deviceId: `${d.integration}@${d.id}`
       }), Order.ATOMIC];
     };
   });
