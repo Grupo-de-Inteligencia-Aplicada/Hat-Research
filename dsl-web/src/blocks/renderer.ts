@@ -128,7 +128,7 @@ class CustomConstantProvider extends Blockly.zelos.ConstantProvider {
       `font-family: ${this.FIELD_TEXT_FONTFAMILY};`,
       `}`,
       `${selector}.blocklyDropDownDiv .goog-menuitem-content {`,
-      `color: #fff;`,
+      `color: ${Colors.TEXT_COLOR};`,
       `}`,
 
       // Connection highlight.
