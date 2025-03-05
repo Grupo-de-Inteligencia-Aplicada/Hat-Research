@@ -52,35 +52,7 @@ lazy_static! {
                 fun: (|_ctx, args| {
                     Box::pin(async move {
                         let arg = args.first();
-                        match arg {
-                            Some(arg) => {
-                                if let Value::String(s) = arg {
-                                    let mut parts = s.split(":");
-                                    let hours: u32 = parts
-                                        .next()
-                                        .context("time string is empty")?
-                                        .parse()
-                                        .context("failed to parse hours")?;
-                                    let mins: u32 = parts
-                                        .next()
-                                        .map(|s| s.parse::<u32>())
-                                        .unwrap_or(Ok(0))
-                                        .context("failed to parse minutes")?;
-                                    let secs: u32 = parts
-                                        .next()
-                                        .map(|s| s.parse::<u32>())
-                                        .unwrap_or(Ok(0))
-                                        .context("failed to parse seconds")?;
-                                    Ok(Value::Time(
-                                        Time::from_hms_opt(hours, mins, secs)
-                                            .context("invalid time provided")?,
-                                    ))
-                                } else {
-                                    bail!("time function only accepts strings");
-                                }
-                            }
-                            None => Ok(Value::Time(Time::now())),
-                        }
+                        Ok(Value::Time(coerce_to_time(arg)?))
                     })
                 }),
             },
@@ -398,6 +370,63 @@ lazy_static! {
                     })
                 }),
             },
+            Function {
+                name: "event_time_between".to_owned(),
+                fun: (|ctx, args| {
+                    Box::pin(async move {
+                        if args.len() < 2 {
+                            bail!("event_time_between requires exactly two arguments");
+                        }
+
+                        let start_time = coerce_to_time(Some(&args[0]))?;
+                        let end_time = coerce_to_time(Some(&args[1]))?;
+
+                        // Use the current time as the "now"
+                        let now = Time::from(ctx.event.datetime);
+
+                        // Circular time comparison:
+                        // if start <= end:   we want start <= now && now <= end
+                        // if start >  end:   we want now >= start OR now <= end
+                        let is_between = if start_time <= end_time {
+                            now >= start_time && now <= end_time
+                        } else {
+                            // Crosses midnight scenario
+                            now >= start_time || now <= end_time
+                        };
+
+                        Ok(Value::Boolean(is_between))
+                    })
+                }),
+            },
         ]
     };
+}
+
+fn coerce_to_time(arg: Option<&Value>) -> anyhow::Result<Time> {
+    match arg {
+        Some(arg) => {
+            if let Value::String(s) = arg {
+                let mut parts = s.split(":");
+                let hours: u32 = parts
+                    .next()
+                    .context("time string is empty")?
+                    .parse()
+                    .context("failed to parse hours")?;
+                let mins: u32 = parts
+                    .next()
+                    .map(|s| s.parse::<u32>())
+                    .unwrap_or(Ok(0))
+                    .context("failed to parse minutes")?;
+                let secs: u32 = parts
+                    .next()
+                    .map(|s| s.parse::<u32>())
+                    .unwrap_or(Ok(0))
+                    .context("failed to parse seconds")?;
+                Ok(Time::from_hms_opt(hours, mins, secs).context("invalid time provided")?)
+            } else {
+                bail!("time function only accepts strings");
+            }
+        }
+        None => Ok(Time::now()),
+    }
 }
