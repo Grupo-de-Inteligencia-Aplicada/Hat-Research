@@ -71,10 +71,13 @@ async fn main() -> anyhow::Result<()> {
 
     runtime.parse(path_string, &source)?;
 
+    // The runtime can integrate with any implementation of the Integration trait
+    // Here is an example of a Dummy integration
     runtime.integrate(DummyIntegration::new()).await;
+    // Here is the default integration with HomeAssistant
     runtime.integrate(HassIntegration::new(
-        "https://ha.polaris.fleap.dev",
-       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI3YzhiYjdkMDczYmY0OWFiYTc4YTY0YjVmMzZkYTkwNiIsImlhdCI6MTcyMjQzNzk3NywiZXhwIjoyMDM3Nzk3OTc3fQ.h8uzazAaV_4MopUB3vPu258l54bhoh4DuZc30shF42M"
+        &std::env::var("HA_URL").context("missing environment variable HA_URL")?,
+        &std::env::var("HA_TOKEN").context("missing environment variable HA_TOKEN")?,
     ).await?).await;
 
     let router = server::make_router(runtime);
