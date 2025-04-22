@@ -14,32 +14,6 @@ string = @{ "\"" ~ ( "\"\"" | (!"\"" ~ ANY) )* ~ "\"" }
 null = @{ "null" }
 bool = @{ "true" | "false" }
 
-
-event_declaration = {
-    "event" ~
-    ident ~
-    "{" ~
-    event_parameters? ~
-    "}"
-}
-
-event_parameter = {
-    ident ~
-    ":" ~
-    type_keyword
-}
-
-event_parameters = {
-    event_parameter ~
-    ("," ~ event_parameter)* ~
-    ","?
-}
-
-type_keyword = @{
-    "bool"
-}
-
-
 automation_declaration = {
     "automation" ~
     (string | ident) ~
@@ -109,7 +83,7 @@ lesser_eq = { "<=" }
 
 expr = { atom ~ (bin_op ~ atom)* }
 
-stmt = _{ event_declaration | automation_declaration }
+stmt = _{ automation_declaration }
 
 // Entry rule
 program = _{ SOI ~ stmt* ~ stmt? ~ EOI }
