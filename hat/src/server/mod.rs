@@ -11,7 +11,6 @@ use crate::runtime::HatRuntime;
 
 mod error;
 mod routes;
-mod transpiler;
 
 #[derive(Clone)]
 struct AppState {
@@ -25,14 +24,6 @@ pub fn make_router(runtime: Arc<HatRuntime>) -> Router {
         .allow_headers([CONTENT_TYPE]);
 
     Router::new()
-        .route(
-            "/transpile/into_xml",
-            post(transpiler::transpile_hat_to_workspace),
-        )
-        .route(
-            "/transpile/into_hat",
-            post(transpiler::transpile_workspace_to_hat),
-        )
         .route("/devices", get(routes::devices::get_devices))
         .route("/device", get(routes::devices::get_device))
         .route("/possible_events", get(routes::events::get_possible_events))
