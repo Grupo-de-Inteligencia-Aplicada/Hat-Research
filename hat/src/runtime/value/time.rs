@@ -5,7 +5,6 @@ use std::{
 
 use chrono::{DateTime, Local, NaiveTime, SubsecRound, Utc};
 use serde::{Deserialize, Serialize};
-use tracing::debug;
 
 #[derive(Debug, Clone, PartialOrd, Serialize, Deserialize)]
 pub struct Time(NaiveTime);

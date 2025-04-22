@@ -1,8 +1,10 @@
 use std::sync::Arc;
 
-use axum::{extract::{Path, Query, State}, Json};
+use axum::{
+    extract::{Query, State},
+    Json,
+};
 use serde::Deserialize;
-use tracing::info;
 
 use crate::{
     runtime::device::Device,
@@ -42,8 +44,14 @@ pub struct GetDeviceQuery {
     id: String,
 }
 
-pub async fn get_device(Query(query): Query<GetDeviceQuery>, State(state): State<AppState>) -> ApiResult<Json<Option<Device>>> {
-    let dev = state.runtime.get_device(&query.id).await
+pub async fn get_device(
+    Query(query): Query<GetDeviceQuery>,
+    State(state): State<AppState>,
+) -> ApiResult<Json<Option<Device>>> {
+    let dev = state
+        .runtime
+        .get_device(&query.id)
+        .await
         .raise_internal_error(None)?;
 
     Ok(Json(dev))

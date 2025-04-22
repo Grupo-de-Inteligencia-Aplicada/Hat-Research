@@ -75,10 +75,15 @@ async fn main() -> anyhow::Result<()> {
     // Here is an example of a Dummy integration
     runtime.integrate(DummyIntegration::new()).await;
     // Here is the default integration with HomeAssistant
-    runtime.integrate(HassIntegration::new(
-        &std::env::var("HA_URL").context("missing environment variable HA_URL")?,
-        &std::env::var("HA_TOKEN").context("missing environment variable HA_TOKEN")?,
-    ).await?).await;
+    runtime
+        .integrate(
+            HassIntegration::new(
+                &std::env::var("HA_URL").context("missing environment variable HA_URL")?,
+                &std::env::var("HA_TOKEN").context("missing environment variable HA_TOKEN")?,
+            )
+            .await?,
+        )
+        .await;
 
     let router = server::make_router(runtime);
 

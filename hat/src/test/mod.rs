@@ -1,13 +1,13 @@
-use std::sync::Arc;
 use crate::runtime::context::AutomationContext;
 use crate::runtime::device::{Device, DeviceType};
 use crate::runtime::event::{Event, EventType};
 use crate::runtime::function::FunctionCall;
-use crate::runtime::HatRuntime;
 use crate::runtime::parser::expression::Expression;
 use crate::runtime::parser::expression::Expression::{BinaryOperation, Constant, Function};
 use crate::runtime::parser::operation::Operation;
 use crate::runtime::value::Value;
+use crate::runtime::HatRuntime;
+use std::sync::Arc;
 
 #[tokio::test]
 pub async fn test_parse_sample() {

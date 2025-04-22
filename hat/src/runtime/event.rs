@@ -1,8 +1,8 @@
 use crate::runtime::device::Device;
 use chrono::Local;
 use serde::{Deserialize, Serialize};
-use strum::VariantArray;
 use std::collections::HashMap;
+use strum::VariantArray;
 
 use super::device::DeviceType;
 
@@ -45,7 +45,7 @@ impl EventType {
                 }
             }
         }
-        return None;
+        None
     }
     pub const fn as_str(&self) -> &'static str {
         use EventType::*;

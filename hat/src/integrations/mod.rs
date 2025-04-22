@@ -4,9 +4,9 @@ use anyhow::Result;
 use async_trait::async_trait;
 use tokio::sync::mpsc;
 
+pub(crate) mod clock;
 pub mod dummy;
 pub mod home_assistant;
-pub(crate) mod clock;
 
 #[async_trait]
 pub trait Integration: Send + Sync {
