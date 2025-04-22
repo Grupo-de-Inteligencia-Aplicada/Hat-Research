@@ -1,45 +1,56 @@
+use std::sync::Arc;
 use crate::runtime::context::AutomationContext;
 use crate::runtime::device::{Device, DeviceType};
 use crate::runtime::event::{Event, EventType};
 use crate::runtime::function::FunctionCall;
+use crate::runtime::HatRuntime;
 use crate::runtime::parser::expression::Expression;
+use crate::runtime::parser::expression::Expression::{BinaryOperation, Constant, Function};
+use crate::runtime::parser::operation::Operation;
 use crate::runtime::value::Value;
 
-#[test]
-pub fn test_parse_sample() {
-    let src = include_str!("sample.hat");
+#[tokio::test]
+pub async fn test_parse_sample() {
+    async fn parse_sample(src: &str) {
+        let runtime = HatRuntime::new().await;
+        runtime.parse("test.hat".into(), src).unwrap();
+    }
+
+    parse_sample(include_str!("sample.hat")).await;
+    parse_sample(include_str!("another.hat")).await;
 }
 
-#[test]
-pub fn test_function_call() {
-    let expression: Expression = FunctionCall {
-        name: "get_device".to_string(),
-        arguments: vec![
-            FunctionCall {
-                name: "get_integration".to_string(),
-                arguments: vec![],
-            }
-            .into(),
-            Value::Boolean(true).into(),
-        ],
-    }
-    .into();
+#[tokio::test]
+pub async fn test_function_call() {
+    let runtime = HatRuntime::new().await;
 
-    let mut context = AutomationContext {
+    let context = AutomationContext {
         event: Event {
             typ: EventType::Dummy,
             datetime: Default::default(),
             device: Device {
-                integration: "TestIntegration".to_string(),
-                id: "test_device".to_string(),
+                integration: "test".to_string(),
+                id: "test_dev".to_string(),
                 name: None,
                 typ: DeviceType::Dummy,
+                state: None,
+                attributes: Default::default(),
             },
             parameters: Default::default(),
         },
+        runtime: Arc::clone(&runtime),
     };
 
-    let result = expression.evaluate(&mut context).unwrap();
+    let expression: Expression = BinaryOperation {
+        lhs: Box::new(Constant(Value::String("Example-".into()))),
+        op: Operation::Add,
+        rhs: Box::new(Function(FunctionCall {
+            name: "get_device".to_string(),
+            arguments: vec![],
+        })),
+    };
 
-    assert_eq!(result, Value::String(context.event.device.full_id()))
+    let result = expression.evaluate(Arc::new(context)).await.unwrap();
+
+    assert_eq!(result, Value::String("Example-test@test_dev".into()));
 }
