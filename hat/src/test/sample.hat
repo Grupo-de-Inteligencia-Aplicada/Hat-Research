@@ -1,3 +1,15 @@
+schedule "Morning Routine Cron" (cron "0 7 * * *") {
+	run echo("Testing...")
+}
+
+schedule "Morning Routime Time" (at 07:00) {
+	run echo("Testing..." + 07:00)
+}
+
+schedule "Start of the week routine" (every monday at 08:00) {
+	run echo("Testing...")
+}
+
 // Example automation to turn on the lights and fan when detect motion
 automation "Automation to" (MotionSensorOnEvent) {
   if get_device() == "HassIntegration0@binary_sensor.zy_m100_wifi_presence_sensor_motion"

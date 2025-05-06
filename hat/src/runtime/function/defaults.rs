@@ -1,6 +1,7 @@
 use std::sync::Arc;
 use std::time::Duration;
 
+use crate::runtime::value::time::coerce_to_time;
 use crate::runtime::value::Value;
 use crate::runtime::HatRuntime;
 use crate::runtime::{function::Function, value::time::Time};
@@ -400,33 +401,4 @@ lazy_static! {
             },
         ]
     };
-}
-
-fn coerce_to_time(arg: Option<&Value>) -> anyhow::Result<Time> {
-    match arg {
-        Some(arg) => {
-            if let Value::String(s) = arg {
-                let mut parts = s.split(":");
-                let hours: u32 = parts
-                    .next()
-                    .context("time string is empty")?
-                    .parse()
-                    .context("failed to parse hours")?;
-                let mins: u32 = parts
-                    .next()
-                    .map(|s| s.parse::<u32>())
-                    .unwrap_or(Ok(0))
-                    .context("failed to parse minutes")?;
-                let secs: u32 = parts
-                    .next()
-                    .map(|s| s.parse::<u32>())
-                    .unwrap_or(Ok(0))
-                    .context("failed to parse seconds")?;
-                Ok(Time::from_hms_opt(hours, mins, secs).context("invalid time provided")?)
-            } else {
-                bail!("time function only accepts strings");
-            }
-        }
-        None => Ok(Time::now()),
-    }
 }

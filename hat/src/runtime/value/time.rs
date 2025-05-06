@@ -3,8 +3,13 @@ use std::{
     ops::{Deref, DerefMut},
 };
 
+use anyhow::bail;
 use chrono::{DateTime, Local, NaiveTime, SubsecRound, Utc};
 use serde::{Deserialize, Serialize};
+
+use crate::runtime::parser::parse_time;
+
+use super::Value;
 
 #[derive(Debug, Clone, PartialOrd, Serialize, Deserialize)]
 pub struct Time(NaiveTime);
@@ -63,5 +68,18 @@ impl Deref for Time {
 
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+pub fn coerce_to_time(arg: Option<&Value>) -> anyhow::Result<Time> {
+    match arg {
+        Some(arg) => {
+            if let Value::String(s) = arg {
+                parse_time(&s)
+            } else {
+                bail!("time function only accepts strings");
+            }
+        }
+        None => Ok(Time::now()),
     }
 }

@@ -1,38 +1,54 @@
-WHITESPACE = _{ " " | "\t" | "\n" | "\r" }
+WHITESPACE          = _{ " " | "\t" | "\n" | "\r" }
 SINGLE_LINE_COMMENT = _{ "//" ~ (!NEWLINE ~ ANY)* ~ NEWLINE }
-BLOCK_COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
-COMMENT = _{
-    SINGLE_LINE_COMMENT |
-    BLOCK_COMMENT
+BLOCK_COMMENT       = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
+COMMENT             = _{
+    SINGLE_LINE_COMMENT
+  | BLOCK_COMMENT
 }
 
 ident = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
 
 integer = @{ "_"? ~ ASCII_DIGIT+ }
 decimal = @{ "_"? ~ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT* }
-string = @{ "\"" ~ ( "\"\"" | (!"\"" ~ ANY) )* ~ "\"" }
-null = @{ "null" }
-bool = @{ "true" | "false" }
+string  = @{ "\"" ~ ("\"\"" | (!"\"" ~ ANY))* ~ "\"" }
+null    = @{ "null" }
+bool    = @{ "true" | "false" }
+time    = @{ ASCII_DIGIT? ~ ASCII_DIGIT ~ ":" ~ ASCII_DIGIT? ~ ASCII_DIGIT ~ (":" ~ ASCII_DIGIT? ~ ASCII_DIGIT)? }
+
+schedule_declaration = {
+    "schedule" ~ (string | ident) ~ "(" ~ schedule_interval ~ ")" ~ "{" ~ (automation_condition | automation_action) ~ "}"
+}
+
+schedule_interval = { schedule_interval_cron | schedule_interval_time }
+
+schedule_interval_time = {
+    ("every" ~ schedule_interval_time_weekday)? ~ "at" ~ time
+}
+
+schedule_interval_time_weekday = {
+    "monday"
+  | "tuesday"
+  | "wednesday"
+  | "thursday"
+  | "friday"
+  | "saturday"
+  | "sunday"
+}
+
+schedule_interval_cron = {
+    "cron" ~ string
+}
 
 automation_declaration = {
-    "automation" ~
-    (string | ident) ~
-    "(" ~
-    automation_triggers ~
-    ")" ~
-    "{" ~
-    (automation_condition | automation_action)* ~
-    "}"
+    "automation" ~ (string | ident) ~ "(" ~ automation_triggers ~ ")" ~ "{" ~ (automation_condition | automation_action)* ~ "}"
 }
 
 automation_triggers = {
-    ident ~
-    ("," ~ ident)*
+    ident ~ ("," ~ ident)*
 }
 
 automation_condition = {
-    "if" ~
-    expr
+    "if" ~ expr
 }
 
 automation_action = {
@@ -40,50 +56,45 @@ automation_action = {
 }
 
 atom = {
-    function |
-    const_atom |
-    ( "(" ~ expr ~ ")" )
+    function
+  | const_atom
+  | ("(" ~ expr ~ ")")
 }
 
 const_atom = _{
-    null |
-    bool |
-    string |
-    decimal |
-    integer
+    null
+  | bool
+  | string
+  | time
+  | decimal
+  | integer
 }
 
 function = {
-    ident ~
-    "(" ~
-    function_parameters ~
-    ")"
+    ident ~ "(" ~ function_parameters ~ ")"
 }
 
 function_parameters = {
-    (
-        expr ~
-        ("," ~ expr)*
-    )?
+    (expr ~ ("," ~ expr)*)?
 }
 
-bin_op = _{ add | subtract | multiply | divide | equals | not_equals | and | or | greater_eq | lesser_eq | greater | lesser }
-add = { "+" }
-subtract = { "-" }
-multiply = { "*" }
-divide = { "/" }
-equals = { "==" }
-not_equals = { "!=" }
-and = { "and" }
-or = { "or" }
-greater = { ">" }
-greater_eq = { ">=" }
-lesser = { "<" }
-lesser_eq = { "<=" }
+bin_op     = _{ add | subtract | multiply | divide | equals | not_equals | and | or | greater_eq | lesser_eq | greater | lesser }
+add        =  { "+" }
+subtract   =  { "-" }
+multiply   =  { "*" }
+divide     =  { "/" }
+equals     =  { "==" }
+not_equals =  { "!=" }
+and        =  { "and" }
+or         =  { "or" }
+greater    =  { ">" }
+greater_eq =  { ">=" }
+lesser     =  { "<" }
+lesser_eq  =  { "<=" }
 
 expr = { atom ~ (bin_op ~ atom)* }
 
-stmt = _{ automation_declaration }
+stmt = _{ automation_declaration | schedule_declaration }
 
 // Entry rule
 program = _{ SOI ~ stmt* ~ stmt? ~ EOI }

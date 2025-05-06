@@ -1,5 +1,6 @@
 use crate::runtime::automation::Automation;
 use crate::runtime::function::FunctionCall;
+use crate::runtime::schedule::Weekday;
 use crate::runtime::value::Value;
 use crate::runtime::RuntimeError;
 use anyhow::{bail, Context, Result};
@@ -11,6 +12,10 @@ use pest::pratt_parser::PrattParser;
 use pest::Parser;
 use pest_derive::Parser;
 use std::str::FromStr;
+use tracing::debug;
+
+use super::schedule::{Schedule, ScheduleInterval};
+use super::value::time::Time;
 
 pub mod expression;
 pub mod operation;
@@ -103,6 +108,14 @@ pub fn parse(filename: String, code: &str) -> std::result::Result<Vec<Automation
                             Rule::greater_eq => ">=",
                             Rule::lesser => "<",
                             Rule::lesser_eq => "<=",
+                            Rule::schedule_interval => "schedule interval",
+                            Rule::time => "time",
+                            Rule::schedule_declaration => "schedule declaration",
+                            Rule::schedule_interval_time => "schedule interval time",
+                            Rule::schedule_interval_time_weekday => {
+                                "weekday of the schedule interval"
+                            }
+                            Rule::schedule_interval_cron => "schedule interval cron",
                         })
                         .collect(),
                     ErrorVariant::CustomError { .. } => todo!(),
@@ -114,50 +127,141 @@ pub fn parse(filename: String, code: &str) -> std::result::Result<Vec<Automation
     let mut automations = Vec::new();
 
     for rule in program {
-        if matches!(rule.as_rule(), Rule::automation_declaration) {
-            let mut inner = rule.into_inner();
+        match rule.as_rule() {
+            Rule::automation_declaration => {
+                let mut inner = rule.into_inner();
 
-            let name_rule = inner.next().expect("missing name of the automation");
-            let name = match name_rule.as_rule() {
-                Rule::ident => name_rule.as_span().as_str().to_owned(),
-                Rule::string => parse_string(name_rule).expect("failed to parse string"),
-                _ => unreachable!(),
-            };
+                let name_rule = inner.next().expect("missing name of the automation");
+                let name = match name_rule.as_rule() {
+                    Rule::ident => name_rule.as_span().as_str().to_owned(),
+                    Rule::string => parse_string(name_rule).expect("failed to parse string"),
+                    _ => unreachable!(),
+                };
 
-            let triggers: Vec<_> = inner
-                .next()
-                .expect("missing the automation triggers")
-                .into_inner()
-                .map(|trigger| trigger.as_span().as_str().to_owned())
-                .collect();
+                let triggers: Vec<_> = inner
+                    .next()
+                    .expect("missing the automation triggers")
+                    .into_inner()
+                    .map(|trigger| trigger.as_span().as_str().to_owned())
+                    .collect();
 
-            let mut conditions = Vec::new();
-            let mut actions = Vec::new();
+                let mut conditions = Vec::new();
+                let mut actions = Vec::new();
 
-            for next in inner {
-                match next.as_rule() {
-                    Rule::automation_condition => {
-                        conditions.push(parse_expression(next.into_inner()).unwrap());
+                for next in inner {
+                    match next.as_rule() {
+                        Rule::automation_condition => {
+                            conditions.push(parse_expression(next.into_inner()).unwrap());
+                        }
+                        Rule::automation_action => {
+                            actions.push(parse_expression(next.into_inner()).unwrap());
+                        }
+                        _ => unreachable!(),
                     }
-                    Rule::automation_action => {
-                        actions.push(parse_expression(next.into_inner()).unwrap());
+                }
+
+                let automation = Automation {
+                    name: name.clone(),
+                    triggers,
+                    conditions,
+                    actions,
+                };
+
+                automations.push(automation);
+            }
+            Rule::schedule_declaration => {
+                let mut inner = rule.into_inner();
+
+                let name_rule = inner.next().expect("missing name of the automation");
+                let name = match name_rule.as_rule() {
+                    Rule::ident => name_rule.as_span().as_str().to_owned(),
+                    Rule::string => parse_string(name_rule).expect("failed to parse string"),
+                    _ => unreachable!(),
+                };
+
+                let interval = inner
+                    .next()
+                    .expect("missing schedule interval")
+                    .into_inner()
+                    .next()
+                    .unwrap();
+
+                let interval = match interval.as_rule() {
+                    Rule::schedule_interval_cron => {
+                        let inner = interval.into_inner().next().unwrap();
+                        let cron_rule =
+                            parse_string(inner).expect("failed to parse cron rule string");
+
+                        ScheduleInterval::Cron(cron_rule)
+                    }
+                    Rule::schedule_interval_time => {
+                        let mut inner = interval.into_inner();
+                        let mut weekday: Option<Weekday> = None;
+
+                        if inner.len() > 1 {
+                            weekday =
+                                Some(inner.next().unwrap().as_span().as_str().try_into().unwrap());
+                        }
+
+                        let time_span = inner.next().unwrap().as_span().as_str();
+                        let time = parse_time(time_span)
+                            .expect(&format!("invalid time format: {time_span}"));
+
+                        ScheduleInterval::Time { weekday, at: time }
                     }
                     _ => unreachable!(),
+                };
+
+                let mut conditions = Vec::new();
+                let mut actions = Vec::new();
+
+                for next in inner {
+                    match next.as_rule() {
+                        Rule::automation_condition => {
+                            conditions.push(parse_expression(next.into_inner()).unwrap());
+                        }
+                        Rule::automation_action => {
+                            actions.push(parse_expression(next.into_inner()).unwrap());
+                        }
+                        _ => unreachable!(),
+                    }
                 }
+
+                let schedule = Schedule {
+                    name,
+                    interval,
+                    conditions,
+                    actions,
+                };
+
+                debug!("SCHED {schedule:?}");
             }
-
-            let automation = Automation {
-                name: name.clone(),
-                triggers,
-                conditions,
-                actions,
-            };
-
-            automations.push(automation);
+            Rule::EOI => {}
+            _ => unreachable!("top level rule not implemented {rule:?}"),
         }
     }
 
     Ok(automations)
+}
+
+pub fn parse_time(span: &str) -> Result<Time> {
+    let mut parts = span.split(":");
+    let hours: u32 = parts
+        .next()
+        .context("time string is empty")?
+        .parse()
+        .context("failed to parse hours")?;
+    let mins: u32 = parts
+        .next()
+        .map(|s| s.parse::<u32>())
+        .unwrap_or(Ok(0))
+        .context("failed to parse minutes")?;
+    let secs: u32 = parts
+        .next()
+        .map(|s| s.parse::<u32>())
+        .unwrap_or(Ok(0))
+        .context("failed to parse seconds")?;
+    Ok(Time::from_hms_opt(hours, mins, secs).context("invalid time provided")?)
 }
 
 fn parse_string(rule: Pair<Rule>) -> Result<String> {
@@ -182,6 +286,8 @@ fn parse_atom(rule: Pair<Rule>) -> Result<Expression> {
                     _ => unreachable!(),
                 },
                 Rule::string => parse_string(inner).map(|s| Expression::Constant(s.into())),
+                Rule::time => parse_time(inner.as_span().as_str())
+                    .map(|time| Expression::Constant(time.into())),
                 Rule::decimal => {
                     let inner = inner.as_span().as_str();
                     Ok(Expression::Constant(f64::from_str(inner)?.into()))

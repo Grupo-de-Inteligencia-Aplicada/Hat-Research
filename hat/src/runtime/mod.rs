@@ -4,6 +4,7 @@ pub mod device;
 pub mod event;
 pub mod function;
 pub mod parser;
+pub mod schedule;
 pub mod value;
 
 use self::event::Event;
