@@ -1,6 +1,6 @@
 use crate::runtime::automation::Automation;
 use crate::runtime::function::FunctionCall;
-use crate::runtime::schedule::Weekday;
+use crate::runtime::scheduler::Weekday;
 use crate::runtime::value::Value;
 use crate::runtime::RuntimeError;
 use anyhow::{bail, Context, Result};
@@ -12,9 +12,8 @@ use pest::pratt_parser::PrattParser;
 use pest::Parser;
 use pest_derive::Parser;
 use std::str::FromStr;
-use tracing::debug;
 
-use super::schedule::{Schedule, ScheduleInterval};
+use super::scheduler::{ScheduleInterval, ScheduleTask};
 use super::value::time::Time;
 
 pub mod expression;
@@ -40,7 +39,10 @@ lazy_static::lazy_static! {
     };
 }
 
-pub fn parse(filename: String, code: &str) -> std::result::Result<Vec<Automation>, RuntimeError> {
+pub fn parse(
+    filename: String,
+    code: &str,
+) -> std::result::Result<(Vec<Automation>, Vec<ScheduleTask>), RuntimeError> {
     // TODO: stop panicking
     let code_program = HatParser::parse(Rule::program, code);
 
@@ -125,6 +127,7 @@ pub fn parse(filename: String, code: &str) -> std::result::Result<Vec<Automation
     };
 
     let mut automations = Vec::new();
+    let mut scheduler_tasks = Vec::new();
 
     for rule in program {
         match rule.as_rule() {
@@ -227,21 +230,21 @@ pub fn parse(filename: String, code: &str) -> std::result::Result<Vec<Automation
                     }
                 }
 
-                let schedule = Schedule {
+                let schedule_task = ScheduleTask {
                     name,
                     interval,
                     conditions,
                     actions,
                 };
 
-                debug!("SCHED {schedule:?}");
+                scheduler_tasks.push(schedule_task);
             }
             Rule::EOI => {}
             _ => unreachable!("top level rule not implemented {rule:?}"),
         }
     }
 
-    Ok(automations)
+    Ok((automations, scheduler_tasks))
 }
 
 pub fn parse_time(span: &str) -> Result<Time> {

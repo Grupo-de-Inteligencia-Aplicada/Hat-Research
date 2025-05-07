@@ -1,4 +1,4 @@
-use crate::runtime::context::AutomationContext;
+use crate::runtime::context::ExpressionContext;
 use crate::runtime::device::{Device, DeviceType};
 use crate::runtime::event::{Event, EventType};
 use crate::runtime::function::FunctionCall;
@@ -24,7 +24,7 @@ pub async fn test_parse_sample() {
 pub async fn test_function_call() {
     let runtime = HatRuntime::new().await;
 
-    let context = AutomationContext {
+    let context = ExpressionContext {
         event: Event {
             typ: EventType::Dummy,
             datetime: Default::default(),

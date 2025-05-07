@@ -1,4 +1,4 @@
-schedule "Morning Routine Cron" (cron "0 7 * * *") {
+schedule "Morning Routine Cron" (cron "1/2 * * * * *") {
 	run echo("Testing...")
 }
 
@@ -6,7 +6,7 @@ schedule "Morning Routime Time" (at 07:00) {
 	run echo("Testing..." + 07:00)
 }
 
-schedule "Start of the week routine" (every monday at 08:00) {
+schedule "Start of the week routine" (every wednesday at 13:10) {
 	run echo("Testing...")
 }
 
@@ -78,10 +78,4 @@ automation "Desligar aspersores no horário específico" (TimeUpdateEvent) {
 automation "Test time function" (Dummy) {
   if event_time() >= time("06:00") and event_time() <= time("12:00")
   run echo("está de manhã")
-}
-
-// Exemplo de automação para testar a funcionalidade de horários
-automation "Test time function 2" (Dummy) {
-  if event_time() > time("12:00") and event_time() < time("18:00")
-  run echo("está de tarde")
 }

@@ -3,7 +3,7 @@ use std::future::Future;
 use std::pin::Pin;
 use std::sync::Arc;
 
-use crate::runtime::context::AutomationContext;
+use crate::runtime::context::ExpressionContext;
 use crate::runtime::function::FunctionCall;
 use crate::runtime::value::Value;
 
@@ -25,7 +25,7 @@ pub enum Expression {
 impl Expression {
     pub fn evaluate<'a>(
         &'a self,
-        ctx: Arc<AutomationContext>,
+        ctx: Arc<ExpressionContext>,
     ) -> Pin<Box<dyn Future<Output = Result<Value>> + Send + 'a>> {
         Box::pin(async move {
             match self {

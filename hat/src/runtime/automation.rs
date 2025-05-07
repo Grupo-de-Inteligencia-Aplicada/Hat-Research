@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use super::event::Event;
-use crate::runtime::context::AutomationContext;
+use crate::runtime::context::ExpressionContext;
 use crate::runtime::parser::expression::Expression;
 
 use anyhow::{Context, Result};
@@ -24,7 +24,7 @@ impl Automation {
         false
     }
 
-    pub async fn trigger(&self, ctx: Arc<AutomationContext>) -> Result<()> {
+    pub async fn trigger(&self, ctx: Arc<ExpressionContext>) -> Result<()> {
         for condition in &self.conditions {
             let result = condition
                 .evaluate(Arc::clone(&ctx))

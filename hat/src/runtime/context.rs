@@ -4,20 +4,28 @@ use crate::runtime::HatRuntime;
 use std::fmt::{Debug, Formatter};
 use std::sync::Arc;
 
-pub struct AutomationContext {
-    pub event: Event,
+use super::scheduler::TaskID;
+
+pub struct ExpressionContext {
+    pub trigger: Trigger,
     pub runtime: Arc<HatRuntime>,
 }
 
-impl Debug for AutomationContext {
+#[derive(Debug)]
+pub enum Trigger {
+    Event(Event),
+    Task(TaskID),
+}
+
+impl Debug for ExpressionContext {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("AutomationContext")
-            .field("event", &self.event)
+            .field("trigger", &self.trigger)
             .finish()
     }
 }
 
-impl AutomationContext {
+impl ExpressionContext {
     pub fn get_function(&self, name: &str) -> Option<Arc<Function>> {
         self.runtime
             .functions

@@ -4,21 +4,24 @@ pub mod device;
 pub mod event;
 pub mod function;
 pub mod parser;
-pub mod schedule;
+pub mod scheduler;
 pub mod value;
 
 use self::event::Event;
 use crate::integrations::clock::ClockIntegration;
 use crate::integrations::Integration;
 use crate::runtime::automation::Automation;
-use crate::runtime::context::AutomationContext;
+use crate::runtime::context::ExpressionContext;
 use crate::runtime::function::Function;
 use anyhow::Result;
+use context::Trigger;
 use device::Device;
+use futures_util::FutureExt;
+use scheduler::{ScheduleTask, Scheduler, TaskID};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use thiserror::Error;
-use tokio::sync::{mpsc, oneshot, RwLock};
+use tokio::sync::{mpsc, oneshot, Mutex as TokioMutex, RwLock};
 use tokio::task::JoinHandle;
 use tracing::{error, trace, warn};
 
@@ -40,12 +43,16 @@ pub enum RuntimeError {
         col_number: usize,
         expected: Vec<&'static str>,
     },
+    #[error("Scheduler error: {inner}")]
+    SchedulerError { inner: anyhow::Error },
 }
 
 type IntegrationAndStopChannel = (Arc<dyn Integration>, oneshot::Sender<()>);
 
 pub struct HatRuntime {
+    scheduler: Scheduler,
     automations: Mutex<HashMap<String, Arc<Automation>>>,
+    scheduler_tasks: TokioMutex<HashMap<TaskID, Arc<ScheduleTask>>>,
     integrations: RwLock<HashMap<String, IntegrationAndStopChannel>>,
     executor_channel: mpsc::UnboundedSender<ExecutorMessage>,
     executor_handle: tokio::sync::Mutex<Option<JoinHandle<()>>>,
@@ -57,7 +64,9 @@ impl HatRuntime {
         let (tx, mut rx) = mpsc::unbounded_channel();
 
         let runtime = Arc::new(Self {
+            scheduler: Scheduler::new(tx.clone()).await.unwrap(),
             automations: Default::default(),
+            scheduler_tasks: Default::default(),
             integrations: Default::default(),
             executor_channel: tx,
             executor_handle: Default::default(),
@@ -83,8 +92,8 @@ impl HatRuntime {
                             };
 
                             for automation in filtered_automations {
-                                let context = Arc::new(AutomationContext {
-                                    event: event.clone(),
+                                let context = Arc::new(ExpressionContext {
+                                    trigger: Trigger::Event(event.clone()),
                                     runtime: Arc::clone(&rt),
                                 });
                                 if let Err(e) = automation.trigger(context).await {
@@ -92,6 +101,17 @@ impl HatRuntime {
                                 }
                             }
                         });
+                    }
+                    ExecutorMessage::TaskRun(task_id) => {
+                        if let Some(task) = rt.get_task(&task_id).await {
+                            let ctx = Arc::new(ExpressionContext {
+                                trigger: Trigger::Task(task_id),
+                                runtime: Arc::clone(&rt),
+                            });
+                            if let Err(e) = task.execute(ctx).await {
+                                error!("Failed to run scheduled task {}: {e:?}", task.name);
+                            }
+                        }
                     }
                 }
             }
@@ -155,29 +175,56 @@ impl HatRuntime {
         }
     }
 
-    pub fn parse(&self, filename: String, code: &str) -> std::result::Result<(), RuntimeError> {
-        let automations = parser::parse(filename, code)?;
-        let mut lock = self.automations.lock().unwrap();
-        for automation in automations {
-            let name = automation.name.clone();
-            lock.insert(name, Arc::new(automation));
-        }
-        Ok(())
-    }
-
-    pub fn replace_source(
+    pub async fn parse(
         &self,
         filename: String,
         code: &str,
     ) -> std::result::Result<(), RuntimeError> {
-        let automations = parser::parse(filename, code)?;
+        let (automations, scheduler_tasks) = parser::parse(filename, code)?;
+
+        {
+            let mut automations_lock = self.automations.lock().unwrap();
+
+            for automation in automations {
+                let name = automation.name.clone();
+                automations_lock.insert(name, Arc::new(automation));
+            }
+        }
+
+        let mut scheduler_tasks_lock = self.scheduler_tasks.lock().await;
+
+        for task in scheduler_tasks {
+            let task = Arc::new(task);
+            let task_id = self
+                .scheduler
+                .schedule(Arc::clone(&task))
+                .await
+                .map_err(|e| RuntimeError::SchedulerError { inner: e })?;
+
+            scheduler_tasks_lock.insert(task_id, task);
+        }
+
+        Ok(())
+    }
+
+    pub async fn replace_source(
+        &self,
+        filename: String,
+        code: &str,
+    ) -> std::result::Result<(), RuntimeError> {
+        self.clear_automations();
+        self.clear_scheduler_tasks().await;
+        self.parse(filename, code).await
+    }
+
+    pub fn clear_automations(&self) {
         let mut lock = self.automations.lock().unwrap();
         lock.clear();
-        for automation in automations {
-            let name = automation.name.clone();
-            lock.insert(name, Arc::new(automation));
-        }
-        Ok(())
+    }
+
+    pub async fn clear_scheduler_tasks(&self) {
+        let mut lock = self.scheduler_tasks.lock().await;
+        lock.clear();
     }
 
     pub fn register_function(&self, fun: Function) {
@@ -236,6 +283,12 @@ impl HatRuntime {
             lock.insert(fun.name.clone(), Arc::new(fun.clone()));
         }
     }
+
+    async fn get_task(&self, tid: &TaskID) -> Option<Arc<ScheduleTask>> {
+        let tasks_lock = self.scheduler_tasks.lock().await;
+
+        tasks_lock.get(tid).map(Arc::clone)
+    }
 }
 
 impl Drop for HatRuntime {
@@ -245,6 +298,7 @@ impl Drop for HatRuntime {
 }
 
 #[derive(Debug)]
-enum ExecutorMessage {
+pub enum ExecutorMessage {
     Event(Event),
+    TaskRun(TaskID),
 }

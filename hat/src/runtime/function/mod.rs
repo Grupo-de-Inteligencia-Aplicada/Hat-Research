@@ -2,14 +2,14 @@ pub mod defaults;
 
 use std::{fmt::Display, future::Future, pin::Pin, sync::Arc};
 
-use crate::runtime::context::AutomationContext;
+use crate::runtime::context::ExpressionContext;
 use crate::runtime::parser::expression::Expression;
 use crate::runtime::value::Value;
 
 use anyhow::{bail, Context, Result};
 
 pub(crate) type NativeFunctionType =
-    fn(Arc<AutomationContext>, Vec<Value>) -> Pin<Box<dyn Future<Output = Result<Value>> + Send>>;
+    fn(Arc<ExpressionContext>, Vec<Value>) -> Pin<Box<dyn Future<Output = Result<Value>> + Send>>;
 
 #[derive(Debug, Clone)]
 pub struct Function {
@@ -18,7 +18,7 @@ pub struct Function {
 }
 
 impl Function {
-    pub async fn call(&self, ctx: Arc<AutomationContext>, args: Vec<Value>) -> Result<Value> {
+    pub async fn call(&self, ctx: Arc<ExpressionContext>, args: Vec<Value>) -> Result<Value> {
         (self.fun)(ctx, args).await
     }
 }
@@ -32,7 +32,7 @@ pub struct FunctionCall {
 impl FunctionCall {
     pub fn evaluate<'a>(
         &'a self,
-        ctx: Arc<AutomationContext>,
+        ctx: Arc<ExpressionContext>,
     ) -> Pin<Box<dyn Future<Output = Result<Value>> + Send + 'a>> {
         Box::pin(async move {
             let mut arguments = Vec::with_capacity(self.arguments.len());

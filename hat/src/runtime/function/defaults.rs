@@ -1,6 +1,7 @@
 use std::sync::Arc;
 use std::time::Duration;
 
+use crate::runtime::context::Trigger;
 use crate::runtime::value::time::coerce_to_time;
 use crate::runtime::value::Value;
 use crate::runtime::HatRuntime;
@@ -28,24 +29,44 @@ lazy_static! {
             },
             Function {
                 name: "get_device".to_owned(),
-                fun: (|ctx, _args| Box::pin(async move { Ok(ctx.event.device.full_id().into()) })),
+                fun: (|ctx, _args| Box::pin(async move {
+                    match &ctx.trigger {
+                        Trigger::Event(e) => Ok(e.device.full_id().into()),
+                        _ => Ok(Value::Null),
+                    }
+                })),
             },
             Function {
                 name: "get_integration".to_owned(),
                 fun: (|ctx, _args| {
-                    Box::pin(async move { Ok(ctx.event.device.integration.clone().into()) })
+                    Box::pin(async move {
+                        match &ctx.trigger {
+                            Trigger::Event(e) => Ok(e.device.integration.clone().into()),
+                            _ => Ok(Value::Null),
+                        }
+                    })
                 }),
             },
             Function {
                 name: "event_date".to_owned(),
                 fun: (|ctx, _args| {
-                    Box::pin(async move { Ok(ctx.event.datetime.to_rfc3339().into()) })
+                    Box::pin(async move {
+                        match &ctx.trigger {
+                            Trigger::Event(e) => Ok(e.datetime.to_rfc3339().into()),
+                            _ => Ok(Value::Null),
+                        }
+                    })
                 }),
             },
             Function {
                 name: "event_time".to_owned(),
                 fun: (|ctx, _args| {
-                    Box::pin(async move { Ok(Time::from(ctx.event.datetime).into()) })
+                    Box::pin(async move {
+                        match &ctx.trigger {
+                            Trigger::Event(e) => Ok(Time::from(e.datetime).into()),
+                            _ => Ok(Value::Null),
+                        }
+                    })
                 }),
             },
             Function {
@@ -375,6 +396,11 @@ lazy_static! {
                 name: "event_time_between".to_owned(),
                 fun: (|ctx, args| {
                     Box::pin(async move {
+                        let event = match &ctx.trigger {
+                            Trigger::Event(e) => e,
+                            _ => bail!("event_time_between executed in a non-event context"),
+                        };
+
                         if args.len() < 2 {
                             bail!("event_time_between requires exactly two arguments");
                         }
@@ -383,7 +409,7 @@ lazy_static! {
                         let end_time = coerce_to_time(Some(&args[1]))?;
 
                         // Use the current time as the "now"
-                        let now = Time::from(ctx.event.datetime);
+                        let now = Time::from(event.datetime);
 
                         // Circular time comparison:
                         // if start <= end:   we want start <= now && now <= end

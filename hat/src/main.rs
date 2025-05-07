@@ -69,7 +69,7 @@ async fn main() -> anyhow::Result<()> {
 
     let runtime = HatRuntime::new().await;
 
-    runtime.parse(path_string, &source)?;
+    runtime.parse(path_string, &source).await?;
 
     // The runtime can integrate with any implementation of the Integration trait
     // Here is an example of a Dummy integration

@@ -27,3 +27,5 @@ quick-xml = { version = "0.37.0", features = ["serde", "serialize"] }
 tower-http = { version = "0.6.1", features = ["cors"] }
 http = "1.1.0"
 strum = { version = "0.26.3", features = ["derive"] }
+tokio-cron-scheduler = "0.14.0"
+uuid = "1.16.0"

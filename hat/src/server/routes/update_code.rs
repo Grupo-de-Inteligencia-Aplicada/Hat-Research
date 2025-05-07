@@ -6,11 +6,16 @@ use crate::server::{
     AppState,
 };
 
+#[axum::debug_handler]
 pub async fn update_code(
     State(state): State<AppState>,
     src: String,
 ) -> ApiResult<Json<serde_json::Value>> {
-    if let Err(e) = state.runtime.replace_source("web-source.hat".into(), &src) {
+    if let Err(e) = state
+        .runtime
+        .replace_source("web-source.hat".into(), &src)
+        .await
+    {
         Err(ApiError::bad_request(format!(
             "failed to parse source: {e:#?}"
         )))
