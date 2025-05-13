@@ -1,4 +1,4 @@
-use crate::runtime::context::ExpressionContext;
+use crate::runtime::context::{ExpressionContext, Trigger};
 use crate::runtime::device::{Device, DeviceType};
 use crate::runtime::event::{Event, EventType};
 use crate::runtime::function::FunctionCall;
@@ -13,7 +13,7 @@ use std::sync::Arc;
 pub async fn test_parse_sample() {
     async fn parse_sample(src: &str) {
         let runtime = HatRuntime::new().await;
-        runtime.parse("test.hat".into(), src).unwrap();
+        runtime.parse("test.hat".into(), src).await.unwrap();
     }
 
     parse_sample(include_str!("sample.hat")).await;
@@ -25,7 +25,7 @@ pub async fn test_function_call() {
     let runtime = HatRuntime::new().await;
 
     let context = ExpressionContext {
-        event: Event {
+        trigger: Trigger::Event(Event {
             typ: EventType::Dummy,
             datetime: Default::default(),
             device: Device {
@@ -37,7 +37,7 @@ pub async fn test_function_call() {
                 attributes: Default::default(),
             },
             parameters: Default::default(),
-        },
+        }),
         runtime: Arc::clone(&runtime),
     };
 

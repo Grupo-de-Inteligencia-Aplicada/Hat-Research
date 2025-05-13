@@ -1,5 +1,3 @@
-#![feature(async_drop)]
-
 use std::{
     net::{Ipv4Addr, SocketAddr, SocketAddrV4},
     path::PathBuf,
