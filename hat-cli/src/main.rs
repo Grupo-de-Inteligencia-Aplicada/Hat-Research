@@ -3,19 +3,14 @@ use std::{
     path::PathBuf,
 };
 
-use crate::integrations::dummy::DummyIntegration;
-use crate::runtime::HatRuntime;
 use anyhow::Context;
 use clap::Parser;
-use integrations::home_assistant::HassIntegration;
+use hat::integrations::dummy::DummyIntegration;
+use hat::integrations::home_assistant::HassIntegration;
+use hat::runtime::HatRuntime;
+use hat::server;
 use tracing::info;
-use tracing_subscriber::{fmt, prelude::*, EnvFilter};
-
-pub mod integrations;
-pub mod runtime;
-pub mod server;
-#[cfg(test)]
-pub mod test;
+use tracing_subscriber::{EnvFilter, fmt, prelude::*};
 
 #[derive(clap::Parser, Debug)]
 #[command(

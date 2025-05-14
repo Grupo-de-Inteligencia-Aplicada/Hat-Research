@@ -425,6 +425,16 @@ lazy_static! {
                     })
                 }),
             },
+            // This function simulates a call to a service
+            Function {
+                name: "benchmark_simulation".to_owned(),
+                fun: (|ctx, args| {
+                    Box::pin(async move {
+                        tokio::time::sleep(Duration::from_millis(100)).await;
+                        Ok(Value::Null)
+                    })
+                }),
+            },
         ]
     };
 }

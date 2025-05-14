@@ -54,14 +54,14 @@ pub struct HatRuntime {
     automations: Mutex<HashMap<String, Arc<Automation>>>,
     scheduler_tasks: TokioMutex<HashMap<TaskID, Arc<ScheduleTask>>>,
     integrations: RwLock<HashMap<String, IntegrationAndStopChannel>>,
-    executor_channel: mpsc::UnboundedSender<ExecutorMessage>,
+    executor_channel: mpsc::Sender<ExecutorMessage>,
     executor_handle: tokio::sync::Mutex<Option<JoinHandle<()>>>,
     functions: std::sync::RwLock<HashMap<String, Arc<Function>>>,
 }
 
 impl HatRuntime {
     pub async fn new() -> Arc<Self> {
-        let (tx, mut rx) = mpsc::unbounded_channel();
+        let (tx, mut rx) = mpsc::channel(128);
 
         let runtime = Arc::new(Self {
             scheduler: Scheduler::new(tx.clone()).await.unwrap(),
@@ -143,7 +143,7 @@ impl HatRuntime {
                             trace!("Event from integration {integration_id}: {event:?}");
                             if executor_channel.send(
                                 ExecutorMessage::Event(event)
-                            ).is_err() {
+                            ).await.is_err() {
                                 break;
                             }
                         } else {
@@ -162,8 +162,10 @@ impl HatRuntime {
         );
     }
 
-    pub fn dispatch_event(&self, event: Event) -> Result<()> {
-        self.executor_channel.send(ExecutorMessage::Event(event))?;
+    pub async fn dispatch_event(&self, event: Event) -> Result<()> {
+        self.executor_channel
+            .send(ExecutorMessage::Event(event))
+            .await?;
         Ok(())
     }
 

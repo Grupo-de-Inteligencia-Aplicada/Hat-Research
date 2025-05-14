@@ -8,10 +8,7 @@ use tracing::debug;
 use uuid::Uuid;
 
 use super::{
-    context::{ExpressionContext, Trigger},
-    parser::expression::Expression,
-    value::time::Time,
-    ExecutorMessage,
+    context::ExpressionContext, parser::expression::Expression, value::time::Time, ExecutorMessage,
 };
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -19,11 +16,11 @@ pub struct TaskID(pub Uuid);
 
 pub struct Scheduler {
     inner_scheduler: JobScheduler,
-    runtime_msg_tx: mpsc::UnboundedSender<ExecutorMessage>,
+    runtime_msg_tx: mpsc::Sender<ExecutorMessage>,
 }
 
 impl Scheduler {
-    pub async fn new(runtime_msg_tx: mpsc::UnboundedSender<ExecutorMessage>) -> Result<Self> {
+    pub async fn new(runtime_msg_tx: mpsc::Sender<ExecutorMessage>) -> Result<Self> {
         let inner = JobScheduler::new().await?;
         inner.start().await?;
         Ok(Self {
@@ -41,7 +38,11 @@ impl Scheduler {
             .add(
                 Job::new_async_tz(&cron_expr, chrono::Local, move |tid, _l| {
                     let tx = (&executor_tx).clone();
-                    Box::pin(async move { tx.send(ExecutorMessage::TaskRun(TaskID(tid))).unwrap() })
+                    Box::pin(async move {
+                        tx.send(ExecutorMessage::TaskRun(TaskID(tid)))
+                            .await
+                            .unwrap()
+                    })
                 })
                 .map_err(|e| match e {
                     JobSchedulerError::ParseSchedule => {

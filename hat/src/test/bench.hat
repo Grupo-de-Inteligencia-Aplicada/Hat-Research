@@ -1,0 +1,13 @@
+automation Bench (Dummy) {
+    run benchmark_simulation()
+}
+
+automation Bench2 (Dummy) {
+    if get_integration() == "benchmark"
+    run benchmark_simulation()
+}
+
+automation Bench3 (Dummy) {
+    if get_device() == "should_not_run"
+    run benchmark_simulation()
+}

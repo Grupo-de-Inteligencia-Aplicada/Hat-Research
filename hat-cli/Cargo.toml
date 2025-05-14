@@ -1,13 +1,10 @@
 [package]
-name = "hat"
+name = "hat-cli"
 version = "0.1.0"
-edition = "2021"
-
-[[bench]]
-name = "benchmark"
-harness = false
+edition = "2024"
 
 [dependencies]
+hat = { path = "../hat" }
 anyhow = "1.0.86"
 futures-util = "0.3.30"
 pest = "2.7.11"
